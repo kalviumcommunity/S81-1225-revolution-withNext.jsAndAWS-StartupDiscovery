@@ -1,0 +1,87 @@
+name: Staging Build & Deploy
+
+on:
+  push:
+    branches:
+      - staging
+  pull_request:
+    branches:
+      - staging
+
+jobs:
+  build-staging:
+    name: Build Staging Environment
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for Staging
+        run: npm run build:staging
+        env:
+          NODE_ENV: staging
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.STAGING_API_BASE_URL }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.STAGING_APP_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+          GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID_STAGING }}
+          GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET_STAGING }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID_STAGING }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET_STAGING }}
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Verify no secrets in build output
+        run: |
+          echo "Checking for potential secrets in build output..."
+          if grep -r "client_secret" .next/; then
+            echo "ERROR: Potential secrets found in build output!"
+            exit 1
+          fi
+          if grep -r "password" .next/ | grep -v node_modules; then
+            echo "ERROR: Potential secrets found in build output!"
+            exit 1
+          fi
+          echo "✓ No obvious secrets detected in build output"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-build
+          path: .next/
+          retention-days: 7
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: build-staging
+    runs-on: ubuntu-latest
+    environment: staging
+    if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: staging-build
+          path: .next/
+
+      - name: Deploy to Staging Environment
+        run: |
+          echo "Deploying to staging environment..."
+          echo "In production, this would deploy to AWS, Vercel, or similar."
+          echo "Build timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          echo "Commit SHA: ${{ github.sha }}"
