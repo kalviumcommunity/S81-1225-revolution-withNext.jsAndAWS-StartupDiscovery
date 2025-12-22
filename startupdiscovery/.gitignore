@@ -31,13 +31,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-# All environment files should be gitignored to prevent accidental secret leaks
-.env
-.env.local
-.env.*.local
-
-# Only .env.example and documentation are committed (no secrets!)
-!.env.example
+.env*
 
 # vercel
 .vercel
