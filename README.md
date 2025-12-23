@@ -357,3 +357,314 @@ This lesson helped me understand how modern applications are:
 * **Deployed securely to the cloud**
 
 These practices are essential for **real-world, production-ready software systems** and form the foundation of modern DevOps workflows.
+
+---
+
+## 🔀 GitHub Collaboration Workflow
+
+This project implements a **professional team branching and pull request workflow** to ensure code quality, collaboration, and maintainability. This section documents the workflow, guidelines, and reflection on how it improves development.
+
+---
+
+### 📋 Branching Strategy
+
+All development work follows a **structured branching convention** to maintain clarity and organization.
+
+#### Branch Naming Format
+
+```
+<type>/<descriptive-name>
+```
+
+#### Branch Types
+
+| Type | Purpose | Example |
+|------|---------|---------|
+| `feature/` | New functionality or enhancements | `feature/startup-listing-page` |
+| `fix/` | Bug fixes and error corrections | `fix/navbar-mobile-overflow` |
+| `chore/` | Maintenance, refactoring, dependencies | `chore/update-dependencies` |
+| `docs/` | Documentation updates | `docs/setup-instructions` |
+
+**Why this matters:**
+- Clear intent from branch name alone
+- Easy to filter and search branches
+- Maintains organized repository structure
+- Professional standard in real-world teams
+
+📖 **Full Guide:** [`.github/BRANCHING_GUIDE.md`](.github/BRANCHING_GUIDE.md)
+
+---
+
+### 📝 Pull Request Workflow
+
+Every code change goes through a **Pull Request (PR)** process before merging to `main`.
+
+#### PR Template
+
+A standardized PR template is automatically loaded when creating pull requests:
+
+- **Summary** – What this PR does
+- **Changes Made** – Detailed list of modifications
+- **Type of Change** – Feature, fix, chore, or docs
+- **Screenshots/Evidence** – Visual proof of changes
+- **Checklist** – Build passes, lint clean, self-reviewed
+- **Testing Done** – How changes were verified
+
+**Why this matters:**
+- Ensures complete documentation of every change
+- Forces developers to think through their work
+- Provides clear context for reviewers
+- Creates searchable history of project evolution
+
+📄 **Template:** [`.github/pull_request_template.md`](.github/pull_request_template.md)
+
+---
+
+### ✅ Code Review Checklist
+
+Every PR undergoes review using a **standardized checklist** covering:
+
+#### Code Quality
+- Readable, well-organized code
+- No duplication
+- Proper TypeScript usage
+- Component structure follows best practices
+
+#### Functionality
+- Changes work as intended
+- Edge cases handled
+- No new bugs introduced
+
+#### Standards
+- ESLint checks pass
+- Build succeeds
+- No console errors/warnings
+
+#### Security
+- No exposed secrets
+- Secure coding practices
+- Dependencies up to date
+
+#### Documentation
+- Complex logic has comments
+- PR description is complete
+- README updated if needed
+
+**Why this matters:**
+- Catches bugs before they reach production
+- Maintains consistent code quality
+- Shares knowledge across the team
+- Prevents technical debt
+
+📋 **Full Checklist:** [`.github/CODE_REVIEW_CHECKLIST.md`](.github/CODE_REVIEW_CHECKLIST.md)
+
+---
+
+### 🛡️ Branch Protection Rules
+
+The `main` branch is protected with the following rules:
+
+#### 1. Require Pull Request Reviews
+- At least **1 approval** required before merging
+- No direct pushes to `main`
+- Dismiss stale reviews when new commits are pushed
+
+**Impact:** Ensures all code is peer-reviewed before going to production
+
+#### 2. Require Status Checks
+- Build must pass
+- ESLint must pass
+- All automated checks must succeed
+
+**Impact:** Prevents broken code from reaching `main`
+
+#### 3. Require Up-to-Date Branches
+- Branch must include latest `main` changes before merging
+- Prevents merge conflicts and integration issues
+
+**Impact:** Ensures smooth, conflict-free merges
+
+#### 4. No Bypass for Administrators
+- Rules apply to everyone, including project leads
+- Consistency across all contributors
+
+**Impact:** Same standards for all team members
+
+**Why this matters:**
+- Protects production code from accidental errors
+- Enforces quality gates automatically
+- Creates accountability through review process
+- Prevents shortcuts that lead to bugs
+
+📖 **Detailed Guide:** [`.github/BRANCH_PROTECTION.md`](.github/BRANCH_PROTECTION.md)
+
+---
+
+### 🔄 Complete Workflow Example
+
+```bash
+# 1. Start from main branch
+git checkout main
+git pull origin main
+
+# 2. Create feature branch following naming convention
+git checkout -b feature/investor-dashboard
+
+# 3. Make changes and commit
+git add .
+git commit -m "Add investor dashboard with analytics view"
+
+# 4. Push branch to GitHub
+git push origin feature/investor-dashboard
+
+# 5. Create Pull Request on GitHub
+# - PR template auto-loads
+# - Fill in all sections
+# - Add screenshots
+
+# 6. Automated checks run
+# - Build check
+# - Lint check
+# - All must pass ✅
+
+# 7. Request review from teammate
+# - Reviewer uses code review checklist
+# - Provides feedback or approves
+
+# 8. Address feedback (if any)
+git add .
+git commit -m "Address review feedback: optimize query"
+git push origin feature/investor-dashboard
+
+# 9. Merge after approval
+# - Click "Merge pull request"
+# - Delete branch after merge
+
+# 10. Update local main
+git checkout main
+git pull origin main
+```
+
+---
+
+### 📸 Evidence & Documentation
+
+To demonstrate this workflow implementation, the following evidence is captured:
+
+1. ✅ Branch protection rules screenshot
+2. ✅ Pull request with status checks passing
+3. ✅ Code review approval
+4. ✅ Successfully merged PR
+5. ✅ Branch naming examples
+6. ✅ PR template in use
+
+📖 **Evidence Guide:** [`.github/EVIDENCE_GUIDE.md`](.github/EVIDENCE_GUIDE.md)
+
+---
+
+### 🎓 Reflection: How This Workflow Improves Development
+
+#### 1. Code Quality
+
+**Before:**
+- Code could be pushed directly to `main` without review
+- Bugs could slip through unnoticed
+- Inconsistent code style
+- No automated quality checks
+
+**After:**
+- Every line of code is reviewed by at least one other developer
+- ESLint enforces consistent style automatically
+- Build checks prevent broken code from merging
+- Higher overall code quality and fewer production bugs
+
+**Real Impact:** Bugs are caught during review instead of in production, saving debugging time and preventing user-facing issues.
+
+---
+
+#### 2. Team Collaboration
+
+**Before:**
+- No visibility into what others are working on
+- Unclear change history
+- Difficult to understand why changes were made
+- Knowledge siloed within individuals
+
+**After:**
+- PRs provide clear documentation of all changes
+- Team members learn from each other's code during reviews
+- Discussion threads capture decision-making context
+- Knowledge sharing through code review process
+
+**Real Impact:** The whole team understands the codebase better. New members can read PR history to understand project evolution.
+
+---
+
+#### 3. Development Velocity
+
+**Before:**
+- Bugs discovered late in development or production
+- Time wasted fixing preventable issues
+- Unclear what's safe to change
+- Fear of breaking things slows development
+
+**After:**
+- Issues caught early in PR review stage (cheaper to fix)
+- Automated checks provide fast feedback
+- Confidence to make changes knowing reviews will catch issues
+- Protected `main` branch means it's always deployable
+
+**Real Impact:** Although reviews add a step, they save time overall by preventing bugs, reducing debugging, and enabling confident iteration.
+
+---
+
+#### 4. Accountability & Professionalism
+
+**Before:**
+- Hard to track who changed what and why
+- No formal approval process
+- Inconsistent documentation
+
+**After:**
+- Clear authorship and approval trail
+- Every change documented and justified
+- Professional development practices
+- Portfolio-ready project structure
+
+**Real Impact:** This workflow demonstrates professional software engineering practices, making the project suitable for portfolios, job interviews, and real-world team environments.
+
+---
+
+### 🚀 Key Learnings
+
+1. **Code review is not about finding fault** – it's about improving code quality and sharing knowledge
+2. **Branch protection prevents mistakes** – automated checks catch errors humans might miss
+3. **Structured workflows enable scale** – what works for 2 developers works for 20
+4. **Documentation through PRs creates living project history** – future developers can understand why decisions were made
+5. **Small overhead, massive long-term benefit** – spending 5 minutes on a PR review prevents hours of debugging
+
+---
+
+### 📚 Documentation Index
+
+All workflow documentation is located in `.github/`:
+
+- [`BRANCHING_GUIDE.md`](.github/BRANCHING_GUIDE.md) – Branch naming conventions and examples
+- [`pull_request_template.md`](.github/pull_request_template.md) – Auto-loaded PR template
+- [`CODE_REVIEW_CHECKLIST.md`](.github/CODE_REVIEW_CHECKLIST.md) – Comprehensive review guidelines
+- [`BRANCH_PROTECTION.md`](.github/BRANCH_PROTECTION.md) – Branch protection setup and rationale
+- [`EVIDENCE_GUIDE.md`](.github/EVIDENCE_GUIDE.md) – Screenshot and documentation requirements
+
+---
+
+### 🎯 Workflow Principles
+
+This GitHub workflow is built on these core principles:
+
+1. **Quality over speed** – Take time to review, but maintain momentum
+2. **Automation over manual checks** – Let tools do the repetitive work
+3. **Transparency over silos** – Everything is visible and documented
+4. **Collaboration over individual work** – Multiple eyes make better code
+5. **Prevention over fixing** – Catch issues before they become problems
+
+By implementing this professional workflow, **StartupDiscovery** demonstrates production-ready development practices aligned with industry standards and team collaboration best practices.
