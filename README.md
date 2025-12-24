@@ -668,3 +668,567 @@ This GitHub workflow is built on these core principles:
 5. **Prevention over fixing** – Catch issues before they become problems
 
 By implementing this professional workflow, **StartupDiscovery** demonstrates production-ready development practices aligned with industry standards and team collaboration best practices.
+
+---
+
+## 🐳 Docker & Docker Compose Setup
+
+**StartupDiscovery** uses Docker and Docker Compose to create a consistent, reproducible development environment. This ensures that the application runs the same way on every developer's machine and in production.
+
+### 📦 What is Docker?
+
+Docker packages your application and all its dependencies into a **container** – a lightweight, standalone executable unit that runs consistently across different environments.
+
+**Benefits:**
+- ✅ **Consistency:** "Works on my machine" becomes "Works everywhere"
+- ✅ **Isolation:** Each service runs in its own container
+- ✅ **Portability:** Easy to deploy to any cloud platform
+- ✅ **Team Collaboration:** Everyone uses identical environments
+
+---
+
+### 🏗️ Architecture Overview
+
+Our Docker setup includes **3 services**:
+
+```
+┌─────────────────────────────────────────────────┐
+│              startupdiscovery-network            │
+│                  (Bridge Network)                │
+│                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌────────┐│
+│  │   Next.js    │  │  PostgreSQL  │  │ Redis  ││
+│  │     App      │  │      DB      │  │ Cache  ││
+│  │  Port: 3000  │  │  Port: 5432  │  │  6379  ││
+│  └──────────────┘  └──────────────┘  └────────┘│
+│         │                 │                │    │
+│         └─────── depends_on ──────────────┘    │
+│                                                  │
+│  Volumes: postgres-data, redis-data             │
+└─────────────────────────────────────────────────┘
+```
+
+---
+
+### 📄 Dockerfile Explanation
+
+**Location:** `startupdiscovery/Dockerfile`
+
+The Dockerfile uses a **multi-stage build** approach to create an optimized production image.
+
+#### **Stage 1: Dependencies**
+```dockerfile
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci --only=production
+```
+
+**What it does:**
+- Starts with lightweight Node.js 20 Alpine Linux image (~50MB vs ~900MB for full Node)
+- Sets `/app` as working directory
+- Copies only package files (leverages Docker layer caching)
+- Installs production dependencies only using `npm ci` (faster, reproducible)
+
+**Why multi-stage?** Keeps final image small by excluding build tools and dev dependencies.
+
+---
+
+#### **Stage 2: Builder**
+```dockerfile
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
+COPY . .
+RUN npm run build
+```
+
+**What it does:**
+- Creates fresh stage for building
+- Installs all dependencies (including devDependencies needed for build)
+- Copies entire application source code
+- Builds Next.js app (`npm run build` creates optimized `.next` folder)
+
+**Why separate stage?** Build dependencies (~200MB) are discarded after build completes.
+
+---
+
+#### **Stage 3: Runner (Production)**
+```dockerfile
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+# Create non-root user for security
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy only necessary files from builder
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+RUN chown -R nextjs:nodejs /app
+USER nextjs
+
+EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]
+```
+
+**What it does:**
+- Creates final production image
+- Sets `NODE_ENV=production` for optimizations
+- Creates `nextjs` user (security best practice – don't run as root)
+- Copies **only** built files from builder stage (not source code)
+- Changes file ownership to `nextjs` user
+- Exposes port 3000 for external access
+- Starts app using `node server.js` (Next.js standalone server)
+
+**Why standalone output?** Next.js bundles everything needed into a single folder, reducing image size and startup time.
+
+---
+
+### 🐙 Docker Compose Explanation
+
+**Location:** `docker-compose.yml` (root directory)
+
+Docker Compose orchestrates multiple containers as a single application.
+
+#### **Service 1: Next.js App (`app`)**
+```yaml
+app:
+  container_name: startupdiscovery-app
+  build:
+    context: ./startupdiscovery
+    dockerfile: Dockerfile
+  ports:
+    - "3000:3000"
+  environment:
+    - DATABASE_URL=postgresql://postgres:postgres@db:5432/startupdiscovery
+    - REDIS_URL=redis://redis:6379
+  depends_on:
+    - db
+    - redis
+  networks:
+    - startupdiscovery-network
+  restart: unless-stopped
+```
+
+**What it does:**
+- Builds Docker image from `startupdiscovery/Dockerfile`
+- Maps host port 3000 to container port 3000 (`host:container`)
+- Injects environment variables (DATABASE_URL, REDIS_URL)
+- Waits for `db` and `redis` to start before starting app
+- Connects to shared network
+- Automatically restarts if crashes (but not if manually stopped)
+
+**Environment Variables:**
+- `DATABASE_URL`: Connection string to PostgreSQL (uses service name `db` as hostname)
+- `REDIS_URL`: Connection string to Redis (uses service name `redis` as hostname)
+
+---
+
+#### **Service 2: PostgreSQL Database (`db`)**
+```yaml
+db:
+  container_name: startupdiscovery-db
+  image: postgres:15-alpine
+  ports:
+    - "5432:5432"
+  environment:
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    - POSTGRES_DB=startupdiscovery
+  volumes:
+    - postgres-data:/var/lib/postgresql/data
+  networks:
+    - startupdiscovery-network
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U postgres"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+```
+
+**What it does:**
+- Uses official PostgreSQL 15 Alpine image (production-ready database)
+- Exposes port 5432 for database connections
+- Creates database named `startupdiscovery` with user `postgres`
+- Mounts named volume `postgres-data` for **data persistence**
+- Health check verifies database is ready before app connects
+
+**Volume (`postgres-data`):**
+- Stores database data outside container
+- Data survives container restarts and deletions
+- Located in Docker's volume directory (`/var/lib/docker/volumes/`)
+
+---
+
+#### **Service 3: Redis Cache (`redis`)**
+```yaml
+redis:
+  container_name: startupdiscovery-redis
+  image: redis:7-alpine
+  ports:
+    - "6379:6379"
+  volumes:
+    - redis-data:/data
+  networks:
+    - startupdiscovery-network
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: 10s
+    timeout: 3s
+    retries: 5
+```
+
+**What it does:**
+- Uses official Redis 7 Alpine image (in-memory cache/database)
+- Exposes port 6379 for Redis connections
+- Mounts `redis-data` volume for persistence (optional but recommended)
+- Health check pings Redis to verify it's ready
+
+---
+
+### 🌐 Networking Explained
+
+```yaml
+networks:
+  startupdiscovery-network:
+    driver: bridge
+```
+
+**What is a bridge network?**
+- Creates isolated network for containers to communicate
+- Containers can reach each other using **service names** as hostnames
+- Example: App connects to `db:5432` instead of `localhost:5432`
+- External access requires port mapping (`ports` configuration)
+
+**Why use custom network?**
+- Security: Containers only talk to each other, not other Docker containers
+- DNS: Automatic service name resolution
+- Isolation: Clean separation from other projects
+
+---
+
+### 💾 Volumes Explained
+
+```yaml
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+```
+
+**What are volumes?**
+- Persistent storage managed by Docker
+- Survive container deletions and restarts
+- Stored outside container filesystem
+
+**Without volumes:** Deleting container = losing all data  
+**With volumes:** Deleting container = data preserved
+
+**Location:** `/var/lib/docker/volumes/` on host machine
+
+---
+
+### 🚀 Running the Application
+
+#### **1. Build and Start Containers**
+```bash
+docker-compose up --build
+```
+
+**What happens:**
+1. Builds Next.js Docker image (first time: 3-5 minutes)
+2. Pulls PostgreSQL and Redis images from Docker Hub
+3. Creates network and volumes
+4. Starts all three containers
+5. Shows combined logs from all services
+
+**Flags:**
+- `--build`: Forces rebuild (use after code changes)
+- `-d`: Detached mode (runs in background)
+
+---
+
+#### **2. Verify Running Containers**
+```bash
+docker ps
+```
+
+**Expected output:**
+```
+CONTAINER ID   IMAGE                    STATUS         PORTS                    NAMES
+abc123def456   startupdiscovery-app     Up 30 seconds  0.0.0.0:3000->3000/tcp   startupdiscovery-app
+def456ghi789   postgres:15-alpine       Up 35 seconds  0.0.0.0:5432->5432/tcp   startupdiscovery-db
+ghi789jkl012   redis:7-alpine           Up 35 seconds  0.0.0.0:6379->6379/tcp   startupdiscovery-redis
+```
+
+**What to check:**
+- ✅ STATUS shows "Up X seconds/minutes"
+- ✅ All three containers are listed
+- ✅ Ports are correctly mapped
+
+---
+
+#### **3. Access the Application**
+```bash
+# Open browser
+http://localhost:3000
+
+# Or test with curl
+curl http://localhost:3000
+```
+
+**What to verify:**
+- ✅ App loads without errors
+- ✅ No connection errors in logs
+- ✅ Database connection successful (check logs)
+
+---
+
+#### **4. Stop Containers**
+```bash
+# Stop and remove containers (keeps volumes)
+docker-compose down
+
+# Stop, remove containers AND volumes (deletes data)
+docker-compose down -v
+```
+
+---
+
+#### **5. View Logs**
+```bash
+# All services
+docker-compose logs
+
+# Specific service
+docker-compose logs app
+docker-compose logs db
+docker-compose logs redis
+
+# Follow logs (real-time)
+docker-compose logs -f app
+```
+
+---
+
+### 🛠️ Common Issues & Solutions
+
+#### **Issue 1: Port Already in Use**
+**Error:**
+```
+Error starting userland proxy: listen tcp4 0.0.0.0:3000: bind: address already in use
+```
+
+**Solution:**
+```bash
+# Find process using port 3000
+lsof -i :3000
+
+# Kill the process
+kill -9 <PID>
+
+# Or change port in docker-compose.yml
+ports:
+  - "3001:3000"  # Use port 3001 on host
+```
+
+---
+
+#### **Issue 2: Slow Build Times**
+**Problem:** First build takes 5-10 minutes
+
+**Solutions:**
+- ✅ **Normal for first build** – subsequent builds use cache (~30 seconds)
+- ✅ Don't change `package.json` unnecessarily (breaks cache)
+- ✅ Use `.dockerignore` to exclude `node_modules`, `.next`, etc.
+
+**Check cache usage:**
+```bash
+docker-compose build --progress=plain
+```
+
+---
+
+#### **Issue 3: Database Connection Failed**
+**Error:**
+```
+Error: connect ECONNREFUSED db:5432
+```
+
+**Solution:**
+```bash
+# Wait for health check to pass
+docker-compose logs db
+
+# Look for:
+# "database system is ready to accept connections"
+
+# Restart app service
+docker-compose restart app
+```
+
+**Why it happens:** App starts before database is ready. Health checks minimize this, but rare timing issues can occur.
+
+---
+
+#### **Issue 4: Changes Not Reflected**
+**Problem:** Code changes don't appear in running container
+
+**Solution:**
+```bash
+# Rebuild image
+docker-compose up --build
+
+# Or rebuild specific service
+docker-compose build app
+docker-compose up -d
+```
+
+**Why:** Production build requires rebuild (unlike `npm run dev` hot reload).
+
+---
+
+#### **Issue 5: Out of Disk Space**
+**Problem:** Docker images/volumes consume too much space
+
+**Solution:**
+```bash
+# Check disk usage
+docker system df
+
+# Clean unused images, containers, networks
+docker system prune
+
+# Clean volumes (WARNING: deletes data)
+docker volume prune
+```
+
+---
+
+### 📸 Evidence for Kalvium Submission
+
+#### **Screenshot 1: Successful Build**
+```bash
+docker-compose build
+```
+
+**Capture:**
+- ✅ All build stages completing (deps → builder → runner)
+- ✅ "Successfully built" message
+- ✅ Image ID displayed
+
+---
+
+#### **Screenshot 2: Running Containers**
+```bash
+docker ps
+```
+
+**Capture:**
+- ✅ All 3 containers running (app, db, redis)
+- ✅ Correct port mappings
+- ✅ "Up X seconds" status
+
+---
+
+#### **Screenshot 3: Application Running**
+**Capture browser showing:**
+- ✅ `http://localhost:3000` loaded successfully
+- ✅ No console errors
+- ✅ App rendering correctly
+
+---
+
+#### **Screenshot 4: Container Logs**
+```bash
+docker-compose logs app
+```
+
+**Capture:**
+- ✅ "Server started on http://0.0.0.0:3000"
+- ✅ No error messages
+- ✅ Successful database/Redis connections (if applicable)
+
+---
+
+#### **Screenshot 5: Database Connection**
+```bash
+docker exec -it startupdiscovery-db psql -U postgres -d startupdiscovery -c "\l"
+```
+
+**Capture:**
+- ✅ Database `startupdiscovery` exists
+- ✅ Connection successful
+
+---
+
+### 🧠 Reflection: Why Docker Compose Improves Team Consistency
+
+#### **Before Docker:**
+- ❌ "Works on my machine" syndrome
+- ❌ Manual installation of PostgreSQL, Redis, Node.js
+- ❌ Version mismatches (Node 18 vs 20, Postgres 14 vs 15)
+- ❌ Different OS configurations (macOS vs Linux vs Windows)
+- ❌ 30-60 minute setup time for new developers
+
+#### **After Docker:**
+- ✅ Single command: `docker-compose up`
+- ✅ Identical environments for all developers
+- ✅ Zero dependency installation on host machine
+- ✅ Works across macOS, Linux, Windows (WSL2)
+- ✅ 5-minute setup time (download images once)
+
+---
+
+#### **Real-World Benefits:**
+
+**1. Onboarding Speed:**
+New team member runs:
+```bash
+git clone <repo>
+docker-compose up
+```
+→ Fully working environment in minutes
+
+**2. Debugging Consistency:**
+- Bug reported on dev machine
+- Reproduce exact environment with Docker
+- No "can't reproduce on my machine" issues
+
+**3. Production Parity:**
+- Development = Production (same Node version, DB version)
+- Reduces deployment surprises
+- Easier to debug production issues locally
+
+**4. Dependency Isolation:**
+- Multiple projects can use different versions
+- No global dependency conflicts
+- Clean machine after project ends
+
+**5. CI/CD Integration:**
+- Same Docker image used in testing and production
+- Predictable deployments
+- Faster pipeline execution
+
+---
+
+### 🎯 Key Takeaways
+
+1. **Docker containers = consistent environments everywhere**
+2. **Multi-stage builds = smaller, faster images**
+3. **Docker Compose = orchestrate multiple services easily**
+4. **Volumes = data persistence across restarts**
+5. **Networks = secure inter-service communication**
+6. **Health checks = reliable startup ordering**
+
+By containerizing **StartupDiscovery**, we ensure every developer, tester, and deployment environment runs the exact same application stack – eliminating environment-related bugs and accelerating development velocity.
+
