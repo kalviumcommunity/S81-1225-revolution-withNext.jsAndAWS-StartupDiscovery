@@ -30,6 +30,9 @@ RUN npm ci
 # Copy application source code
 COPY . .
 
+# Generate Prisma Client
+RUN npx prisma generate
+
 # Build the Next.js application
 # This creates the optimized production build in .next folder
 RUN npm run build
