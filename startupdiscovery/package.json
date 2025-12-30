@@ -16,7 +16,11 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "node --import tsx/esm prisma/seed.ts"
+    "prisma:seed": "node --import tsx/esm prisma/seed.ts",
+    "prisma:reset": "prisma migrate reset",
+    "db:test": "tsx scripts/test-db.ts",
+    "db:quick-test": "tsx scripts/quick-test.ts",
+    "db:setup": "prisma migrate dev && prisma db seed"
   },
   "dependencies": {
     "@prisma/client": "^6.2.0",
