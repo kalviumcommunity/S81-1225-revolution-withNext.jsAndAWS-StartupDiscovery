@@ -48,15 +48,15 @@ export const sendError = (
 
 /**
  * Send a validation error response from Zod errors
- * @param error - ZodError instance
+ * Note: Sanitized to prevent exposing internal schema structure
  */
 export const sendValidationError = (error: ZodError) => {
   return NextResponse.json(
     {
       success: false,
       message: 'Validation Error',
-      errors: error.errors.map((e) => ({
-        field: e.path.join('.'),
+      errors: error.issues.map((e: any) => ({
+        field: e.path.length > 0 ? e.path[e.path.length - 1] : 'unknown',
         message: e.message,
       })),
       timestamp: new Date().toISOString(),

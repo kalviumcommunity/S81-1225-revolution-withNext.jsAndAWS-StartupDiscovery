@@ -2,13 +2,11 @@ import { z } from "zod";
 
 /**
  * User Schema for POST requests (creating new users)
+ * Note: role is excluded - only admins can assign roles via separate endpoint
  */
 export const userCreateSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters long"),
   email: z.string().email("Invalid email address"),
-  role: z.enum(['admin', 'moderator', 'user'], {
-    message: "Role must be one of: admin, moderator, user",
-  }),
   age: z.number().min(18, "User must be 18 or older").optional(),
 });
 

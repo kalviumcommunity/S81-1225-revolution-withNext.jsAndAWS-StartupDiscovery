@@ -1,37 +1,28 @@
 import { sendSuccess, sendError, sendValidationError } from '@/lib/responseHandler';
 import { ERROR_CODES } from '@/lib/errorCodes';
 import { taskCreateSchema, taskUpdateSchema, taskDeleteSchema } from '@/lib/schemas/taskSchema';
+import { validateToken } from '@/lib/tokenValidator';
 import { ZodError } from 'zod';
 
 // Authentication helper
-function checkAuth(req: Request): { authorized: boolean; user?: { id: number; role: string } } {
+function checkAuth(req: Request): { authorized: boolean; userId?: number; userRole?: string } {
   const authHeader = req.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return { authorized: false };
   }
-  try {
-    const token = authHeader.substring(7);
-    const [userIdStr, role] = token.split(':');
 
-    if (!userIdStr || !role) {
-      // Token format is incorrect
-      return { authorized: false };
-    }
+  const token = authHeader.substring(7);
+  const validatedToken = validateToken(token);
 
-    const userId = parseInt(userIdStr, 10);
-
-    if (isNaN(userId)) {
-      // userId is not a valid number
-      return { authorized: false };
-    }
-
-    return {
-      authorized: true,
-      user: { id: userId, role: role },
-    };
-  } catch {
+  if (!validatedToken) {
     return { authorized: false };
   }
+
+  return {
+    authorized: true,
+    userId: validatedToken.userId,
+    userRole: validatedToken.role,
+  };
 }
 
 // Mock data store (in production, this would be a database)

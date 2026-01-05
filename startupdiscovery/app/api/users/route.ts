@@ -1,51 +1,34 @@
 import { sendSuccess, sendError, sendValidationError } from '@/lib/responseHandler';
 import { ERROR_CODES } from '@/lib/errorCodes';
 import { userCreateSchema, userUpdateSchema, userDeleteSchema } from '@/lib/schemas/userSchema';
+import { validateToken, hasRole } from '@/lib/tokenValidator';
 import { ZodError } from 'zod';
 
-// Authentication helper
-function checkAuth(req: Request): { authorized: boolean; user?: { id: number; role: string } } {
+// Authentication helper with token verification
+function checkAuth(req: Request): { authorized: boolean; userId?: number; userRole?: string } {
   const authHeader = req.headers.get('authorization');
   
-  // In production, verify JWT token or session
-  // For now, checking for presence of Authorization header
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return { authorized: false };
   }
   
-  // Mock user from token - in production, decode and verify JWT
-  // For demonstration: Bearer token format would be "Bearer user_id:role"
   try {
     const token = authHeader.substring(7);
-    const [userIdStr, role] = token.split(':');
-
-    if (!userIdStr || !role) {
-      // Token format is incorrect
-      return { authorized: false };
-    }
-
-    const userId = parseInt(userIdStr, 10);
-
-    if (isNaN(userId)) {
-      // userId is not a valid number
+    const validatedToken = validateToken(token);
+    
+    if (!validatedToken) {
+      // Invalid or forged token
       return { authorized: false };
     }
 
     return {
       authorized: true,
-      user: { id: userId, role: role },
+      userId: validatedToken.userId,
+      userRole: validatedToken.role,
     };
   } catch {
     return { authorized: false };
   }
-}
-
-// Authorization helper
-function checkPermission(userRole: string, requiredRole: string): boolean {
-  const roleHierarchy = { admin: 3, moderator: 2, user: 1 };
-  const userLevel = roleHierarchy[userRole as keyof typeof roleHierarchy] || 0;
-  const requiredLevel = roleHierarchy[requiredRole as keyof typeof roleHierarchy] || 0;
-  return userLevel >= requiredLevel;
 }
 
 // Mock data store (in production, this would be a database)
@@ -144,8 +127,9 @@ export async function GET(req: Request) {
 
 /**
  * POST /api/users
- * Create a new user
- * Body: { name: string, email: string, role?: string }
+ * Create a new user (default role: 'user')
+ * Body: { name: string, email: string, age?: number }
+ * Only admins can create users
  */
 export async function POST(req: Request) {
   // Require admin permission to create users
@@ -158,7 +142,7 @@ export async function POST(req: Request) {
     );
   }
   
-  if (!auth.user || !checkPermission(auth.user.role, 'admin')) {
+  if (!auth.userId || !hasRole(auth.userRole || 'user', 'admin')) {
     return sendError(
       'Forbidden. Admin permission required.',
       ERROR_CODES.INSUFFICIENT_PERMISSIONS,
@@ -185,7 +169,7 @@ export async function POST(req: Request) {
       id: nextId++,
       name: data.name,
       email: data.email,
-      role: data.role,
+      role: 'user', // Default role - admins can change via PUT
       ...(data.age && { age: data.age }),
     };
 
@@ -228,7 +212,7 @@ export async function PUT(req: Request) {
     const data = userUpdateSchema.parse(body);
 
     // Users can only update their own profile unless they're admin
-    if (auth.user && data.id !== auth.user.id && !checkPermission(auth.user.role, 'admin')) {
+    if (auth.userId && data.id !== auth.userId && !hasRole(auth.userRole || 'user', 'admin')) {
       return sendError(
         'Forbidden. You can only update your own profile.',
         ERROR_CODES.INSUFFICIENT_PERMISSIONS,
@@ -252,12 +236,12 @@ export async function PUT(req: Request) {
       );
     }
 
-    // Update user
+    // Update user - only admins can change roles
     users[userIndex] = {
       ...users[userIndex],
       ...(data.name && { name: data.name }),
       ...(data.email && { email: data.email }),
-      ...(data.role && { role: data.role }),
+      ...(data.role && hasRole(auth.userRole || 'user', 'admin') && { role: data.role }),
       ...(data.age && { age: data.age }),
     };
 
@@ -291,7 +275,7 @@ export async function DELETE(req: Request) {
     );
   }
   
-  if (!auth.user || !checkPermission(auth.user.role, 'admin')) {
+  if (!auth.userId || !hasRole(auth.userRole || 'user', 'admin')) {
     return sendError(
       'Forbidden. Admin permission required.',
       ERROR_CODES.INSUFFICIENT_PERMISSIONS,
