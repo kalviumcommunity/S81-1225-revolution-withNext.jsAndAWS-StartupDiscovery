@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
-import { sendSuccess, sendError } from '@/lib/responseHandler';
+import { sendSuccess, sendError, sendValidationError } from '@/lib/responseHandler';
 import { ERROR_CODES } from '@/lib/errorCodes';
+import { userCreateSchema, userUpdateSchema, userDeleteSchema } from '@/lib/schemas/userSchema';
+import { ZodError } from 'zod';
 
 // Authentication helper
 function checkAuth(req: Request): { authorized: boolean; user?: { id: number; role: string } } {
@@ -16,10 +17,23 @@ function checkAuth(req: Request): { authorized: boolean; user?: { id: number; ro
   // For demonstration: Bearer token format would be "Bearer user_id:role"
   try {
     const token = authHeader.substring(7);
-    const [userId, role] = token.split(':');
+    const [userIdStr, role] = token.split(':');
+
+    if (!userIdStr || !role) {
+      // Token format is incorrect
+      return { authorized: false };
+    }
+
+    const userId = parseInt(userIdStr, 10);
+
+    if (isNaN(userId)) {
+      // userId is not a valid number
+      return { authorized: false };
+    }
+
     return {
       authorized: true,
-      user: { id: parseInt(userId) || 1, role: role || 'user' },
+      user: { id: userId, role: role },
     };
   } catch {
     return { authorized: false };
@@ -153,26 +167,10 @@ export async function POST(req: Request) {
   }
 
   try {
-    const data = await req.json();
+    const body = await req.json();
 
-    // Validate required fields
-    if (!data.name || !data.email) {
-      return sendError(
-        'Missing required fields: name and email are required',
-        ERROR_CODES.MISSING_REQUIRED_FIELD,
-        400
-      );
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(data.email)) {
-      return sendError(
-        'Invalid email format',
-        ERROR_CODES.INVALID_EMAIL_FORMAT,
-        400
-      );
-    }
+    // Validate input with Zod schema
+    const data = userCreateSchema.parse(body);
 
     // Check for duplicate email
     if (users.some((user) => user.email === data.email)) {
@@ -187,13 +185,17 @@ export async function POST(req: Request) {
       id: nextId++,
       name: data.name,
       email: data.email,
-      role: data.role || 'user',
+      role: data.role,
+      ...(data.age && { age: data.age }),
     };
 
     users.push(newUser);
 
-    return sendSuccess(newUser, 'User created successfully', 201);
+    return sendSuccess({ user: newUser }, 'User created successfully', 201);
   } catch (error) {
+    if (error instanceof ZodError) {
+      return sendValidationError(error);
+    }
     return sendError(
       'Failed to create user',
       ERROR_CODES.INTERNAL_ERROR,
@@ -220,7 +222,10 @@ export async function PUT(req: Request) {
   }
 
   try {
-    const data = await req.json();
+    const body = await req.json();
+
+    // Validate input with Zod schema
+    const data = userUpdateSchema.parse(body);
 
     // Users can only update their own profile unless they're admin
     if (auth.user && data.id !== auth.user.id && !checkPermission(auth.user.role, 'admin')) {
@@ -231,11 +236,6 @@ export async function PUT(req: Request) {
       );
     }
 
-    // Validate required ID
-    if (!data.id) {
-      return sendError('User ID is required', ERROR_CODES.MISSING_REQUIRED_FIELD, 400);
-    }
-
     // Find user index
     const userIndex = users.findIndex((user) => user.id === data.id);
 
@@ -243,21 +243,13 @@ export async function PUT(req: Request) {
       return sendError('User not found', ERROR_CODES.USER_NOT_FOUND, 404);
     }
 
-    // Validate email if provided
-    if (data.email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(data.email)) {
-        return sendError('Invalid email format', ERROR_CODES.INVALID_EMAIL_FORMAT, 400);
-      }
-
-      // Check for duplicate email (excluding current user)
-      if (users.some((user) => user.email === data.email && user.id !== data.id)) {
-        return sendError(
-          'Email already in use by another user',
-          ERROR_CODES.EMAIL_ALREADY_EXISTS,
-          409
-        );
-      }
+    // Check for duplicate email (excluding current user)
+    if (data.email && users.some((user) => user.email === data.email && user.id !== data.id)) {
+      return sendError(
+        'Email already in use by another user',
+        ERROR_CODES.EMAIL_ALREADY_EXISTS,
+        409
+      );
     }
 
     // Update user
@@ -266,10 +258,14 @@ export async function PUT(req: Request) {
       ...(data.name && { name: data.name }),
       ...(data.email && { email: data.email }),
       ...(data.role && { role: data.role }),
+      ...(data.age && { age: data.age }),
     };
 
-    return sendSuccess(users[userIndex], 'User updated successfully');
+    return sendSuccess({ user: users[userIndex] }, 'User updated successfully');
   } catch (error) {
+    if (error instanceof ZodError) {
+      return sendValidationError(error);
+    }
     return sendError(
       'Failed to update user',
       ERROR_CODES.INTERNAL_ERROR,
@@ -304,12 +300,10 @@ export async function DELETE(req: Request) {
   }
 
   try {
-    const data = await req.json();
+    const body = await req.json();
 
-    // Validate required ID
-    if (!data.id) {
-      return sendError('User ID is required', ERROR_CODES.MISSING_REQUIRED_FIELD, 400);
-    }
+    // Validate input with Zod schema
+    const data = userDeleteSchema.parse(body);
 
     // Find user index
     const userIndex = users.findIndex((user) => user.id === data.id);
@@ -321,8 +315,11 @@ export async function DELETE(req: Request) {
     // Remove user
     const deletedUser = users.splice(userIndex, 1)[0];
 
-    return sendSuccess(deletedUser, 'User deleted successfully');
+    return sendSuccess({ user: deletedUser }, 'User deleted successfully');
   } catch (error) {
+    if (error instanceof ZodError) {
+      return sendValidationError(error);
+    }
     return sendError(
       'Failed to delete user',
       ERROR_CODES.INTERNAL_ERROR,

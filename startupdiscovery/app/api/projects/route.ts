@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
-import { sendSuccess, sendError } from '@/lib/responseHandler';
+import { sendSuccess, sendError, sendValidationError } from '@/lib/responseHandler';
 import { ERROR_CODES } from '@/lib/errorCodes';
+import { projectCreateSchema, projectUpdateSchema, projectDeleteSchema } from '@/lib/schemas/projectSchema';
+import { ZodError } from 'zod';
 
 // Authentication helper
 function checkAuth(req: Request): { authorized: boolean; user?: { id: number; role: string } } {
@@ -10,10 +11,23 @@ function checkAuth(req: Request): { authorized: boolean; user?: { id: number; ro
   }
   try {
     const token = authHeader.substring(7);
-    const [userId, role] = token.split(':');
+    const [userIdStr, role] = token.split(':');
+
+    if (!userIdStr || !role) {
+      // Token format is incorrect
+      return { authorized: false };
+    }
+
+    const userId = parseInt(userIdStr, 10);
+
+    if (isNaN(userId)) {
+      // userId is not a valid number
+      return { authorized: false };
+    }
+
     return {
       authorized: true,
-      user: { id: parseInt(userId) || 1, role: role || 'user' },
+      user: { id: userId, role: role },
     };
   } catch {
     return { authorized: false };
@@ -211,59 +225,21 @@ export async function POST(req: Request) {
   }
 
   try {
-    const data = await req.json();
+    const body = await req.json();
 
-    // Validate required fields
-    if (!data.name || !data.description || !data.category || data.budget === undefined || !data.startDate || !data.owner) {
-      return sendError('Missing required fields', ERROR_CODES.MISSING_REQUIRED_FIELD, 400,
-        { requiredFields: ['name', 'description', 'category', 'budget', 'startDate', 'owner'] });
-    }
-
-    // Validate budget
-    if (typeof data.budget !== 'number' || data.budget < 0) {
-      return sendError('Budget must be a positive number', ERROR_CODES.INVALID_INPUT, 400);
-    }
-
-    // Validate status if provided
-    const validStatuses = ['planning', 'active', 'on-hold', 'completed', 'cancelled'];
-    if (data.status && !validStatuses.includes(data.status)) {
-      return NextResponse.json(
-        { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
-        { status: 400 }
-      );
-    }
-
-    // Validate dates
-    const startDate = new Date(data.startDate);
-    if (isNaN(startDate.getTime())) {
-      return sendError('Invalid startDate format', ERROR_CODES.INVALID_INPUT, 400);
-    }
-
-    if (data.endDate) {
-      const endDate = new Date(data.endDate);
-      if (isNaN(endDate.getTime())) {
-        return sendError('Invalid endDate format', ERROR_CODES.INVALID_INPUT, 400);
-      }
-      if (endDate < startDate) {
-        return sendError('endDate cannot be before startDate', ERROR_CODES.INVALID_INPUT, 400);
-      }
-    }
-
-    // Validate team size
-    if (data.teamSize !== undefined && (typeof data.teamSize !== 'number' || data.teamSize < 1)) {
-      return sendError('Team size must be a positive number', ERROR_CODES.INVALID_INPUT, 400);
-    }
+    // Validate input with Zod schema
+    const data = projectCreateSchema.parse(body);
 
     const newProject = {
       id: nextId++,
       name: data.name,
       description: data.description,
-      status: data.status || 'planning',
+      status: data.status,
       category: data.category,
       budget: data.budget,
       startDate: data.startDate,
       endDate: data.endDate || null,
-      teamSize: data.teamSize || 1,
+      teamSize: data.teamSize,
       owner: data.owner,
     };
 
@@ -271,6 +247,9 @@ export async function POST(req: Request) {
 
     return sendSuccess({ project: newProject }, 'Project created successfully', 201);
   } catch (error) {
+    if (error instanceof ZodError) {
+      return sendValidationError(error);
+    }
     return sendError('Invalid request body', ERROR_CODES.INVALID_REQUEST_BODY, 400,
       { details: error instanceof Error ? error.message : 'Unknown error' });
   }
@@ -289,52 +268,16 @@ export async function PUT(req: Request) {
   }
 
   try {
-    const data = await req.json();
+    const body = await req.json();
 
-    // Validate required ID
-    if (!data.id) {
-      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
-    }
+    // Validate input with Zod schema
+    const data = projectUpdateSchema.parse(body);
 
     // Find project index
     const projectIndex = projects.findIndex((project) => project.id === data.id);
 
     if (projectIndex === -1) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
-    }
-
-    // Validate budget if provided
-    if (data.budget !== undefined && (typeof data.budget !== 'number' || data.budget < 0)) {
-      return sendError('Budget must be a positive number', ERROR_CODES.INVALID_INPUT, 400);
-    }
-
-    // Validate status if provided
-    const validStatuses = ['planning', 'active', 'on-hold', 'completed', 'cancelled'];
-    if (data.status && !validStatuses.includes(data.status)) {
-      return NextResponse.json(
-        { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
-        { status: 400 }
-      );
-    }
-
-    // Validate dates if provided
-    if (data.startDate) {
-      const startDate = new Date(data.startDate);
-      if (isNaN(startDate.getTime())) {
-        return sendError('Invalid startDate format', ERROR_CODES.INVALID_INPUT, 400);
-      }
-    }
-
-    if (data.endDate) {
-      const endDate = new Date(data.endDate);
-      if (isNaN(endDate.getTime())) {
-        return sendError('Invalid endDate format', ERROR_CODES.INVALID_INPUT, 400);
-      }
-    }
-
-    // Validate team size if provided
-    if (data.teamSize !== undefined && (typeof data.teamSize !== 'number' || data.teamSize < 1)) {
-      return sendError('Team size must be a positive number', ERROR_CODES.INVALID_INPUT, 400);
+      return sendError('Project not found', ERROR_CODES.RESOURCE_NOT_FOUND, 404);
     }
 
     // Update project
@@ -353,6 +296,9 @@ export async function PUT(req: Request) {
 
     return sendSuccess({ project: projects[projectIndex] }, 'Project updated successfully');
   } catch (error) {
+    if (error instanceof ZodError) {
+      return sendValidationError(error);
+    }
     return sendError('Invalid request body', ERROR_CODES.INVALID_REQUEST_BODY, 400,
       { details: error instanceof Error ? error.message : 'Unknown error' });
   }
@@ -371,13 +317,10 @@ export async function DELETE(req: Request) {
   }
 
   try {
-    const data = await req.json();
+    const body = await req.json();
 
-    // Validate required ID
-    if (!data.id) {
-      return sendError('Project ID is required', ERROR_CODES.MISSING_REQUIRED_FIELD, 400,
-        { requiredFields: ['id'] });
-    }
+    // Validate input with Zod schema
+    const data = projectDeleteSchema.parse(body);
 
     // Find project index
     const projectIndex = projects.findIndex((project) => project.id === data.id);
@@ -391,6 +334,9 @@ export async function DELETE(req: Request) {
 
     return sendSuccess({ project: deletedProject }, 'Project deleted successfully');
   } catch (error) {
+    if (error instanceof ZodError) {
+      return sendValidationError(error);
+    }
     return sendError('Invalid request body', ERROR_CODES.INVALID_REQUEST_BODY, 400,
       { details: error instanceof Error ? error.message : 'Unknown error' });
   }

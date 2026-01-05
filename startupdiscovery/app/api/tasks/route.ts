@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
-import { sendSuccess, sendError } from '@/lib/responseHandler';
+import { sendSuccess, sendError, sendValidationError } from '@/lib/responseHandler';
 import { ERROR_CODES } from '@/lib/errorCodes';
+import { taskCreateSchema, taskUpdateSchema, taskDeleteSchema } from '@/lib/schemas/taskSchema';
+import { ZodError } from 'zod';
 
 // Authentication helper
 function checkAuth(req: Request): { authorized: boolean; user?: { id: number; role: string } } {
@@ -10,10 +11,23 @@ function checkAuth(req: Request): { authorized: boolean; user?: { id: number; ro
   }
   try {
     const token = authHeader.substring(7);
-    const [userId, role] = token.split(':');
+    const [userIdStr, role] = token.split(':');
+
+    if (!userIdStr || !role) {
+      // Token format is incorrect
+      return { authorized: false };
+    }
+
+    const userId = parseInt(userIdStr, 10);
+
+    if (isNaN(userId)) {
+      // userId is not a valid number
+      return { authorized: false };
+    }
+
     return {
       authorized: true,
-      user: { id: parseInt(userId) || 1, role: role || 'user' },
+      user: { id: userId, role: role },
     };
   } catch {
     return { authorized: false };
@@ -181,34 +195,17 @@ export async function POST(req: Request) {
   }
 
   try {
-    const data = await req.json();
+    const body = await req.json();
 
-    // Validate required fields
-    if (!data.title || !data.description) {
-      return sendError('Missing required fields', ERROR_CODES.MISSING_REQUIRED_FIELD, 400,
-        { requiredFields: ['title', 'description'] });
-    }
-
-    // Validate status if provided
-    const validStatuses = ['pending', 'in-progress', 'completed'];
-    if (data.status && !validStatuses.includes(data.status)) {
-      return sendError('Invalid status value', ERROR_CODES.INVALID_INPUT, 400,
-        { validValues: validStatuses });
-    }
-
-    // Validate priority if provided
-    const validPriorities = ['low', 'medium', 'high'];
-    if (data.priority && !validPriorities.includes(data.priority)) {
-      return sendError('Invalid priority value', ERROR_CODES.INVALID_INPUT, 400,
-        { validValues: validPriorities });
-    }
+    // Validate input with Zod schema
+    const data = taskCreateSchema.parse(body);
 
     const newTask = {
       id: nextId++,
       title: data.title,
       description: data.description,
-      status: data.status || 'pending',
-      priority: data.priority || 'medium',
+      status: data.status,
+      priority: data.priority,
       assignedTo: data.assignedTo || 'Unassigned',
       createdAt: new Date().toISOString(),
     };
@@ -217,6 +214,9 @@ export async function POST(req: Request) {
 
     return sendSuccess({ task: newTask }, 'Task created successfully', 201);
   } catch (error) {
+    if (error instanceof ZodError) {
+      return sendValidationError(error);
+    }
     return sendError('Invalid request body', ERROR_CODES.INVALID_REQUEST_BODY, 400,
       { details: error instanceof Error ? error.message : 'Unknown error' });
   }
@@ -235,32 +235,16 @@ export async function PUT(req: Request) {
   }
 
   try {
-    const data = await req.json();
+    const body = await req.json();
 
-    // Validate required ID
-    if (!data.id) {
-      return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
-    }
+    // Validate input with Zod schema
+    const data = taskUpdateSchema.parse(body);
 
     // Find task index
     const taskIndex = tasks.findIndex((task) => task.id === data.id);
 
     if (taskIndex === -1) {
-      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
-    }
-
-    // Validate status if provided
-    const validStatuses = ['pending', 'in-progress', 'completed'];
-    if (data.status && !validStatuses.includes(data.status)) {
-      return sendError('Invalid status value', ERROR_CODES.INVALID_INPUT, 400,
-        { validValues: validStatuses });
-    }
-
-    // Validate priority if provided
-    const validPriorities = ['low', 'medium', 'high'];
-    if (data.priority && !validPriorities.includes(data.priority)) {
-      return sendError('Invalid priority value', ERROR_CODES.INVALID_INPUT, 400,
-        { validValues: validPriorities });
+      return sendError('Task not found', ERROR_CODES.RESOURCE_NOT_FOUND, 404);
     }
 
     // Update task
@@ -275,6 +259,9 @@ export async function PUT(req: Request) {
 
     return sendSuccess({ task: tasks[taskIndex] }, 'Task updated successfully');
   } catch (error) {
+    if (error instanceof ZodError) {
+      return sendValidationError(error);
+    }
     return sendError('Invalid request body', ERROR_CODES.INVALID_REQUEST_BODY, 400,
       { details: error instanceof Error ? error.message : 'Unknown error' });
   }
@@ -293,13 +280,10 @@ export async function DELETE(req: Request) {
   }
 
   try {
-    const data = await req.json();
+    const body = await req.json();
 
-    // Validate required ID
-    if (!data.id) {
-      return sendError('Task ID is required', ERROR_CODES.MISSING_REQUIRED_FIELD, 400,
-        { requiredFields: ['id'] });
-    }
+    // Validate input with Zod schema
+    const data = taskDeleteSchema.parse(body);
 
     // Find task index
     const taskIndex = tasks.findIndex((task) => task.id === data.id);
@@ -313,6 +297,9 @@ export async function DELETE(req: Request) {
 
     return sendSuccess({ task: deletedTask }, 'Task deleted successfully');
   } catch (error) {
+    if (error instanceof ZodError) {
+      return sendValidationError(error);
+    }
     return sendError('Invalid request body', ERROR_CODES.INVALID_REQUEST_BODY, 400,
       { details: error instanceof Error ? error.message : 'Unknown error' });
   }
