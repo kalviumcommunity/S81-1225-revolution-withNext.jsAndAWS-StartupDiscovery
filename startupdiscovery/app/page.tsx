@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import prisma from '@/lib/prisma';
+// import prisma from '@/lib/prisma';
 
 // ✅ Hybrid Rendering (ISR) - Revalidate every 60 seconds
 export const revalidate = 60;
@@ -22,6 +22,11 @@ interface Startup {
 }
 
 async function getStartups(): Promise<Startup[]> {
+  // Temporarily return empty array to avoid database requirement
+  // Database configuration needed for full functionality
+  return [];
+  
+  /* Uncomment when DATABASE_URL is configured
   try {
     const startups = await prisma.startup.findMany({
       where: {
@@ -53,6 +58,7 @@ async function getStartups(): Promise<Startup[]> {
     console.error('Failed to fetch startups:', error);
     return [];
   }
+  */
 }
 
 export default async function Home() {
