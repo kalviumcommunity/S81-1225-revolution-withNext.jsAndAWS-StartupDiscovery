@@ -1,13 +1,25 @@
-import { sendSuccess, sendError, sendValidationError } from '@/lib/responseHandler';
-import { ERROR_CODES } from '@/lib/errorCodes';
-import { taskCreateSchema, taskUpdateSchema, taskDeleteSchema } from '@/lib/schemas/taskSchema';
-import { validateToken } from '@/lib/tokenValidator';
-import { ZodError } from 'zod';
+import {
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from "@/lib/responseHandler";
+import { ERROR_CODES } from "@/lib/errorCodes";
+import {
+  taskCreateSchema,
+  taskUpdateSchema,
+  taskDeleteSchema,
+} from "@/lib/schemas/taskSchema";
+import { validateToken } from "@/lib/tokenValidator";
+import { ZodError } from "zod";
 
 // Authentication helper
-function checkAuth(req: Request): { authorized: boolean; userId?: number; userRole?: string } {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+function checkAuth(req: Request): {
+  authorized: boolean;
+  userId?: number;
+  userRole?: string;
+} {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return { authorized: false };
   }
 
@@ -29,48 +41,48 @@ function checkAuth(req: Request): { authorized: boolean; userId?: number; userRo
 const tasks = [
   {
     id: 1,
-    title: 'Design API architecture',
-    description: 'Create RESTful API design for the project',
-    status: 'completed',
-    priority: 'high',
-    assignedTo: 'Alice Johnson',
-    createdAt: '2026-01-01T10:00:00Z',
+    title: "Design API architecture",
+    description: "Create RESTful API design for the project",
+    status: "completed",
+    priority: "high",
+    assignedTo: "Alice Johnson",
+    createdAt: "2026-01-01T10:00:00Z",
   },
   {
     id: 2,
-    title: 'Implement user authentication',
-    description: 'Set up JWT-based authentication system',
-    status: 'in-progress',
-    priority: 'high',
-    assignedTo: 'Bob Smith',
-    createdAt: '2026-01-02T14:30:00Z',
+    title: "Implement user authentication",
+    description: "Set up JWT-based authentication system",
+    status: "in-progress",
+    priority: "high",
+    assignedTo: "Bob Smith",
+    createdAt: "2026-01-02T14:30:00Z",
   },
   {
     id: 3,
-    title: 'Write unit tests',
-    description: 'Add test coverage for API endpoints',
-    status: 'pending',
-    priority: 'medium',
-    assignedTo: 'Charlie Brown',
-    createdAt: '2026-01-03T09:15:00Z',
+    title: "Write unit tests",
+    description: "Add test coverage for API endpoints",
+    status: "pending",
+    priority: "medium",
+    assignedTo: "Charlie Brown",
+    createdAt: "2026-01-03T09:15:00Z",
   },
   {
     id: 4,
-    title: 'Database optimization',
-    description: 'Optimize database queries and add indexes',
-    status: 'in-progress',
-    priority: 'medium',
-    assignedTo: 'Diana Prince',
-    createdAt: '2026-01-03T16:45:00Z',
+    title: "Database optimization",
+    description: "Optimize database queries and add indexes",
+    status: "in-progress",
+    priority: "medium",
+    assignedTo: "Diana Prince",
+    createdAt: "2026-01-03T16:45:00Z",
   },
   {
     id: 5,
-    title: 'Update documentation',
-    description: 'Update README and API documentation',
-    status: 'pending',
-    priority: 'low',
-    assignedTo: 'Eve Wilson',
-    createdAt: '2026-01-04T11:20:00Z',
+    title: "Update documentation",
+    description: "Update README and API documentation",
+    status: "pending",
+    priority: "low",
+    assignedTo: "Eve Wilson",
+    createdAt: "2026-01-04T11:20:00Z",
   },
 ];
 
@@ -91,36 +103,45 @@ export async function GET(req: Request) {
   // Require authentication
   const auth = checkAuth(req);
   if (!auth.authorized) {
-    return sendError('Authentication required', ERROR_CODES.UNAUTHORIZED, 401);
+    return sendError("Authentication required", ERROR_CODES.UNAUTHORIZED, 401);
   }
 
   try {
     const { searchParams } = new URL(req.url);
-    const page = Number(searchParams.get('page')) || 1;
-    const limit = Number(searchParams.get('limit')) || 10;
-    const status = searchParams.get('status');
-    const priority = searchParams.get('priority');
-    const assignedTo = searchParams.get('assignedTo');
-    const search = searchParams.get('search');
+    const page = Number(searchParams.get("page")) || 1;
+    const limit = Number(searchParams.get("limit")) || 10;
+    const status = searchParams.get("status");
+    const priority = searchParams.get("priority");
+    const assignedTo = searchParams.get("assignedTo");
+    const search = searchParams.get("search");
 
     // Validate pagination parameters
     if (page < 1 || limit < 1 || limit > 100) {
-      return sendError('Invalid pagination parameters', ERROR_CODES.INVALID_PAGINATION, 400, 
-        { details: 'Page must be >= 1, limit must be between 1 and 100' });
+      return sendError(
+        "Invalid pagination parameters",
+        ERROR_CODES.INVALID_PAGINATION,
+        400,
+        { details: "Page must be >= 1, limit must be between 1 and 100" }
+      );
     }
 
     // Validate status if provided
-    const validStatuses = ['pending', 'in-progress', 'completed'];
+    const validStatuses = ["pending", "in-progress", "completed"];
     if (status && !validStatuses.includes(status)) {
-      return sendError('Invalid status value', ERROR_CODES.INVALID_INPUT, 400,
-        { validValues: validStatuses });
+      return sendError("Invalid status value", ERROR_CODES.INVALID_INPUT, 400, {
+        validValues: validStatuses,
+      });
     }
 
     // Validate priority if provided
-    const validPriorities = ['low', 'medium', 'high'];
+    const validPriorities = ["low", "medium", "high"];
     if (priority && !validPriorities.includes(priority)) {
-      return sendError('Invalid priority value', ERROR_CODES.INVALID_INPUT, 400,
-        { validValues: validPriorities });
+      return sendError(
+        "Invalid priority value",
+        ERROR_CODES.INVALID_INPUT,
+        400,
+        { validValues: validPriorities }
+      );
     }
 
     // Filter tasks based on query parameters
@@ -131,7 +152,9 @@ export async function GET(req: Request) {
     }
 
     if (priority) {
-      filteredTasks = filteredTasks.filter((task) => task.priority === priority);
+      filteredTasks = filteredTasks.filter(
+        (task) => task.priority === priority
+      );
     }
 
     if (assignedTo) {
@@ -156,20 +179,27 @@ export async function GET(req: Request) {
     const endIndex = startIndex + limit;
     const paginatedTasks = filteredTasks.slice(startIndex, endIndex);
 
-    return sendSuccess({
-      tasks: paginatedTasks,
-      pagination: {
-        page,
-        limit,
-        totalItems,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
+    return sendSuccess(
+      {
+        tasks: paginatedTasks,
+        pagination: {
+          page,
+          limit,
+          totalItems,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1,
+        },
       },
-    }, 'Tasks retrieved successfully');
+      "Tasks retrieved successfully"
+    );
   } catch (error) {
-    return sendError('Internal server error', ERROR_CODES.INTERNAL_SERVER_ERROR, 500,
-      { details: error instanceof Error ? error.message : 'Unknown error' });
+    return sendError(
+      "Internal server error",
+      ERROR_CODES.INTERNAL_SERVER_ERROR,
+      500,
+      { details: error instanceof Error ? error.message : "Unknown error" }
+    );
   }
 }
 
@@ -182,7 +212,7 @@ export async function POST(req: Request) {
   // Require authentication
   const auth = checkAuth(req);
   if (!auth.authorized) {
-    return sendError('Authentication required', ERROR_CODES.UNAUTHORIZED, 401);
+    return sendError("Authentication required", ERROR_CODES.UNAUTHORIZED, 401);
   }
 
   try {
@@ -197,19 +227,23 @@ export async function POST(req: Request) {
       description: data.description,
       status: data.status,
       priority: data.priority,
-      assignedTo: data.assignedTo || 'Unassigned',
+      assignedTo: data.assignedTo || "Unassigned",
       createdAt: new Date().toISOString(),
     };
 
     tasks.push(newTask);
 
-    return sendSuccess({ task: newTask }, 'Task created successfully', 201);
+    return sendSuccess({ task: newTask }, "Task created successfully", 201);
   } catch (error) {
     if (error instanceof ZodError) {
       return sendValidationError(error);
     }
-    return sendError('Invalid request body', ERROR_CODES.INVALID_REQUEST_BODY, 400,
-      { details: error instanceof Error ? error.message : 'Unknown error' });
+    return sendError(
+      "Invalid request body",
+      ERROR_CODES.INVALID_REQUEST_BODY,
+      400,
+      { details: error instanceof Error ? error.message : "Unknown error" }
+    );
   }
 }
 
@@ -222,7 +256,7 @@ export async function PUT(req: Request) {
   // Require authentication
   const auth = checkAuth(req);
   if (!auth.authorized) {
-    return sendError('Authentication required', ERROR_CODES.UNAUTHORIZED, 401);
+    return sendError("Authentication required", ERROR_CODES.UNAUTHORIZED, 401);
   }
 
   try {
@@ -235,7 +269,7 @@ export async function PUT(req: Request) {
     const taskIndex = tasks.findIndex((task) => task.id === data.id);
 
     if (taskIndex === -1) {
-      return sendError('Task not found', ERROR_CODES.RESOURCE_NOT_FOUND, 404);
+      return sendError("Task not found", ERROR_CODES.RESOURCE_NOT_FOUND, 404);
     }
 
     // Update task
@@ -248,13 +282,17 @@ export async function PUT(req: Request) {
       ...(data.assignedTo && { assignedTo: data.assignedTo }),
     };
 
-    return sendSuccess({ task: tasks[taskIndex] }, 'Task updated successfully');
+    return sendSuccess({ task: tasks[taskIndex] }, "Task updated successfully");
   } catch (error) {
     if (error instanceof ZodError) {
       return sendValidationError(error);
     }
-    return sendError('Invalid request body', ERROR_CODES.INVALID_REQUEST_BODY, 400,
-      { details: error instanceof Error ? error.message : 'Unknown error' });
+    return sendError(
+      "Invalid request body",
+      ERROR_CODES.INVALID_REQUEST_BODY,
+      400,
+      { details: error instanceof Error ? error.message : "Unknown error" }
+    );
   }
 }
 
@@ -267,7 +305,7 @@ export async function DELETE(req: Request) {
   // Require authentication
   const auth = checkAuth(req);
   if (!auth.authorized) {
-    return sendError('Authentication required', ERROR_CODES.UNAUTHORIZED, 401);
+    return sendError("Authentication required", ERROR_CODES.UNAUTHORIZED, 401);
   }
 
   try {
@@ -280,18 +318,22 @@ export async function DELETE(req: Request) {
     const taskIndex = tasks.findIndex((task) => task.id === data.id);
 
     if (taskIndex === -1) {
-      return sendError('Task not found', ERROR_CODES.RESOURCE_NOT_FOUND, 404);
+      return sendError("Task not found", ERROR_CODES.RESOURCE_NOT_FOUND, 404);
     }
 
     // Remove task
     const deletedTask = tasks.splice(taskIndex, 1)[0];
 
-    return sendSuccess({ task: deletedTask }, 'Task deleted successfully');
+    return sendSuccess({ task: deletedTask }, "Task deleted successfully");
   } catch (error) {
     if (error instanceof ZodError) {
       return sendValidationError(error);
     }
-    return sendError('Invalid request body', ERROR_CODES.INVALID_REQUEST_BODY, 400,
-      { details: error instanceof Error ? error.message : 'Unknown error' });
+    return sendError(
+      "Invalid request body",
+      ERROR_CODES.INVALID_REQUEST_BODY,
+      400,
+      { details: error instanceof Error ? error.message : "Unknown error" }
+    );
   }
 }

@@ -1,10 +1,12 @@
 # 🚀 Quick Reference - API Endpoints
 
 ## Start Server
+
 ```bash
 cd startupdiscovery
 npm run dev
 ```
+
 **Server**: http://localhost:3000
 
 ---
@@ -12,21 +14,25 @@ npm run dev
 ## 👥 Users API
 
 ### GET All Users
+
 ```bash
 curl http://localhost:3000/api/users
 ```
 
 ### GET with Pagination
+
 ```bash
 curl "http://localhost:3000/api/users?page=1&limit=2"
 ```
 
 ### GET with Filter
+
 ```bash
 curl "http://localhost:3000/api/users?role=admin"
 ```
 
 ### POST Create User
+
 ```bash
 curl -X POST http://localhost:3000/api/users \
   -H "Content-Type: application/json" \
@@ -34,6 +40,7 @@ curl -X POST http://localhost:3000/api/users \
 ```
 
 ### PUT Update User
+
 ```bash
 curl -X PUT http://localhost:3000/api/users \
   -H "Content-Type: application/json" \
@@ -41,6 +48,7 @@ curl -X PUT http://localhost:3000/api/users \
 ```
 
 ### DELETE User
+
 ```bash
 curl -X DELETE http://localhost:3000/api/users \
   -H "Content-Type: application/json" \
@@ -52,16 +60,19 @@ curl -X DELETE http://localhost:3000/api/users \
 ## 📝 Tasks API
 
 ### GET All Tasks
+
 ```bash
 curl http://localhost:3000/api/tasks
 ```
 
 ### GET with Filters
+
 ```bash
 curl "http://localhost:3000/api/tasks?status=in-progress&priority=high"
 ```
 
 ### POST Create Task
+
 ```bash
 curl -X POST http://localhost:3000/api/tasks \
   -H "Content-Type: application/json" \
@@ -69,6 +80,7 @@ curl -X POST http://localhost:3000/api/tasks \
 ```
 
 ### PUT Update Task
+
 ```bash
 curl -X PUT http://localhost:3000/api/tasks \
   -H "Content-Type: application/json" \
@@ -76,6 +88,7 @@ curl -X PUT http://localhost:3000/api/tasks \
 ```
 
 ### DELETE Task
+
 ```bash
 curl -X DELETE http://localhost:3000/api/tasks \
   -H "Content-Type: application/json" \
@@ -87,16 +100,19 @@ curl -X DELETE http://localhost:3000/api/tasks \
 ## 🚀 Projects API
 
 ### GET All Projects
+
 ```bash
 curl http://localhost:3000/api/projects
 ```
 
 ### GET with Budget Filter
+
 ```bash
 curl "http://localhost:3000/api/projects?minBudget=40000&maxBudget=60000"
 ```
 
 ### POST Create Project
+
 ```bash
 curl -X POST http://localhost:3000/api/projects \
   -H "Content-Type: application/json" \
@@ -111,6 +127,7 @@ curl -X POST http://localhost:3000/api/projects \
 ```
 
 ### PUT Update Project
+
 ```bash
 curl -X PUT http://localhost:3000/api/projects \
   -H "Content-Type: application/json" \
@@ -118,6 +135,7 @@ curl -X PUT http://localhost:3000/api/projects \
 ```
 
 ### DELETE Project
+
 ```bash
 curl -X DELETE http://localhost:3000/api/projects \
   -H "Content-Type: application/json" \
@@ -128,29 +146,29 @@ curl -X DELETE http://localhost:3000/api/projects \
 
 ## 📊 Common Query Parameters
 
-| Parameter | Description | Example |
-|-----------|-------------|---------|
-| `page` | Page number (default: 1) | `?page=2` |
-| `limit` | Items per page (max: 100) | `?limit=20` |
-| `role` | Filter by role (users) | `?role=admin` |
-| `status` | Filter by status | `?status=active` |
-| `priority` | Filter by priority (tasks) | `?priority=high` |
-| `search` | Text search | `?search=alice` |
-| `minBudget` | Minimum budget (projects) | `?minBudget=40000` |
-| `maxBudget` | Maximum budget (projects) | `?maxBudget=60000` |
+| Parameter   | Description                | Example            |
+| ----------- | -------------------------- | ------------------ |
+| `page`      | Page number (default: 1)   | `?page=2`          |
+| `limit`     | Items per page (max: 100)  | `?limit=20`        |
+| `role`      | Filter by role (users)     | `?role=admin`      |
+| `status`    | Filter by status           | `?status=active`   |
+| `priority`  | Filter by priority (tasks) | `?priority=high`   |
+| `search`    | Text search                | `?search=alice`    |
+| `minBudget` | Minimum budget (projects)  | `?minBudget=40000` |
+| `maxBudget` | Maximum budget (projects)  | `?maxBudget=60000` |
 
 ---
 
 ## 🎯 Status Codes
 
-| Code | Meaning | When |
-|------|---------|------|
-| 200 | OK | Successful GET, PUT, DELETE |
-| 201 | Created | Successful POST |
-| 400 | Bad Request | Invalid input |
-| 404 | Not Found | Resource doesn't exist |
-| 409 | Conflict | Duplicate resource |
-| 500 | Server Error | Internal error |
+| Code | Meaning      | When                        |
+| ---- | ------------ | --------------------------- |
+| 200  | OK           | Successful GET, PUT, DELETE |
+| 201  | Created      | Successful POST             |
+| 400  | Bad Request  | Invalid input               |
+| 404  | Not Found    | Resource doesn't exist      |
+| 409  | Conflict     | Duplicate resource          |
+| 500  | Server Error | Internal error              |
 
 ---
 

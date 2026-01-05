@@ -12,9 +12,13 @@
 All 5 deliverables have been implemented:
 
 ### 1️⃣ Migration Setup ✅
+
 ### 2️⃣ Seed Script (Idempotent) ✅
+
 ### 3️⃣ Verification Steps ✅
+
 ### 4️⃣ README Documentation ✅
+
 ### 5️⃣ Reflection ✅
 
 ---
@@ -110,6 +114,7 @@ npx prisma migrate dev --name init_schema
 ### Migration Commands
 
 #### Create Migration
+
 ```bash
 # Create and apply new migration
 npx prisma migrate dev --name migration_name
@@ -121,6 +126,7 @@ npx prisma migrate dev --name migration_name
 ```
 
 #### Check Migration Status
+
 ```bash
 npx prisma migrate status
 
@@ -134,6 +140,7 @@ npx prisma migrate status
 ```
 
 #### Apply Migrations (Production)
+
 ```bash
 # Only apply migrations (don't generate or seed)
 npx prisma migrate deploy
@@ -143,6 +150,7 @@ npx prisma migrate deploy
 ```
 
 #### Reset Database (Development Only)
+
 ```bash
 # ⚠️ DELETES ALL DATA - use only in development
 npx prisma migrate reset
@@ -174,6 +182,7 @@ model User {
 ```
 
 Run:
+
 ```bash
 npx prisma migrate dev --name add_name_field
 ```
@@ -245,14 +254,14 @@ const user = await prisma.user.upsert({
 **File:** `prisma/seed.ts`
 
 ```typescript
-import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcrypt';
-import { Decimal } from '@prisma/client/runtime/library';
+import { PrismaClient } from "@prisma/client";
+import { hash } from "bcrypt";
+import { Decimal } from "@prisma/client/runtime/library";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting database seed...\n');
+  console.log("🌱 Starting database seed...\n");
 
   try {
     // 1. CREATE CATEGORIES (Idempotent with upsert)
@@ -263,29 +272,30 @@ async function main() {
     // 6. CREATE VOTES (Delete and recreate for safety)
     // 7. CREATE BOOKMARKS (Delete and recreate)
     // 8. CREATE FOLLOWS (Delete and recreate)
-    
-    console.log('🎉 Seeding completed successfully!');
+
+    console.log("🎉 Seeding completed successfully!");
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error("❌ Error:", error);
     throw error;
   }
 }
 
-main()
-  .finally(async () => await prisma.$disconnect());
+main().finally(async () => await prisma.$disconnect());
 ```
 
 ### Idempotent Methods Used
 
 #### Method 1: Upsert (for simple data)
+
 ```typescript
 const category = await prisma.category.upsert({
-  where: { slug: 'saas' },        // ← Check by unique field
-  update: {},                      // ← No update needed
-  create: {                        // ← Create if doesn't exist
-    name: 'SaaS',
-    slug: 'saas',
-    description: '...',
+  where: { slug: "saas" }, // ← Check by unique field
+  update: {}, // ← No update needed
+  create: {
+    // ← Create if doesn't exist
+    name: "SaaS",
+    slug: "saas",
+    description: "...",
   },
 });
 
@@ -295,6 +305,7 @@ const category = await prisma.category.upsert({
 ```
 
 #### Method 2: Check & Create (for complex data)
+
 ```typescript
 const existing = await prisma.comment.findMany({
   where: { content: 'Amazing product!' }
@@ -312,6 +323,7 @@ if (existing.length === 0) {
 ```
 
 #### Method 3: Delete & Recreate (for unique constraints)
+
 ```typescript
 // Delete existing votes for these users
 await prisma.vote.deleteMany({
@@ -319,8 +331,8 @@ await prisma.vote.deleteMany({
     OR: [
       { userId: 1, startupId: 1 },
       { userId: 2, startupId: 1 },
-    ]
-  }
+    ],
+  },
 });
 
 // Create fresh votes
@@ -328,7 +340,7 @@ await prisma.vote.createMany({
   data: [
     { userId: 1, startupId: 1, value: 1 },
     { userId: 2, startupId: 1, value: 1 },
-  ]
+  ],
 });
 
 // Result:
@@ -444,35 +456,42 @@ npx prisma studio
 ### Step 4: Verify Tables in Studio
 
 **Check Users Table:**
+
 - [ ] 3 users visible (alice, bob, admin)
 - [ ] Passwords are hashed (not plain text)
 - [ ] Emails are unique
 - [ ] Timestamps are populated
 
 **Check Startups Table:**
+
 - [ ] 2 startups visible (CloudSync Pro, HealthTrack AI)
 - [ ] Slug values are unique
 - [ ] UserId matches correct user
 - [ ] ViewCount and voteCount are set
 
 **Check Categories Table:**
+
 - [ ] 6 categories visible (SaaS, E-commerce, FinTech, etc.)
 - [ ] Slug values are unique
 
 **Check Comments Table:**
+
 - [ ] 2 comments visible
 - [ ] UserId and StartupId are populated correctly
 - [ ] Content is displayed
 
 **Check Votes Table:**
+
 - [ ] 3 votes visible
 - [ ] UserId and StartupId are set
 
 **Check Bookmarks Table:**
+
 - [ ] 3 bookmarks visible
 - [ ] UserId and StartupId are set
 
 **Check Follows Table:**
+
 - [ ] 3 follows visible
 - [ ] followerId and followingId are set
 
@@ -521,7 +540,7 @@ npx prisma migrate dev
 ```
 1. LOCAL TESTING
    └─ npx prisma migrate dev
-   
+
 2. CODE REVIEW
    └─ Team reviews migration SQL
 
@@ -567,6 +586,7 @@ Before running migrations in production:
 ### Why Migrations Prevent Schema Drift
 
 **Without Migrations:**
+
 ```
 ❌ Developer A: "Let me add a column manually"
 ❌ Developer B: Doesn't know about change
@@ -576,6 +596,7 @@ Before running migrations in production:
 ```
 
 **With Migrations:**
+
 ```
 ✅ Developer A: npx prisma migrate dev --name add_column
 ✅ Migration file created (version controlled)
@@ -587,6 +608,7 @@ Before running migrations in production:
 ```
 
 **Benefits:**
+
 - ✅ Schema tracked like code
 - ✅ Changes reviewable
 - ✅ Easy to rollback
@@ -596,6 +618,7 @@ Before running migrations in production:
 ### Why Seeding Helps New Developers
 
 **Without Seeding:**
+
 ```
 New Developer:
 1. npm install
@@ -607,6 +630,7 @@ New Developer:
 ```
 
 **With Seeding:**
+
 ```
 New Developer:
 1. npm install
@@ -618,6 +642,7 @@ New Developer:
 ```
 
 **Benefits:**
+
 - ✅ Consistent development environment
 - ✅ Faster onboarding
 - ✅ Reproducible state
@@ -642,6 +667,7 @@ npx prisma migrate deploy
 **Production Safety Practices:**
 
 1. **Always Backup First**
+
    ```bash
    pg_dump production_db > backup_2024_12_30.sql
    ```
@@ -675,18 +701,21 @@ npx prisma migrate deploy
 ### What You've Learned
 
 ✅ **Migrations**
+
 - Version-control database schema changes
 - Track schema history
 - Enable safe team collaboration
 - Make deployments predictable
 
 ✅ **Seed Scripts**
+
 - Populate database with consistent data
 - Automate developer onboarding
 - Ensure reproducible state
 - Should be idempotent (safe to run multiple times)
 
 ✅ **Production Safety**
+
 - Always backup before migrations
 - Test in staging first
 - Plan rollback strategy
@@ -714,24 +743,28 @@ npx prisma migrate deploy
 ## 📞 Troubleshooting
 
 **Q: "Unique constraint violation" when running seed**
+
 ```
 A: Seed script isn't fully idempotent
    Use: upsert or delete-before-create
 ```
 
 **Q: Migrations not applying in production**
+
 ```
 A: Use npx prisma migrate deploy (not migrate dev)
    migrate dev is for development only
 ```
 
 **Q: Can't rollback a migration**
+
 ```
 A: Restore from database backup
    That's why backups are critical!
 ```
 
 **Q: Prisma Studio won't open**
+
 ```
 A: Port 5555 might be in use
    Kill the process or use different port
@@ -742,6 +775,6 @@ A: Port 5555 might be in use
 **Assignment:** Kalvium Concept 2.15  
 **Status:** ✅ Complete  
 **Quality:** Production-Ready  
-**Idempotency:** Verified  
+**Idempotency:** Verified
 
 Good luck with your submission! 🚀

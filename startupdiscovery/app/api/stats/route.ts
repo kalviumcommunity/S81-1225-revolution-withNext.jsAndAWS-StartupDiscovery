@@ -1,20 +1,21 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const [totalStartups, publishedStartups, totalUsers, totalVotes] = await Promise.all([
-      prisma.startup.count(),
-      prisma.startup.count({ where: { status: 'PUBLISHED' } }),
-      prisma.user.count(),
-      prisma.vote.count(),
-    ]);
+    const [totalStartups, publishedStartups, totalUsers, totalVotes] =
+      await Promise.all([
+        prisma.startup.count(),
+        prisma.startup.count({ where: { status: "PUBLISHED" } }),
+        prisma.user.count(),
+        prisma.vote.count(),
+      ]);
 
     const topStartups = await prisma.startup.findMany({
-      where: { status: 'PUBLISHED' },
-      orderBy: { voteCount: 'desc' },
+      where: { status: "PUBLISHED" },
+      orderBy: { voteCount: "desc" },
       take: 5,
       select: {
         title: true,
@@ -38,11 +39,11 @@ export async function GET() {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('API Error:', error);
+    console.error("API Error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to fetch statistics',
+        error: "Failed to fetch statistics",
       },
       { status: 500 }
     );

@@ -153,6 +153,7 @@ Protected Route Access:
 Register a new user account.
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/signup \
   -H "Content-Type: application/json" \
@@ -165,13 +166,15 @@ curl -X POST http://localhost:3000/api/auth/signup \
 ```
 
 **Password Requirements:**
+
 - Minimum 8 characters
 - At least one uppercase letter (A-Z)
 - At least one lowercase letter (a-z)
 - At least one number (0-9)
-- At least one special character (!@#$%^&*)
+- At least one special character (!@#$%^&\*)
 
 **Success Response (201):**
+
 ```json
 {
   "success": true,
@@ -198,6 +201,7 @@ curl -X POST http://localhost:3000/api/auth/signup \
 Authenticate user and receive JWT token.
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -208,6 +212,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -227,6 +232,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 ```
 
 **Error Response (401):**
+
 ```json
 {
   "success": false,
@@ -247,18 +253,21 @@ All user endpoints require JWT authentication in the `Authorization` header.
 Retrieve list of all users.
 
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:3000/api/users?page=1&limit=10&search=alice" \
   -H "Authorization: Bearer <YOUR_JWT_TOKEN>"
 ```
 
 **Query Parameters:**
+
 - `page` (number): Page number (default: 1)
 - `limit` (number): Items per page (default: 10, max: 100)
 - `role` (string): Filter by role (USER, ADMIN, MODERATOR)
 - `search` (string): Search by name or email
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -322,30 +331,35 @@ startupdiscovery/
 ## 🛡️ Security Features
 
 ### 1. Password Security
+
 - ✅ bcrypt hashing with cost factor 10
 - ✅ Automatic salt generation
 - ✅ Never stored in plain text
 - ✅ Constant-time comparison
 
 ### 2. JWT Security
+
 - ✅ HMAC-SHA256 signature
 - ✅ Token expiration (7 days)
 - ✅ Signature verification on each request
 - ✅ Payload tampering detection
 
 ### 3. Input Validation
+
 - ✅ Zod schema validation
 - ✅ Email format verification
 - ✅ Password strength enforcement
 - ✅ SQL injection prevention (Prisma ORM)
 
 ### 4. Database Security
+
 - ✅ Unique constraints (email, username)
 - ✅ Role-based access control
 - ✅ Parameterized queries
 - ✅ XSS prevention through JSON encoding
 
 ### 5. Request Security
+
 - ✅ HTTPS recommended for production
 - ✅ Authorization header validation
 - ✅ Bearer token parsing
@@ -370,18 +384,21 @@ npm run dev
 The test suite (`test-auth.ps1`) includes:
 
 **Signup Tests:**
+
 - ✅ Valid user registration
 - ❌ Duplicate email prevention
 - ❌ Weak password validation
 - ❌ Missing required fields
 
 **Login Tests:**
+
 - ✅ Valid credentials
 - ❌ Invalid password
 - ❌ Non-existent user
 - ❌ Missing password field
 
 **Protected Route Tests:**
+
 - ✅ Valid JWT access
 - ❌ Missing authorization header
 - ❌ Invalid/tampered token
@@ -389,6 +406,7 @@ The test suite (`test-auth.ps1`) includes:
 - ✅ Pagination & search with auth
 
 **Token Analysis:**
+
 - 📋 JWT header inspection
 - 📦 Payload decoding
 - 🔒 Signature verification
@@ -426,11 +444,13 @@ curl -X GET http://localhost:3000/api/users \
 ### Token Expiry & Refresh
 
 **Current Implementation (7-Day Expiry):**
+
 - Single token valid for 7 days
 - User must re-login after expiration
 - Simple but less secure for long-lived tokens
 
 **Recommended Pattern (Refresh Token):**
+
 ```
 Access Token (1 hour) + Refresh Token (7 days)
 ├─ Use access token for API requests
@@ -441,14 +461,15 @@ Access Token (1 hour) + Refresh Token (7 days)
 
 ### Token Storage Best Practices
 
-| Method | Pros | Cons | Best For |
-|--------|------|------|----------|
+| Method               | Pros                        | Cons            | Best For        |
+| -------------------- | --------------------------- | --------------- | --------------- |
 | **HTTP-Only Cookie** | XSS safe, automatic sending | CSRF vulnerable | Production apps |
-| **localStorage** | Simple, persistent | XSS vulnerable | Dev/testing |
-| **sessionStorage** | Simple, cleared on close | XSS vulnerable | Short sessions |
-| **Memory Variable** | XSS safe, not persisted | Lost on refresh | SPA with SSR |
+| **localStorage**     | Simple, persistent          | XSS vulnerable  | Dev/testing     |
+| **sessionStorage**   | Simple, cleared on close    | XSS vulnerable  | Short sessions  |
+| **Memory Variable**  | XSS safe, not persisted     | Lost on refresh | SPA with SSR    |
 
 **Production Recommendation:**
+
 - Secure HTTP-Only Cookie with CSRF token
 - Implement refresh token endpoint
 - Add CSRF protection middleware
@@ -457,6 +478,7 @@ Access Token (1 hour) + Refresh Token (7 days)
 ### Security Enhancements
 
 #### 1. Token Leak Handling
+
 ```typescript
 // If token leaks (e.g., GitHub commit):
 // 1. Detect via security scanner
@@ -468,6 +490,7 @@ Access Token (1 hour) + Refresh Token (7 days)
 ```
 
 #### 2. Session Management
+
 ```typescript
 // Store sessions in database:
 model Session {
@@ -487,6 +510,7 @@ model Session {
 ```
 
 #### 3. Rate Limiting
+
 ```
 // Protect auth endpoints:
 POST /api/auth/signup - 5 attempts per hour per IP
@@ -494,6 +518,7 @@ POST /api/auth/login - 5 failed attempts per 15 min
 ```
 
 #### 4. Multi-Factor Authentication
+
 ```
 // Enhanced security:
 1. Email/password login
@@ -563,6 +588,7 @@ This authentication system implements industry best practices for secure user ma
 - **Reflective**: Best practices and security considerations included
 
 For production deployment, implement the recommended enhancements:
+
 - Refresh token pattern
 - Token blacklisting
 - Session database storage

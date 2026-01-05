@@ -44,6 +44,7 @@ const users = await prisma.user.findMany();
 ```
 
 **Problems:**
+
 - 🐌 Fetches unused data (description, timestamps, etc.)
 - 🐌 Transfers more data over network
 - 🐌 Uses more memory
@@ -75,6 +76,7 @@ const users = await prisma.user.findMany({
 ```
 
 **Benefits:**
+
 - ✅ Only fetches 4 fields instead of 10
 - ✅ Faster query execution
 - ✅ Less data transferred
@@ -82,6 +84,7 @@ const users = await prisma.user.findMany({
 - ✅ No password leak
 
 **Performance Gain:**
+
 ```
 Before: ~500ms (fetching 10 fields × 1000 users)
 After:  ~150ms (fetching 4 fields × 1000 users)
@@ -103,7 +106,7 @@ for (const startup of startups) {
   const user = await prisma.user.findUnique({
     where: { id: startup.userId },
   });
-  console.log(startup.name, 'by', user.name);
+  console.log(startup.name, "by", user.name);
 }
 
 // Total queries: 1 + N
@@ -111,6 +114,7 @@ for (const startup of startups) {
 ```
 
 **What happens:**
+
 ```
 Query 1: SELECT * FROM startups;                 // 1 query
 Query 2: SELECT * FROM users WHERE id = 1;       // 100 more queries
@@ -123,6 +127,7 @@ Total: 101 queries for 100 startups!
 ```
 
 **Performance:**
+
 ```
 101 queries × 10ms each = 1010ms (1 second)
 ```
@@ -145,7 +150,7 @@ const startups = await prisma.startup.findMany({
 
 // Access user directly
 for (const startup of startups) {
-  console.log(startup.name, 'by', startup.user.name);
+  console.log(startup.name, "by", startup.user.name);
 }
 
 // Total queries: 1
@@ -153,10 +158,11 @@ for (const startup of startups) {
 ```
 
 **What happens:**
+
 ```
-Query 1: 
-  SELECT 
-    startups.*, 
+Query 1:
+  SELECT
+    startups.*,
     users.id, users.name, users.email
   FROM startups
   LEFT JOIN users ON startups.userId = users.id;
@@ -165,6 +171,7 @@ Total: 1 query for 100 startups!
 ```
 
 **Performance:**
+
 ```
 1 query × 20ms = 20ms
 
@@ -214,6 +221,7 @@ await prisma.startupTag.createMany({
 ```
 
 **Performance:**
+
 ```
 Before: 10 queries × 15ms = 150ms
 After:   1 query  × 25ms =  25ms
@@ -221,6 +229,7 @@ Result: 6x faster ⚡
 ```
 
 **SQL Generated:**
+
 ```sql
 -- Before (10 separate queries)
 INSERT INTO startup_tags (startupId, tagId) VALUES (1, 1);
@@ -229,7 +238,7 @@ INSERT INTO startup_tags (startupId, tagId) VALUES (1, 3);
 ...
 
 -- After (1 bulk insert)
-INSERT INTO startup_tags (startupId, tagId) VALUES 
+INSERT INTO startup_tags (startupId, tagId) VALUES
   (1, 1), (1, 2), (1, 3), (1, 4), (1, 5),
   (1, 6), (1, 7), (1, 8), (1, 9), (1, 10);
 ```
@@ -256,10 +265,10 @@ const allStartups = await prisma.startup.findMany();
 ```typescript
 // Page 1: First 10 startups
 const page1 = await prisma.startup.findMany({
-  take: 10,          // Get 10 items
-  skip: 0,           // Skip 0 items (start from beginning)
+  take: 10, // Get 10 items
+  skip: 0, // Skip 0 items (start from beginning)
   orderBy: {
-    createdAt: 'desc', // Newest first
+    createdAt: "desc", // Newest first
   },
   select: {
     id: true,
@@ -272,10 +281,10 @@ const page1 = await prisma.startup.findMany({
 
 // Page 2: Next 10 startups
 const page2 = await prisma.startup.findMany({
-  take: 10,          // Get 10 items
-  skip: 10,          // Skip first 10 items
+  take: 10, // Get 10 items
+  skip: 10, // Skip first 10 items
   orderBy: {
-    createdAt: 'desc',
+    createdAt: "desc",
   },
   select: {
     id: true,
@@ -291,7 +300,7 @@ function getPage(pageNumber: number, pageSize: number = 10) {
   return prisma.startup.findMany({
     take: pageSize,
     skip: (pageNumber - 1) * pageSize,
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     select: {
       id: true,
       name: true,
@@ -306,6 +315,7 @@ const page3 = await getPage(3, 10); // Skip 20, take 10
 ```
 
 **Performance:**
+
 ```
 Before: Fetch 100,000 records = 5000ms (5 seconds)
 After:  Fetch 10 records      =   50ms (0.05 seconds)
@@ -332,7 +342,7 @@ async function getStartupsPaginated(params: PaginationParams = {}) {
     take: pageSize,
     skip: (page - 1) * pageSize,
     orderBy: {
-      voteCount: 'desc', // Most popular first
+      voteCount: "desc", // Most popular first
     },
     select: {
       id: true,
@@ -363,9 +373,9 @@ async function getStartupsPaginated(params: PaginationParams = {}) {
 
 // Usage
 const result = await getStartupsPaginated({ page: 2, pageSize: 20 });
-console.log('Startups:', result.data);
-console.log('Page 2 of', result.pagination.totalPages);
-console.log('Has next page?', result.pagination.hasNextPage);
+console.log("Startups:", result.data);
+console.log("Page 2 of", result.pagination.totalPages);
+console.log("Has next page?", result.pagination.hasNextPage);
 ```
 
 ---
@@ -421,7 +431,7 @@ const startup = await prisma.startup.findUnique({
     comments: {
       take: 5, // Only get 5 most recent
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
       include: {
         user: {
@@ -445,6 +455,7 @@ const startup = await prisma.startup.findUnique({
 ```
 
 **Performance:**
+
 ```
 Before: 4 queries × 15ms = 60ms
 After:  1 query  × 30ms = 30ms
@@ -453,7 +464,7 @@ Result: 2x faster ⚡
 
 ---
 
-## 6️⃣ Count Queries: Use _count Instead of findMany
+## 6️⃣ Count Queries: Use \_count Instead of findMany
 
 ### ❌ BEFORE (Fetch all, then count)
 
@@ -485,6 +496,7 @@ const voteCount = await prisma.vote.count({
 ```
 
 **Performance:**
+
 ```
 Before: Fetch 10,000 votes = 500ms
 After:  Count in database  =  10ms
@@ -502,7 +514,7 @@ Result: 50x faster ⚡⚡
 const allStartups = await prisma.startup.findMany();
 
 const activeStartups = allStartups.filter(
-  (s) => s.status === 'ACTIVE' && s.voteCount > 10
+  (s) => s.status === "ACTIVE" && s.voteCount > 10
 );
 
 // Fetches 10,000 startups
@@ -516,19 +528,20 @@ const activeStartups = allStartups.filter(
 // Let database do the filtering
 const activeStartups = await prisma.startup.findMany({
   where: {
-    status: 'ACTIVE',
+    status: "ACTIVE",
     voteCount: {
       gt: 10, // greater than 10
     },
   },
 });
 
-// Database does: 
-// SELECT * FROM startups 
+// Database does:
+// SELECT * FROM startups
 // WHERE status = 'ACTIVE' AND voteCount > 10;
 ```
 
 **Performance:**
+
 ```
 Before: Fetch 10,000 → filter to 100 = 800ms
 After:  Fetch 100 directly           =  50ms
@@ -554,7 +567,7 @@ startups.sort((a, b) => b.voteCount - a.voteCount);
 // Let database sort (uses indexes!)
 const startups = await prisma.startup.findMany({
   orderBy: {
-    voteCount: 'desc',
+    voteCount: "desc",
   },
 });
 
@@ -564,6 +577,7 @@ const startups = await prisma.startup.findMany({
 ```
 
 **Performance:**
+
 ```
 Before: Fetch + JS sort = 600ms
 After:  DB sort         =  80ms (uses index)
@@ -625,7 +639,7 @@ async function getTrendingStartupsBAD() {
   const startups = await prisma.startup.findMany();
 
   // Filter in JavaScript
-  const active = startups.filter((s) => s.status === 'ACTIVE');
+  const active = startups.filter((s) => s.status === "ACTIVE");
 
   // Sort in JavaScript
   active.sort((a, b) => b.voteCount - a.voteCount);
@@ -654,10 +668,10 @@ async function getTrendingStartupsBAD() {
 async function getTrendingStartupsGOOD() {
   return prisma.startup.findMany({
     where: {
-      status: 'ACTIVE', // Filter in database
+      status: "ACTIVE", // Filter in database
     },
     orderBy: {
-      voteCount: 'desc', // Sort in database
+      voteCount: "desc", // Sort in database
     },
     take: 10, // Limit in database
     select: {
@@ -697,21 +711,22 @@ async function getTrendingStartupsGOOD() {
 
 ## 📊 Summary: Optimisation Techniques
 
-| Technique | Before | After | Speedup |
-|-----------|--------|-------|---------|
+| Technique         | Before              | After               | Speedup     |
+| ----------------- | ------------------- | ------------------- | ----------- |
 | **Select fields** | Fetch all 10 fields | Fetch only 4 fields | 3.3x faster |
-| **Fix N+1** | 101 queries | 1 query with JOIN | 50x faster |
-| **Batch creates** | 10 queries | 1 bulk insert | 6x faster |
-| **Pagination** | Fetch 100k records | Fetch 10 records | 100x faster |
-| **Count in DB** | Fetch + count | COUNT query | 50x faster |
-| **Filter in DB** | Fetch all + filter | WHERE clause | 16x faster |
-| **Sort in DB** | Fetch + sort | ORDER BY | 7.5x faster |
+| **Fix N+1**       | 101 queries         | 1 query with JOIN   | 50x faster  |
+| **Batch creates** | 10 queries          | 1 bulk insert       | 6x faster   |
+| **Pagination**    | Fetch 100k records  | Fetch 10 records    | 100x faster |
+| **Count in DB**   | Fetch + count       | COUNT query         | 50x faster  |
+| **Filter in DB**  | Fetch all + filter  | WHERE clause        | 16x faster  |
+| **Sort in DB**    | Fetch + sort        | ORDER BY            | 7.5x faster |
 
 ---
 
 ## ✅ Best Practices Checklist
 
 ### Query Design
+
 - [ ] Use `select` to fetch only needed fields
 - [ ] Use `include` to fetch relations (avoid N+1)
 - [ ] Use `where` to filter in database
@@ -720,6 +735,7 @@ async function getTrendingStartupsGOOD() {
 - [ ] Use `count()` instead of `findMany().length`
 
 ### Performance
+
 - [ ] Batch writes with `createMany`
 - [ ] Use transactions for related writes
 - [ ] Add indexes to frequently queried fields
@@ -727,6 +743,7 @@ async function getTrendingStartupsGOOD() {
 - [ ] Use cursor-based pagination for large datasets
 
 ### Security
+
 - [ ] Never send password hashes to frontend
 - [ ] Use `select` to exclude sensitive fields
 - [ ] Validate user input before queries
@@ -737,6 +754,6 @@ async function getTrendingStartupsGOOD() {
 **Assignment:** Kalvium Concept 2.16  
 **Topic:** Query Optimisation  
 **Status:** ✅ Complete  
-**Next:** Database Indexes  
+**Next:** Database Indexes
 
 Good luck! 🚀

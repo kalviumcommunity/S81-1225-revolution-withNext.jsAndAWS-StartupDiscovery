@@ -23,6 +23,7 @@ Each `route.ts` file implements multiple HTTP verbs (GET, POST, PUT, DELETE) for
 ## API Endpoints
 
 ### Base URL
+
 ```
 http://localhost:3000/api
 ```
@@ -32,15 +33,18 @@ http://localhost:3000/api
 ## 📋 Users API
 
 ### 1. GET /api/users
+
 Retrieve all users with pagination and filtering support.
 
 **Query Parameters:**
+
 - `page` (number, optional): Page number (default: 1)
 - `limit` (number, optional): Items per page (default: 10, max: 100)
 - `role` (string, optional): Filter by role (admin, user, moderator)
 - `search` (string, optional): Search by name or email
 
 **Example Request:**
+
 ```bash
 # Get all users
 curl -X GET http://localhost:3000/api/users
@@ -56,6 +60,7 @@ curl -X GET "http://localhost:3000/api/users?search=alice"
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -79,24 +84,28 @@ curl -X GET "http://localhost:3000/api/users?search=alice"
 ```
 
 **Error Responses:**
+
 - `400 Bad Request`: Invalid pagination parameters
 - `500 Internal Server Error`: Server error
 
 ---
 
 ### 2. POST /api/users
+
 Create a new user.
 
 **Request Body:**
+
 ```json
 {
   "name": "John Doe",
   "email": "john@example.com",
-  "role": "user"  // optional, defaults to "user"
+  "role": "user" // optional, defaults to "user"
 }
 ```
 
 **Example Request:**
+
 ```bash
 curl -X POST http://localhost:3000/api/users \
   -H "Content-Type: application/json" \
@@ -104,6 +113,7 @@ curl -X POST http://localhost:3000/api/users \
 ```
 
 **Success Response (201):**
+
 ```json
 {
   "success": true,
@@ -118,25 +128,29 @@ curl -X POST http://localhost:3000/api/users \
 ```
 
 **Error Responses:**
+
 - `400 Bad Request`: Missing required fields or invalid email format
 - `409 Conflict`: User with email already exists
 
 ---
 
 ### 3. PUT /api/users
+
 Update an existing user.
 
 **Request Body:**
+
 ```json
 {
   "id": 1,
-  "name": "Alice Smith",  // optional
-  "email": "alice.smith@example.com",  // optional
-  "role": "admin"  // optional
+  "name": "Alice Smith", // optional
+  "email": "alice.smith@example.com", // optional
+  "role": "admin" // optional
 }
 ```
 
 **Example Request:**
+
 ```bash
 curl -X PUT http://localhost:3000/api/users \
   -H "Content-Type: application/json" \
@@ -144,6 +158,7 @@ curl -X PUT http://localhost:3000/api/users \
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -158,6 +173,7 @@ curl -X PUT http://localhost:3000/api/users \
 ```
 
 **Error Responses:**
+
 - `400 Bad Request`: Missing ID or invalid email format
 - `404 Not Found`: User not found
 - `409 Conflict`: Email already in use
@@ -165,9 +181,11 @@ curl -X PUT http://localhost:3000/api/users \
 ---
 
 ### 4. DELETE /api/users
+
 Delete a user.
 
 **Request Body:**
+
 ```json
 {
   "id": 1
@@ -175,6 +193,7 @@ Delete a user.
 ```
 
 **Example Request:**
+
 ```bash
 curl -X DELETE http://localhost:3000/api/users \
   -H "Content-Type: application/json" \
@@ -182,6 +201,7 @@ curl -X DELETE http://localhost:3000/api/users \
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -196,6 +216,7 @@ curl -X DELETE http://localhost:3000/api/users \
 ```
 
 **Error Responses:**
+
 - `400 Bad Request`: Missing ID
 - `404 Not Found`: User not found
 
@@ -204,9 +225,11 @@ curl -X DELETE http://localhost:3000/api/users \
 ## 📝 Tasks API
 
 ### 1. GET /api/tasks
+
 Retrieve all tasks with pagination and filtering support.
 
 **Query Parameters:**
+
 - `page` (number, optional): Page number (default: 1)
 - `limit` (number, optional): Items per page (default: 10, max: 100)
 - `status` (string, optional): Filter by status (pending, in-progress, completed)
@@ -215,6 +238,7 @@ Retrieve all tasks with pagination and filtering support.
 - `search` (string, optional): Search in title and description
 
 **Example Request:**
+
 ```bash
 # Get all tasks
 curl -X GET http://localhost:3000/api/tasks
@@ -230,6 +254,7 @@ curl -X GET "http://localhost:3000/api/tasks?status=pending&priority=high&page=1
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -258,20 +283,23 @@ curl -X GET "http://localhost:3000/api/tasks?status=pending&priority=high&page=1
 ---
 
 ### 2. POST /api/tasks
+
 Create a new task.
 
 **Request Body:**
+
 ```json
 {
   "title": "Implement authentication",
   "description": "Add JWT authentication to the API",
-  "status": "pending",  // optional, defaults to "pending"
-  "priority": "high",  // optional, defaults to "medium"
-  "assignedTo": "Bob Smith"  // optional, defaults to "Unassigned"
+  "status": "pending", // optional, defaults to "pending"
+  "priority": "high", // optional, defaults to "medium"
+  "assignedTo": "Bob Smith" // optional, defaults to "Unassigned"
 }
 ```
 
 **Example Request:**
+
 ```bash
 curl -X POST http://localhost:3000/api/tasks \
   -H "Content-Type: application/json" \
@@ -279,6 +307,7 @@ curl -X POST http://localhost:3000/api/tasks \
 ```
 
 **Success Response (201):**
+
 ```json
 {
   "success": true,
@@ -296,24 +325,28 @@ curl -X POST http://localhost:3000/api/tasks \
 ```
 
 **Error Responses:**
+
 - `400 Bad Request`: Missing required fields or invalid status/priority values
 
 ---
 
 ### 3. PUT /api/tasks
+
 Update an existing task.
 
 **Request Body:**
+
 ```json
 {
   "id": 2,
-  "status": "completed",  // optional
-  "priority": "medium",  // optional
-  "assignedTo": "Charlie Brown"  // optional
+  "status": "completed", // optional
+  "priority": "medium", // optional
+  "assignedTo": "Charlie Brown" // optional
 }
 ```
 
 **Example Request:**
+
 ```bash
 curl -X PUT http://localhost:3000/api/tasks \
   -H "Content-Type: application/json" \
@@ -321,15 +354,18 @@ curl -X PUT http://localhost:3000/api/tasks \
 ```
 
 **Error Responses:**
+
 - `400 Bad Request`: Missing ID or invalid values
 - `404 Not Found`: Task not found
 
 ---
 
 ### 4. DELETE /api/tasks
+
 Delete a task.
 
 **Example Request:**
+
 ```bash
 curl -X DELETE http://localhost:3000/api/tasks \
   -H "Content-Type: application/json" \
@@ -341,9 +377,11 @@ curl -X DELETE http://localhost:3000/api/tasks \
 ## 🚀 Projects API
 
 ### 1. GET /api/projects
+
 Retrieve all projects with pagination and filtering support.
 
 **Query Parameters:**
+
 - `page` (number, optional): Page number (default: 1)
 - `limit` (number, optional): Items per page (default: 10, max: 100)
 - `status` (string, optional): Filter by status (planning, active, on-hold, completed, cancelled)
@@ -354,6 +392,7 @@ Retrieve all projects with pagination and filtering support.
 - `search` (string, optional): Search in name and description
 
 **Example Request:**
+
 ```bash
 # Get all projects
 curl -X GET http://localhost:3000/api/projects
@@ -369,6 +408,7 @@ curl -X GET "http://localhost:3000/api/projects?status=active&category=Web&page=
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -400,24 +440,27 @@ curl -X GET "http://localhost:3000/api/projects?status=active&category=Web&page=
 ---
 
 ### 2. POST /api/projects
+
 Create a new project.
 
 **Request Body:**
+
 ```json
 {
   "name": "AI Chatbot",
   "description": "Intelligent chatbot for customer support",
-  "status": "planning",  // optional, defaults to "planning"
+  "status": "planning", // optional, defaults to "planning"
   "category": "AI/ML",
   "budget": 80000,
   "startDate": "2026-02-01",
-  "endDate": "2026-08-31",  // optional
-  "teamSize": 4,  // optional, defaults to 1
+  "endDate": "2026-08-31", // optional
+  "teamSize": 4, // optional, defaults to 1
   "owner": "John Doe"
 }
 ```
 
 **Example Request:**
+
 ```bash
 curl -X POST http://localhost:3000/api/projects \
   -H "Content-Type: application/json" \
@@ -432,6 +475,7 @@ curl -X POST http://localhost:3000/api/projects \
 ```
 
 **Success Response (201):**
+
 ```json
 {
   "success": true,
@@ -452,14 +496,17 @@ curl -X POST http://localhost:3000/api/projects \
 ```
 
 **Error Responses:**
+
 - `400 Bad Request`: Missing required fields, invalid budget/dates, or invalid status
 
 ---
 
 ### 3. PUT /api/projects
+
 Update an existing project.
 
 **Example Request:**
+
 ```bash
 curl -X PUT http://localhost:3000/api/projects \
   -H "Content-Type: application/json" \
@@ -469,9 +516,11 @@ curl -X PUT http://localhost:3000/api/projects \
 ---
 
 ### 4. DELETE /api/projects
+
 Delete a project.
 
 **Example Request:**
+
 ```bash
 curl -X DELETE http://localhost:3000/api/projects \
   -H "Content-Type: application/json" \
@@ -485,6 +534,7 @@ curl -X DELETE http://localhost:3000/api/projects \
 All endpoints return consistent error responses with appropriate HTTP status codes:
 
 ### Status Codes
+
 - `200 OK`: Successful GET, PUT, DELETE
 - `201 Created`: Successful POST
 - `400 Bad Request`: Invalid request parameters or body
@@ -493,6 +543,7 @@ All endpoints return consistent error responses with appropriate HTTP status cod
 - `500 Internal Server Error`: Server-side error
 
 ### Error Response Format
+
 ```json
 {
   "error": "Error message",
@@ -510,6 +561,7 @@ All GET endpoints support pagination with consistent parameters:
 - `limit`: Items per page (default: 10, max: 100)
 
 **Pagination Response:**
+
 ```json
 {
   "pagination": {
@@ -528,6 +580,7 @@ All GET endpoints support pagination with consistent parameters:
 ## Testing with Postman
 
 ### Import Collection
+
 You can test all endpoints using Postman. Here's a sample collection structure:
 
 1. **Users Collection**
@@ -552,6 +605,7 @@ You can test all endpoints using Postman. Here's a sample collection structure:
    - DELETE Project
 
 ### Environment Variables
+
 ```
 baseUrl: http://localhost:3000/api
 ```
@@ -561,16 +615,19 @@ baseUrl: http://localhost:3000/api
 ## Running the API Locally
 
 1. **Install Dependencies:**
+
 ```bash
 npm install
 ```
 
 2. **Start Development Server:**
+
 ```bash
 npm run dev
 ```
 
 3. **API will be available at:**
+
 ```
 http://localhost:3000/api
 ```
@@ -580,27 +637,32 @@ http://localhost:3000/api
 ## Design Principles & Best Practices
 
 ### 1. **Consistent Naming Conventions**
+
 - ✅ Plural nouns for resource endpoints (`/users`, `/tasks`, `/projects`)
 - ✅ Lowercase with hyphens for multi-word resources
 - ✅ Clear, descriptive names that indicate the resource type
 
 ### 2. **RESTful HTTP Methods**
+
 - `GET`: Retrieve resources (read-only, idempotent)
 - `POST`: Create new resources
 - `PUT`: Update existing resources (full update)
 - `DELETE`: Remove resources
 
 ### 3. **Proper Status Codes**
+
 - Success: 200 (OK), 201 (Created)
 - Client Errors: 400 (Bad Request), 404 (Not Found), 409 (Conflict)
 - Server Errors: 500 (Internal Server Error)
 
 ### 4. **Pagination & Filtering**
+
 - Default pagination to prevent overwhelming responses
 - Flexible filtering options for different use cases
 - Consistent query parameter naming across endpoints
 
 ### 5. **Error Handling**
+
 - Meaningful error messages
 - Validation at multiple levels
 - Consistent error response format
@@ -625,6 +687,7 @@ http://localhost:3000/api
 
 **Example Scenario:**
 When a frontend developer needs to build a user management dashboard:
+
 - They immediately know to call `GET /api/users` for the list
 - They can easily add filters: `?role=admin&page=1&limit=10`
 - Creating a new user is intuitive: `POST /api/users` with the user data

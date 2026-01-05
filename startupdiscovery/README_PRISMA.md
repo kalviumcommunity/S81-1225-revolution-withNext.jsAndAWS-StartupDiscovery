@@ -30,6 +30,7 @@
 ### 1. Setup & Installation
 
 **[INSTALLATION_STEPS.md](./INSTALLATION_STEPS.md)** ⚙️
+
 ```
 ✅ Prerequisites checklist
 ✅ Step-by-step installation
@@ -39,6 +40,7 @@
 ✅ Troubleshooting guide
 ✅ Evidence capture tips
 ```
+
 **Best for:** Setting up your environment
 
 ---
@@ -46,6 +48,7 @@
 ### 2. Complete Guide
 
 **[PRISMA_SETUP_GUIDE.md](./PRISMA_SETUP_GUIDE.md)** 📘
+
 ```
 ✅ What Prisma is and why use it
 ✅ Installation explained
@@ -58,6 +61,7 @@
 ✅ Real-world applications
 ✅ Resources and next steps
 ```
+
 **Best for:** Understanding Prisma in-depth (600+ lines)
 
 ---
@@ -65,6 +69,7 @@
 ### 3. Quick Reference
 
 **[PRISMA_QUICK_REFERENCE.md](./PRISMA_QUICK_REFERENCE.md)** 📝
+
 ```
 ✅ Command cheat sheet
 ✅ CRUD examples (Create, Read, Update, Delete)
@@ -75,6 +80,7 @@
 ✅ Best practices
 ✅ Troubleshooting quick fixes
 ```
+
 **Best for:** Daily development reference (400+ lines)
 
 ---
@@ -82,6 +88,7 @@
 ### 4. Database Schema
 
 **[DATABASE_SCHEMA_VISUAL.md](./DATABASE_SCHEMA_VISUAL.md)** 📊
+
 ```
 ✅ ASCII ER diagrams
 ✅ Table relationships visualization
@@ -90,6 +97,7 @@
 ✅ Common query patterns
 ✅ Schema statistics
 ```
+
 **Best for:** Understanding database structure (300+ lines)
 
 ---
@@ -97,6 +105,7 @@
 ### 5. Assignment Submission
 
 **[KALVIUM_ASSIGNMENT_SUMMARY.md](./KALVIUM_ASSIGNMENT_SUMMARY.md)** 🎓
+
 ```
 ✅ Deliverables checklist
 ✅ Technical implementation details
@@ -105,6 +114,7 @@
 ✅ Evidence documentation guide
 ✅ File structure overview
 ```
+
 **Best for:** Preparing your Kalvium submission (400+ lines)
 
 ---
@@ -112,6 +122,7 @@
 ### 6. Delivery Overview
 
 **[DELIVERY_SUMMARY.md](./DELIVERY_SUMMARY.md)** 📦
+
 ```
 ✅ What files were created
 ✅ What was already in your project
@@ -119,6 +130,7 @@
 ✅ Key benefits summary
 ✅ Next steps
 ```
+
 **Best for:** Quick overview of what you received (300+ lines)
 
 ---
@@ -126,14 +138,18 @@
 ## 🧪 Test Scripts
 
 ### Quick Test
+
 **File:** `scripts/quick-test.ts`
+
 ```bash
 # Run this for quick verification
 npx tsx scripts/quick-test.ts
 # or
 npm run db:quick-test
 ```
+
 **Tests:**
+
 - ✅ Database connection
 - ✅ Record counts
 - ✅ Basic queries
@@ -142,14 +158,18 @@ npm run db:quick-test
 ---
 
 ### Full Test Suite
+
 **File:** `scripts/test-db.ts`
+
 ```bash
 # Run this for comprehensive testing
 npx tsx scripts/test-db.ts
 # or
 npm run db:test
 ```
+
 **Tests:**
+
 - ✅ Connection verification
 - ✅ Statistics (all tables)
 - ✅ Sample data display
@@ -164,24 +184,31 @@ npm run db:test
 ## 🎯 Use Cases - Which Doc to Read?
 
 ### "I need to install Prisma"
+
 → **[INSTALLATION_STEPS.md](./INSTALLATION_STEPS.md)**
 
 ### "I want to understand what Prisma is"
+
 → **[PRISMA_SETUP_GUIDE.md](./PRISMA_SETUP_GUIDE.md)** (Section 1)
 
 ### "How do I write a query?"
+
 → **[PRISMA_QUICK_REFERENCE.md](./PRISMA_QUICK_REFERENCE.md)** (Query Examples)
 
 ### "What tables exist in my database?"
+
 → **[DATABASE_SCHEMA_VISUAL.md](./DATABASE_SCHEMA_VISUAL.md)** (ER Diagram)
 
 ### "How do I submit this assignment?"
+
 → **[KALVIUM_ASSIGNMENT_SUMMARY.md](./KALVIUM_ASSIGNMENT_SUMMARY.md)** (Evidence Section)
 
 ### "What did I receive?"
+
 → **[DELIVERY_SUMMARY.md](./DELIVERY_SUMMARY.md)**
 
 ### "Help! Something's broken"
+
 → **[INSTALLATION_STEPS.md](./INSTALLATION_STEPS.md)** (Troubleshooting)  
 → **[PRISMA_QUICK_REFERENCE.md](./PRISMA_QUICK_REFERENCE.md)** (Troubleshooting)
 
@@ -218,6 +245,7 @@ startupdiscovery/
 ## 🔄 Typical Workflow
 
 ### First Time Setup
+
 ```
 1. Read DELIVERY_SUMMARY.md (5 min)
 2. Follow INSTALLATION_STEPS.md (15 min)
@@ -227,6 +255,7 @@ startupdiscovery/
 ```
 
 ### Learning Prisma
+
 ```
 1. Read PRISMA_SETUP_GUIDE.md (30 min)
 2. Review DATABASE_SCHEMA_VISUAL.md (10 min)
@@ -235,6 +264,7 @@ startupdiscovery/
 ```
 
 ### Assignment Submission
+
 ```
 1. Review KALVIUM_ASSIGNMENT_SUMMARY.md
 2. Capture required screenshots
@@ -243,6 +273,7 @@ startupdiscovery/
 ```
 
 ### Daily Development
+
 ```
 1. Keep PRISMA_QUICK_REFERENCE.md open
 2. Use npm run prisma:studio to view data
@@ -255,6 +286,7 @@ startupdiscovery/
 ## 🎓 Learning Path
 
 **Beginner** (Never used Prisma)
+
 ```
 Day 1: DELIVERY_SUMMARY.md + INSTALLATION_STEPS.md
 Day 2: PRISMA_SETUP_GUIDE.md (Sections 1-4)
@@ -264,6 +296,7 @@ Day 5: Build something with PRISMA_QUICK_REFERENCE.md
 ```
 
 **Intermediate** (Used ORMs before)
+
 ```
 1. INSTALLATION_STEPS.md (10 min)
 2. DATABASE_SCHEMA_VISUAL.md (10 min)
@@ -273,6 +306,7 @@ Day 5: Build something with PRISMA_QUICK_REFERENCE.md
 ```
 
 **Advanced** (Know Prisma)
+
 ```
 1. DATABASE_SCHEMA_VISUAL.md (understand schema)
 2. PRISMA_QUICK_REFERENCE.md (syntax refresh)
@@ -310,6 +344,7 @@ npm run prisma:reset                # Reset DB (⚠️ deletes data)
 Use **[KALVIUM_ASSIGNMENT_SUMMARY.md](./KALVIUM_ASSIGNMENT_SUMMARY.md)** for complete details.
 
 **Quick Checklist:**
+
 - [ ] Read DELIVERY_SUMMARY.md
 - [ ] Complete INSTALLATION_STEPS.md
 - [ ] Run database tests successfully
@@ -322,30 +357,33 @@ Use **[KALVIUM_ASSIGNMENT_SUMMARY.md](./KALVIUM_ASSIGNMENT_SUMMARY.md)** for com
 
 ## 📊 Documentation Stats
 
-| File | Lines | Purpose | Audience |
-|------|-------|---------|----------|
-| PRISMA_SETUP_GUIDE.md | 600+ | Complete guide | Learning |
-| PRISMA_QUICK_REFERENCE.md | 400+ | Cheat sheet | Daily dev |
-| DATABASE_SCHEMA_VISUAL.md | 300+ | ER diagrams | Understanding |
-| INSTALLATION_STEPS.md | 200+ | Setup | First time |
-| KALVIUM_ASSIGNMENT_SUMMARY.md | 400+ | Submission | Assignment |
-| DELIVERY_SUMMARY.md | 300+ | Overview | Quick start |
-| **TOTAL** | **2200+** | **Complete** | **Everyone** |
+| File                          | Lines     | Purpose        | Audience      |
+| ----------------------------- | --------- | -------------- | ------------- |
+| PRISMA_SETUP_GUIDE.md         | 600+      | Complete guide | Learning      |
+| PRISMA_QUICK_REFERENCE.md     | 400+      | Cheat sheet    | Daily dev     |
+| DATABASE_SCHEMA_VISUAL.md     | 300+      | ER diagrams    | Understanding |
+| INSTALLATION_STEPS.md         | 200+      | Setup          | First time    |
+| KALVIUM_ASSIGNMENT_SUMMARY.md | 400+      | Submission     | Assignment    |
+| DELIVERY_SUMMARY.md           | 300+      | Overview       | Quick start   |
+| **TOTAL**                     | **2200+** | **Complete**   | **Everyone**  |
 
 ---
 
 ## 🔗 External Resources
 
 ### Official Prisma Docs
+
 - [Prisma Documentation](https://www.prisma.io/docs)
 - [Client API Reference](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference)
 - [Schema Reference](https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference)
 
 ### Tutorials
+
 - [Next.js + Prisma](https://www.prisma.io/nextjs)
 - [PostgreSQL + Prisma](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases-typescript-postgresql)
 
 ### Community
+
 - [Prisma Discord](https://pris.ly/discord)
 - [Prisma GitHub](https://github.com/prisma/prisma)
 
@@ -365,6 +403,7 @@ Use **[KALVIUM_ASSIGNMENT_SUMMARY.md](./KALVIUM_ASSIGNMENT_SUMMARY.md)** for com
 ## 🎉 You're Ready!
 
 Everything you need is here:
+
 - ✅ Complete documentation (2200+ lines)
 - ✅ Test scripts (ready to run)
 - ✅ Database schema (production-ready)
@@ -379,4 +418,4 @@ Everything you need is here:
 
 **Good luck with your Kalvium assignment! 🚀**
 
-*Last Updated: December 30, 2025*
+_Last Updated: December 30, 2025_

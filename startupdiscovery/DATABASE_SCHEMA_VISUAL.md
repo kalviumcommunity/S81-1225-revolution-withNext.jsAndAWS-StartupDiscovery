@@ -175,27 +175,28 @@
 
 ## 📋 Table Summary
 
-| Table | Purpose | Records | Key Relations |
-|-------|---------|---------|---------------|
-| **User** | User accounts & auth | ~ | → Startups, Comments, Votes |
-| **Session** | User login sessions | ~ | → User |
-| **Startup** | Main startup entities | ~ | → User, Categories, Tags |
-| **Category** | Startup categories | 6+ | ← Startups (M2M) |
-| **Tag** | Flexible tagging | 8+ | ← Startups (M2M) |
-| **Comment** | User feedback | ~ | → User, Startup, Parent Comment |
-| **Vote** | Upvote/downvote | ~ | → User, Startup |
-| **Bookmark** | Saved startups | ~ | → User, Startup |
-| **Follow** | User following | ~ | → User (follower), User (following) |
-| **TeamMember** | Startup team info | ~ | → Startup |
-| **Media** | Images/videos/docs | ~ | → Startup |
-| **Milestone** | Achievements | ~ | → Startup |
-| **Notification** | User notifications | ~ | → User |
+| Table            | Purpose               | Records | Key Relations                       |
+| ---------------- | --------------------- | ------- | ----------------------------------- |
+| **User**         | User accounts & auth  | ~       | → Startups, Comments, Votes         |
+| **Session**      | User login sessions   | ~       | → User                              |
+| **Startup**      | Main startup entities | ~       | → User, Categories, Tags            |
+| **Category**     | Startup categories    | 6+      | ← Startups (M2M)                    |
+| **Tag**          | Flexible tagging      | 8+      | ← Startups (M2M)                    |
+| **Comment**      | User feedback         | ~       | → User, Startup, Parent Comment     |
+| **Vote**         | Upvote/downvote       | ~       | → User, Startup                     |
+| **Bookmark**     | Saved startups        | ~       | → User, Startup                     |
+| **Follow**       | User following        | ~       | → User (follower), User (following) |
+| **TeamMember**   | Startup team info     | ~       | → Startup                           |
+| **Media**        | Images/videos/docs    | ~       | → Startup                           |
+| **Milestone**    | Achievements          | ~       | → Startup                           |
+| **Notification** | User notifications    | ~       | → User                              |
 
 ---
 
 ## 🔑 Relationship Types
 
 ### One-to-Many (1:N)
+
 ```
 User ──< Startup
 User ──< Comment
@@ -208,6 +209,7 @@ Startup ──< Milestone
 ```
 
 ### Many-to-Many (M:N)
+
 ```
 Startup >──< Category (via StartupCategory)
 Startup >──< Tag (via StartupTag)
@@ -215,11 +217,13 @@ User >──< User (via Follow - followers/following)
 ```
 
 ### Self-Referential
+
 ```
 Comment ──< Comment (parent/replies)
 ```
 
 ### Optional References
+
 ```
 Notification ─┬─> Startup (nullable)
               └─> Comment (nullable)
@@ -230,10 +234,12 @@ Notification ─┬─> Startup (nullable)
 ## 📐 Schema Constraints
 
 ### Primary Keys
+
 - All tables use auto-incrementing integers: `@id @default(autoincrement())`
 - Exception: `Session` uses CUID: `@id @default(cuid())`
 
 ### Unique Constraints
+
 ```prisma
 User.email         @unique
 User.username      @unique
@@ -248,6 +254,7 @@ Follow[followerId, followingId] @@unique
 ```
 
 ### Indexes
+
 ```prisma
 User:       email, username, createdAt
 Startup:    userId, slug, status, publishedAt, createdAt, featured, industry
@@ -259,7 +266,9 @@ Session:    userId, token, expiresAt
 ```
 
 ### Cascade Deletes
+
 When a user or startup is deleted, all related records are automatically removed:
+
 ```
 User deleted → Cascades to:
   - Startups
@@ -286,10 +295,12 @@ Startup deleted → Cascades to:
 ## 🏗️ Design Patterns Used
 
 ### 1. **Junction Tables** (Many-to-Many)
+
 - `StartupCategory` - Links Startups ↔ Categories
 - `StartupTag` - Links Startups ↔ Tags
 
 ### 2. **Polymorphic Associations**
+
 ```prisma
 Notification {
   startupId Int?  // Could reference a Startup
@@ -298,6 +309,7 @@ Notification {
 ```
 
 ### 3. **Soft Enums**
+
 ```prisma
 enum UserRole { USER, ADMIN, MODERATOR }
 enum StartupStage { IDEA, MVP, BETA, LAUNCHED, GROWTH, SCALING }
@@ -307,12 +319,14 @@ enum NotificationType { NEW_COMMENT, NEW_VOTE, ... }
 ```
 
 ### 4. **Audit Timestamps**
+
 ```prisma
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 ```
 
 ### 5. **Denormalization for Performance**
+
 ```prisma
 Startup {
   viewCount Int @default(0)
@@ -324,6 +338,7 @@ Tag {
 ```
 
 ### 6. **Nested Comments (Tree Structure)**
+
 ```prisma
 Comment {
   parentId Int?
@@ -337,16 +352,17 @@ Comment {
 ## 🎯 Query Patterns
 
 ### Get Startup with Full Details
+
 ```typescript
 const startup = await prisma.startup.findUnique({
-  where: { slug: 'my-startup' },
+  where: { slug: "my-startup" },
   include: {
     user: true,
     categories: { include: { category: true } },
     tags: { include: { tag: true } },
     team: true,
-    media: { orderBy: { order: 'asc' } },
-    milestones: { orderBy: { order: 'asc' } },
+    media: { orderBy: { order: "asc" } },
+    milestones: { orderBy: { order: "asc" } },
     comments: {
       where: { parentId: null },
       include: {
@@ -362,12 +378,13 @@ const startup = await prisma.startup.findUnique({
 ```
 
 ### Get User Profile
+
 ```typescript
 const profile = await prisma.user.findUnique({
-  where: { username: 'alice_tech' },
+  where: { username: "alice_tech" },
   include: {
     startups: {
-      where: { status: 'PUBLISHED' },
+      where: { status: "PUBLISHED" },
       include: {
         _count: { select: { votes: true, comments: true } },
       },

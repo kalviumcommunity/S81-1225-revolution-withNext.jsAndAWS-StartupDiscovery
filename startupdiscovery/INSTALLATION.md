@@ -23,17 +23,20 @@ npm run type-check
 ## What Gets Installed
 
 ### ESLint & Prettier
+
 - `prettier@^3.7.4` - Code formatter
 - `eslint-plugin-prettier@^5.5.4` - Runs Prettier as ESLint rule
 - `eslint-config-prettier@^10.1.8` - Disables conflicting ESLint rules
 
 ### Pre-commit Hooks
+
 - `husky@^9.1.7` - Git hooks manager
 - `lint-staged@^16.2.7` - Run linters on staged files
 
 ## Files Created/Modified
 
 ### Created
+
 - `.eslintrc.json` - ESLint configuration
 - `.prettierrc` - Prettier configuration
 - `.prettierignore` - Files to ignore in formatting
@@ -44,6 +47,7 @@ npm run type-check
 - `DEMO_VIOLATIONS.ts` - Testing file
 
 ### Modified
+
 - `tsconfig.json` - Added strict TypeScript options
 - `package.json` - Added scripts and lint-staged config
 
@@ -64,10 +68,13 @@ git commit -m "test setup"
 ```
 
 ## Total Install Size
+
 Approximately **30-40 MB** of dev dependencies added.
 
 ## No Breaking Changes
+
 All changes are backward compatible with existing Next.js setup.
 
 ---
+
 **Setup complete!** Read `CODE_QUALITY.md` for usage guide.

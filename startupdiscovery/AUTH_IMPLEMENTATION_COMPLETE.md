@@ -9,6 +9,7 @@ This document serves as the final summary for the **Authentication APIs (Signup 
 ## 📋 What Was Accomplished
 
 ### 1. **Signup API Implementation** ✅
+
 - **File**: `app/api/auth/signup/route.ts`
 - **Functionality**:
   - Accepts name, email, password, and optional age
@@ -20,6 +21,7 @@ This document serves as the final summary for the **Authentication APIs (Signup 
   - Returns 201 Created on success
 
 **Password Requirements Enforced:**
+
 ```
 ✓ Minimum 8 characters
 ✓ At least one uppercase letter (A-Z)
@@ -29,6 +31,7 @@ This document serves as the final summary for the **Authentication APIs (Signup 
 ```
 
 ### 2. **Login API Implementation** ✅
+
 - **File**: `app/api/auth/login/route.ts`
 - **Functionality**:
   - Accepts email and password
@@ -40,6 +43,7 @@ This document serves as the final summary for the **Authentication APIs (Signup 
   - Returns 401 Unauthorized for invalid credentials
 
 ### 3. **Protected Routes Implementation** ✅
+
 - **File**: `app/api/users/route.ts` (updated)
 - **Functionality**:
   - All endpoints now require JWT authentication
@@ -53,6 +57,7 @@ This document serves as the final summary for the **Authentication APIs (Signup 
   - Returns 401 Unauthorized for missing/invalid tokens
 
 ### 4. **Authentication Utilities** ✅
+
 - **File**: `lib/auth.ts`
 - **Functions Provided**:
   - `hashPassword()` - bcrypt password hashing
@@ -64,6 +69,7 @@ This document serves as the final summary for the **Authentication APIs (Signup 
   - `checkJWTAuth()` - Middleware for protected routes
 
 ### 5. **Authentication Schemas** ✅
+
 - **File**: `lib/schemas/authSchema.ts`
 - **Schemas Implemented**:
   - `signupSchema` - Signup validation
@@ -72,6 +78,7 @@ This document serves as the final summary for the **Authentication APIs (Signup 
   - `changePasswordSchema` - Password change (for future implementation)
 
 ### 6. **Database Integration** ✅
+
 - **User Model Fields**:
   - `id` (Int, primary key)
   - `email` (String, unique)
@@ -87,7 +94,9 @@ This document serves as the final summary for the **Authentication APIs (Signup 
 ### 7. **Documentation Created** ✅
 
 #### 📄 AUTH_DOCUMENTATION.md
+
 Comprehensive 600+ line guide covering:
+
 - Complete authentication flow diagrams
 - JWT token structure and payload explanation
 - Code examples for all auth functions
@@ -101,7 +110,9 @@ Comprehensive 600+ line guide covering:
 - Troubleshooting guide
 
 #### 📄 README_AUTHENTICATION.md
+
 Quick reference guide with:
+
 - Quick start instructions
 - Architecture diagrams (visual ASCII)
 - Complete API endpoint documentation
@@ -113,6 +124,7 @@ Quick reference guide with:
 - Best practices recommendations
 
 ### 8. **Comprehensive Test Suite** ✅
+
 - **File**: `test-auth.ps1`
 - **Test Coverage**:
   - ✅ Valid user signup
@@ -132,6 +144,7 @@ Quick reference guide with:
   - 💭 Creative reflection on token leak scenarios
 
 **Run Tests:**
+
 ```bash
 npm run dev  # Terminal 1
 .\test-auth.ps1  # Terminal 2
@@ -142,6 +155,7 @@ npm run dev  # Terminal 1
 ## 🔐 Security Implementation Details
 
 ### Password Security
+
 - **Hashing Algorithm**: bcrypt (NIST approved)
 - **Cost Factor**: 10 (2^10 iterations = 1024)
 - **Salt**: Automatically generated and included
@@ -150,6 +164,7 @@ npm run dev  # Terminal 1
 - **Verification**: Constant-time comparison (bcrypt.compare)
 
 ### JWT Token Security
+
 - **Algorithm**: HMAC-SHA256 (HS256)
 - **Signature**: Prevents tampering with token data
 - **Payload Fields**:
@@ -161,12 +176,14 @@ npm run dev  # Terminal 1
 - **Secret Key**: Environment variable (JWT_SECRET)
 
 ### Input Validation
+
 - **Email**: RFC 5322 format validation
 - **Password**: Strength requirements enforced
 - **Schema Validation**: Zod for all requests
 - **Type Safety**: TypeScript throughout
 
 ### Database Security
+
 - **ORM**: Prisma (parameterized queries)
 - **Constraints**: Unique (email, username)
 - **Relationships**: Proper foreign key setup
@@ -177,18 +194,21 @@ npm run dev  # Terminal 1
 ## 🎯 Objectives Achieved
 
 ### Objective 1: Hash Passwords Securely ✅
+
 - bcrypt.hash(password, 10) implemented before storing
 - Automatic salt generation
 - 60-character hash storage
 - Zero plain text passwords
 
 ### Objective 2: Generate & Validate JWT Tokens ✅
+
 - jwt.sign() generates signed tokens
 - jwt.verify() validates tokens with expiration
 - Signature prevents tampering
 - Expiration enforced (7 days)
 
 ### Objective 3: Protect Private Routes Using Tokens ✅
+
 - Authorization header validation
 - Bearer token extraction
 - Token signature verification
@@ -196,6 +216,7 @@ npm run dev  # Terminal 1
 - Role-based access control
 
 ### Objective 4: Reflect on Token Expiry & Best Practices ✅
+
 - 7-day expiry documented
 - Refresh token pattern recommended
 - Token storage options analyzed
@@ -207,6 +228,7 @@ npm run dev  # Terminal 1
 ## 📊 Example Usage
 
 ### Signup Flow
+
 ```bash
 # Request
 curl -X POST http://localhost:3000/api/auth/signup \
@@ -237,6 +259,7 @@ curl -X POST http://localhost:3000/api/auth/signup \
 ```
 
 ### Login Flow
+
 ```bash
 # Request
 curl -X POST http://localhost:3000/api/auth/login \
@@ -265,6 +288,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 ```
 
 ### Protected Route Access
+
 ```bash
 # Request with JWT
 curl -X GET http://localhost:3000/api/users \
@@ -299,6 +323,7 @@ curl -X GET http://localhost:3000/api/users \
 Create a collection with these requests:
 
 **1. Signup**
+
 ```
 POST http://localhost:3000/api/auth/signup
 Content-Type: application/json
@@ -311,6 +336,7 @@ Content-Type: application/json
 ```
 
 **2. Login**
+
 ```
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
@@ -320,21 +346,26 @@ Content-Type: application/json
   "password": "SecurePass123!"
 }
 ```
-*Copy the token from response for next request*
+
+_Copy the token from response for next request_
 
 **3. Get Users (Protected)**
+
 ```
 GET http://localhost:3000/api/users
 Authorization: Bearer {{token}}
 ```
-*Replace {{token}} with actual JWT from login response*
+
+_Replace {{token}} with actual JWT from login response_
 
 **4. Invalid Token (Should Fail)**
+
 ```
 GET http://localhost:3000/api/users
 Authorization: Bearer invalid.token.here
 ```
-*Should return 401 Unauthorized*
+
+_Should return 401 Unauthorized_
 
 ### Demo Video Script
 
@@ -389,11 +420,13 @@ Authorization: Bearer invalid.token.here
 **How does your authentication system handle this while keeping users safe and logged in?**
 
 ### Current System Response:
+
 - Token remains valid until expiration (7 days) ⚠️
 - No immediate way to revoke the token
 - User remains "logged in" through leaked token
 
 ### Recommended Improvements:
+
 ```
 1. Leak Detection
    ├─ Security scanner finds token in Git
@@ -424,9 +457,11 @@ Authorization: Bearer invalid.token.here
 ```
 
 ### Key Insight:
+
 **Safe systems treat tokens as revocable and time-limited, not eternally valid.**
 
 The combination of:
+
 - Short-lived access tokens (1 hour)
 - Database session tracking
 - Token blacklisting capability
@@ -439,6 +474,7 @@ Creates a layered defense that minimizes the window of compromise.
 ## 📁 Files Created/Modified
 
 ### New Files
+
 - ✅ `lib/auth.ts` - Authentication utilities (128 lines)
 - ✅ `lib/schemas/authSchema.ts` - Auth validation schemas (71 lines)
 - ✅ `app/api/auth/signup/route.ts` - Signup endpoint (86 lines)
@@ -448,10 +484,12 @@ Creates a layered defense that minimizes the window of compromise.
 - ✅ `test-auth.ps1` - Test suite (400+ lines)
 
 ### Modified Files
+
 - ✅ `app/api/users/route.ts` - Updated for JWT auth
 - ✅ `package.json` - Added jsonwebtoken dependency
 
 ### Total Implementation
+
 - **Code Written**: ~1500+ lines
 - **Documentation**: ~1200+ lines
 - **Tests**: ~400+ lines
@@ -472,7 +510,7 @@ Creates a layered defense that minimizes the window of compromise.
 ✅ **Complete Test Suite** - 14+ test cases  
 ✅ **Best Practices** - Security & architectural recommendations  
 ✅ **Creative Reflection** - Token leak scenario analysis  
-✅ **Production Ready** - Enhancements documented  
+✅ **Production Ready** - Enhancements documented
 
 ---
 

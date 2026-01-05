@@ -25,6 +25,7 @@
 ### Why Migrations Matter
 
 **Problem without migrations:**
+
 ```
 👤 Developer A: "My database has a 'bio' field"
 👤 Developer B: "My database doesn't have it"
@@ -32,6 +33,7 @@
 ```
 
 **Solution with migrations:**
+
 ```
 ✅ Everyone has the same schema
 ✅ Changes are tracked and reversible
@@ -94,12 +96,14 @@ npx prisma migrate dev --name init
 ```
 
 **What happens:**
+
 1. Prisma compares `schema.prisma` to your current database
 2. Generates SQL to create all tables, enums, indexes
 3. Applies the migration to your local database
 4. Creates `prisma/migrations/20231230_init/migration.sql`
 
 **Migration file location:**
+
 ```
 prisma/
 └── migrations/
@@ -132,6 +136,7 @@ npx prisma migrate dev --name add_name_to_user
 ```
 
 **Files created:**
+
 ```
 prisma/migrations/
 ├── 20231230_init/
@@ -141,6 +146,7 @@ prisma/migrations/
 ```
 
 **Generated SQL (example):**
+
 ```sql
 -- migration.sql
 ALTER TABLE "users" ADD COLUMN "name" TEXT;
@@ -267,6 +273,7 @@ A **seed script** populates your database with initial data. It runs after migra
 ### Why Seed Scripts?
 
 **Scenario 1: Local Development**
+
 ```
 New Developer Setup:
 1. git clone project
@@ -277,6 +284,7 @@ New Developer Setup:
 ```
 
 **Scenario 2: Production Reset**
+
 ```
 After Testing:
 1. Delete test data
@@ -289,6 +297,7 @@ After Testing:
 **File:** `prisma/seed.ts`
 
 The seed script includes:
+
 - ✅ **Idempotent** - Safe to run multiple times
 - ✅ **Error handling** - Clear error messages
 - ✅ **Logging** - Shows progress
@@ -297,6 +306,7 @@ The seed script includes:
 ### Understanding Idempotency
 
 **Non-idempotent (❌ BAD):**
+
 ```typescript
 // Run once: Creates 1 user
 // Run twice: Creates 2 users (duplicate!)
@@ -308,6 +318,7 @@ const user = await prisma.user.create({
 ```
 
 **Idempotent (✅ GOOD):**
+
 ```typescript
 // Run once: Creates 1 user
 // Run twice: Finds existing user, updates if needed
@@ -325,13 +336,14 @@ const user = await prisma.user.upsert({
 ```typescript
 // 1. Check if category exists
 const category = await prisma.category.upsert({
-  where: { slug: 'saas' },          // ← Check by unique field
-  update: {},                        // ← Don't update if exists
-  create: {                          // ← Create if not exists
-    name: 'SaaS',
-    slug: 'saas',
-    description: 'Software as a Service businesses',
-    color: '#3B82F6',
+  where: { slug: "saas" }, // ← Check by unique field
+  update: {}, // ← Don't update if exists
+  create: {
+    // ← Create if not exists
+    name: "SaaS",
+    slug: "saas",
+    description: "Software as a Service businesses",
+    color: "#3B82F6",
   },
 });
 
@@ -344,26 +356,26 @@ const category = await prisma.category.upsert({
 ### Seed Script Structure
 
 ```typescript
-import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcrypt';
+import { PrismaClient } from "@prisma/client";
+import { hash } from "bcrypt";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting database seed...');
+  console.log("🌱 Starting database seed...");
 
   // 1. Create categories with upsert (idempotent)
   // 2. Create tags with upsert
   // 3. Create users with upsert
   // 4. Create startups with nested relations
   // 5. Create votes, comments, bookmarks, follows
-  
-  console.log('🎉 Seeding completed successfully!');
+
+  console.log("🎉 Seeding completed successfully!");
 }
 
 main()
   .catch(async (e) => {
-    console.error('❌ Error:', e);
+    console.error("❌ Error:", e);
     process.exit(1);
   })
   .finally(async () => {
@@ -394,6 +406,7 @@ npx prisma db seed
 ### Complete Seed Example
 
 See `prisma/seed.ts` in your project for the full implementation with:
+
 - Categories (SaaS, E-commerce, FinTech, etc.)
 - Tags (B2B, B2C, Mobile App, etc.)
 - Users with hashed passwords
@@ -447,6 +460,7 @@ npx prisma studio
 ```
 
 **Opens browser at localhost:5555 where you can:**
+
 - ✅ View all tables
 - ✅ See record counts
 - ✅ Inspect individual records
@@ -455,22 +469,26 @@ npx prisma studio
 ### What to Check in Prisma Studio
 
 **Users Table:**
+
 - [ ] 3 users created (alice, bob, admin)
 - [ ] Passwords are hashed (not plain text)
 - [ ] Emails are unique
 - [ ] Timestamps are set
 
 **Startups Table:**
+
 - [ ] 2 startups created (CloudSync Pro, HealthTrack AI)
 - [ ] Slug is unique
 - [ ] ViewCount and voteCount are set
 - [ ] UserId references correct user
 
 **Categories Table:**
+
 - [ ] 6 categories created
 - [ ] Slug is unique
 
 **Comments Table:**
+
 - [ ] 2 comments created
 - [ ] UserId and startupId are set correctly
 - [ ] Content is displayed
@@ -496,12 +514,14 @@ npx prisma db seed
 ### Development vs Production
 
 **Development:** `npx prisma migrate reset`
+
 - ✅ Safe - deletes all data
 - ✅ Re-runs all migrations
 - ✅ Re-seeds data
 - ✅ Fast setup
 
 **Production:** `npx prisma migrate deploy`
+
 - ✅ Only applies new migrations
 - ✅ Never deletes data
 - ✅ Rollback requires manual steps
@@ -512,12 +532,14 @@ npx prisma db seed
 **Before Running Production Migrations:**
 
 - [ ] **Backup Database**
+
   ```bash
   # PostgreSQL backup
   pg_dump production_db > backup.sql
   ```
 
 - [ ] **Test in Staging**
+
   ```bash
   # Deploy to staging environment first
   # Verify everything works
@@ -525,6 +547,7 @@ npx prisma db seed
   ```
 
 - [ ] **Plan for Rollback**
+
   ```bash
   # Identify rollback strategy
   # Have backup ready
@@ -541,6 +564,7 @@ npx prisma db seed
 ### Common Migration Scenarios
 
 **Scenario 1: Add Required Column**
+
 ```prisma
 // WRONG - Will fail on existing records
 field String  @default(value)  // ← Need default
@@ -550,6 +574,7 @@ field String  @default("default_value")
 ```
 
 **Scenario 2: Rename Column**
+
 ```prisma
 // OLD
 fullName String
@@ -562,6 +587,7 @@ ALTER TABLE users RENAME COLUMN "fullName" TO "name";
 ```
 
 **Scenario 3: Delete Column**
+
 ```prisma
 // Remove from schema
 // Prisma generates:
@@ -589,63 +615,83 @@ npx prisma migrate dev --create-only
 Capture these screenshots for your Kalvium submission:
 
 ### Screenshot 1: Migration Creation
+
 ```bash
 npx prisma migrate dev --name init
 ```
+
 **Capture:**
+
 - Terminal showing "Created migration: TIMESTAMP_init"
 - Output indicating migration applied
 - Success message
 
 ### Screenshot 2: Migration File
+
 **Show:**
+
 - `prisma/migrations/TIMESTAMP_init/migration.sql`
 - SQL commands creating tables
 - Demonstrates actual SQL being generated
 
 ### Screenshot 3: Seed Script Execution
+
 ```bash
 npx prisma db seed
 ```
+
 **Capture:**
+
 - Terminal showing seed script output
 - "✅ Created X categories"
 - "✅ Created X users"
 - Success message
 
 ### Screenshot 4: Prisma Studio - Users Table
+
 ```bash
 npx prisma studio
 ```
+
 **Show:**
+
 - Browser showing http://localhost:5555
 - Users table with 3 records visible
 - Data fields populated correctly
 - Demonstrates seeded data
 
 ### Screenshot 5: Prisma Studio - Startups Table
+
 **Show:**
+
 - Startups table with 2 records
 - Title, slug, userId populated
 - Demonstrates relations working
 
 ### Screenshot 6: Prisma Studio - Comments Table
+
 **Show:**
+
 - Comments table with records
 - UserId and startupId populated
 - Demonstrates foreign keys
 
 ### Screenshot 7: Migration Status
+
 ```bash
 npx prisma migrate status
 ```
+
 **Capture:**
+
 - Terminal showing applied migrations
 - No pending migrations
 - Demonstrates migration tracking
 
 ### Screenshot 8: Idempotency Test
+
 **Show:**
+
 - Running seed twice
 - No errors on second run
 - Demonstrates idempotency
@@ -657,6 +703,7 @@ npx prisma migrate status
 ### Why Migrations Prevent Schema Drift
 
 **Without Migrations (❌):**
+
 ```
 👤 Dev A updates their DB manually
 👤 Dev B doesn't know about change
@@ -666,6 +713,7 @@ npx prisma migrate status
 ```
 
 **With Migrations (✅):**
+
 ```
 👤 Dev A runs: npx prisma migrate dev --name add_field
 → Creates migration file (version controlled)
@@ -678,6 +726,7 @@ npx prisma migrate status
 ```
 
 **Benefits:**
+
 - ✅ Schema changes tracked like code
 - ✅ Easy to review what changed
 - ✅ Can rollback if needed
@@ -687,6 +736,7 @@ npx prisma migrate status
 ### Why Seeding Helps New Developers
 
 **Without Seeding (❌):**
+
 ```
 New Dev Setup:
 1. npm install
@@ -698,6 +748,7 @@ New Dev Setup:
 ```
 
 **With Seeding (✅):**
+
 ```
 New Dev Setup:
 1. npm install
@@ -709,6 +760,7 @@ New Dev Setup:
 ```
 
 **Benefits:**
+
 - ✅ Consistent test data
 - ✅ Faster onboarding
 - ✅ Same development experience for all
@@ -718,13 +770,16 @@ New Dev Setup:
 ### Safety in Production Migrations
 
 **Key Concerns:**
+
 1. **Data Loss** - Wrong migration deletes data
 2. **Downtime** - Large migrations take time
 3. **Incompatibility** - Old code with new schema
 4. **Rollback** - Can't easily undo in production
 
 **Safety Practices:**
+
 1. **Backup First**
+
    ```bash
    pg_dump production_db > backup_$(date +%Y%m%d).sql
    ```
@@ -751,6 +806,7 @@ New Dev Setup:
    - Monitor user reports
 
 **Example Production Workflow:**
+
 ```
 1. Local: Make schema changes, test
 2. Commit: Push migration file to git
@@ -769,18 +825,21 @@ New Dev Setup:
 ## 🎯 Key Takeaways
 
 ### Migrations
+
 - ✅ Version-control your database schema
 - ✅ Ensure team stays in sync
 - ✅ Make deployments predictable
 - ✅ Enable rollbacks if needed
 
 ### Seed Scripts
+
 - ✅ Provide consistent test data
 - ✅ Speed up onboarding
 - ✅ Enable reproducible state
 - ✅ Should be idempotent
 
 ### Production Safety
+
 - ✅ Always backup first
 - ✅ Test in staging
 - ✅ Plan rollback strategy
@@ -809,24 +868,28 @@ npx prisma generate                              # Generate types
 ## 📞 Troubleshooting
 
 **Q: Migration fails with "column already exists"**
+
 ```
 A: You may have run migrate dev twice
    Solution: npx prisma migrate reset
 ```
 
 **Q: Seed script creates duplicates**
+
 ```
 A: Seed script isn't idempotent
    Solution: Use upsert instead of create
 ```
 
 **Q: Can't rollback in production**
+
 ```
 A: Migrations aren't easily reversible
    Solution: Keep backups, restore from backup
 ```
 
 **Q: Prisma Studio won't open**
+
 ```
 A: Port 5555 might be in use
    Solution: Kill process or use different port

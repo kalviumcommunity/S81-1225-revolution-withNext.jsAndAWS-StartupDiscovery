@@ -1,15 +1,19 @@
-import { signupSchema } from '@/lib/schemas/authSchema';
-import { hashPassword, generateToken } from '@/lib/auth';
-import { sendSuccess, sendError, sendValidationError } from '@/lib/responseHandler';
-import { ERROR_CODES } from '@/lib/errorCodes';
-import { ZodError } from 'zod';
-import prisma from '@/lib/prisma';
-import crypto from 'crypto';
+import { signupSchema } from "@/lib/schemas/authSchema";
+import { hashPassword, generateToken } from "@/lib/auth";
+import {
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from "@/lib/responseHandler";
+import { ERROR_CODES } from "@/lib/errorCodes";
+import { ZodError } from "zod";
+import prisma from "@/lib/prisma";
+import crypto from "crypto";
 
 /**
  * POST /api/auth/signup
  * Register a new user with email and password
- * 
+ *
  * Body: {
  *   name: string (required),
  *   email: string (required, valid email),
@@ -31,7 +35,7 @@ export async function POST(req: Request) {
 
     if (existingUser) {
       return sendError(
-        'User with this email already exists',
+        "User with this email already exists",
         ERROR_CODES.EMAIL_ALREADY_EXISTS,
         409
       );
@@ -41,16 +45,16 @@ export async function POST(req: Request) {
     let hashedPassword: string;
     try {
       hashedPassword = await hashPassword(validatedData.password);
-    } catch (error) {
+    } catch {
       return sendError(
-        'Failed to process password',
+        "Failed to process password",
         ERROR_CODES.INTERNAL_ERROR,
         500
       );
     }
 
     // Generate unique username with collision handling
-    const baseUsername = validatedData.email.split('@')[0];
+    const baseUsername = validatedData.email.split("@")[0];
     let username = baseUsername;
     let usernameExists = await prisma.user.findUnique({
       where: { username },
@@ -59,7 +63,7 @@ export async function POST(req: Request) {
     // If username exists, append random suffix until unique
     let attempts = 0;
     while (usernameExists && attempts < 10) {
-      const suffix = crypto.randomBytes(3).toString('hex');
+      const suffix = crypto.randomBytes(3).toString("hex");
       username = `${baseUsername}${suffix}`;
       usernameExists = await prisma.user.findUnique({
         where: { username },
@@ -69,7 +73,7 @@ export async function POST(req: Request) {
 
     if (usernameExists) {
       return sendError(
-        'Unable to generate unique username. Please try again.',
+        "Unable to generate unique username. Please try again.",
         ERROR_CODES.INTERNAL_ERROR,
         500
       );
@@ -82,7 +86,7 @@ export async function POST(req: Request) {
         email: validatedData.email,
         username,
         passwordHash: hashedPassword,
-        role: 'USER', // Default role
+        role: "USER", // Default role
       },
       select: {
         id: true,
@@ -101,9 +105,9 @@ export async function POST(req: Request) {
       {
         user: newUser,
         token,
-        expiresIn: '7d',
+        expiresIn: "7d",
       },
-      'User registered successfully',
+      "User registered successfully",
       201
     );
   } catch (error) {
@@ -112,11 +116,11 @@ export async function POST(req: Request) {
     }
 
     if (error instanceof Error) {
-      console.error('Signup error:', error);
+      console.error("Signup error:", error);
     }
 
     return sendError(
-      'Failed to register user',
+      "Failed to register user",
       ERROR_CODES.INTERNAL_ERROR,
       500
     );

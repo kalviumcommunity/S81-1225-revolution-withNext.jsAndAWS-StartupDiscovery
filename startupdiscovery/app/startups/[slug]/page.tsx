@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { notFound } from 'next/navigation';
-import prisma from '@/lib/prisma';
+import Link from "next/link";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import prisma from "@/lib/prisma";
 
 // ISR with 5 minute revalidation for startup details
 export const revalidate = 300;
@@ -38,11 +38,11 @@ async function getStartup(slug: string) {
         },
         team: true,
         milestones: {
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
         },
         comments: {
           take: 10,
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: "desc" },
           include: {
             user: {
               select: {
@@ -73,7 +73,7 @@ async function getStartup(slug: string) {
 
     return startup;
   } catch (error) {
-    console.error('Failed to fetch startup:', error);
+    console.error("Failed to fetch startup:", error);
     return null;
   }
 }
@@ -105,7 +105,9 @@ export default async function StartupPage({ params }: StartupPageProps) {
               <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-2">
                 {startup.title}
               </h1>
-              <p className="text-xl text-zinc-600 dark:text-zinc-400">{startup.tagline}</p>
+              <p className="text-xl text-zinc-600 dark:text-zinc-400">
+                {startup.tagline}
+              </p>
             </div>
             <div className="flex flex-col items-center ml-8 p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
               <div className="text-3xl mb-1">▲</div>
@@ -174,22 +176,34 @@ export default async function StartupPage({ params }: StartupPageProps) {
               Team
             </h2>
             <div className="grid md:grid-cols-2 gap-4">
-              {startup.team.map((member: { id: number; name: string; role: string; bio: string | null }, index: number) => (
-                <div
-                  key={index}
-                  className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700"
-                >
-                  <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">
-                    {member.name}
-                  </h3>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">
-                    {member.role}
-                  </p>
-                  {member.bio && (
-                    <p className="text-sm text-zinc-700 dark:text-zinc-300">{member.bio}</p>
-                  )}
-                </div>
-              ))}
+              {startup.team.map(
+                (
+                  member: {
+                    id: number;
+                    name: string;
+                    role: string;
+                    bio: string | null;
+                  },
+                  index: number
+                ) => (
+                  <div
+                    key={index}
+                    className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700"
+                  >
+                    <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">
+                      {member.name}
+                    </h3>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">
+                      {member.role}
+                    </p>
+                    {member.bio && (
+                      <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                        {member.bio}
+                      </p>
+                    )}
+                  </div>
+                )
+              )}
             </div>
           </div>
         )}
@@ -201,26 +215,33 @@ export default async function StartupPage({ params }: StartupPageProps) {
               Milestones
             </h2>
             <div className="space-y-4">
-              {startup.milestones.map((milestone: { id: number; title: string; achievedAt: Date | null }) => (
-                <div
-                  key={milestone.id}
-                  className="flex items-start gap-4 p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700"
-                >
-                  <div className="text-2xl">
-                    {milestone.achievedAt ? '✅' : '⏳'}
+              {startup.milestones.map(
+                (milestone: {
+                  id: number;
+                  title: string;
+                  achievedAt: Date | null;
+                }) => (
+                  <div
+                    key={milestone.id}
+                    className="flex items-start gap-4 p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700"
+                  >
+                    <div className="text-2xl">
+                      {milestone.achievedAt ? "✅" : "⏳"}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">
+                        {milestone.title}
+                      </h3>
+                      {milestone.achievedAt && (
+                        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                          Achieved{" "}
+                          {new Date(milestone.achievedAt).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">
-                      {milestone.title}
-                    </h3>
-                    {milestone.achievedAt && (
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                        Achieved {new Date(milestone.achievedAt).toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           </div>
         )}
@@ -240,7 +261,7 @@ export default async function StartupPage({ params }: StartupPageProps) {
                   className="object-cover"
                 />
               ) : (
-                '👤'
+                "👤"
               )}
             </div>
             <div>
@@ -251,7 +272,9 @@ export default async function StartupPage({ params }: StartupPageProps) {
                 @{startup.user.username}
               </p>
               {startup.user.bio && (
-                <p className="text-zinc-700 dark:text-zinc-300">{startup.user.bio}</p>
+                <p className="text-zinc-700 dark:text-zinc-300">
+                  {startup.user.bio}
+                </p>
               )}
             </div>
           </div>
@@ -270,32 +293,41 @@ export default async function StartupPage({ params }: StartupPageProps) {
             </div>
           ) : (
             <div className="space-y-4">
-              {startup.comments.map((comment: { id: number; content: string; createdAt: Date; user: { name: string | null; username: string } }) => (
-                <div
-                  key={comment.id}
-                  className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700"
-                >
-                  <div className="flex items-start gap-3 mb-2">
-                    <div className="w-10 h-10 bg-zinc-200 dark:bg-zinc-700 rounded-full flex items-center justify-center">
-                      👤
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-zinc-900 dark:text-zinc-50">
-                          {comment.user.name || comment.user.username}
-                        </span>
-                        <span className="text-sm text-zinc-500 dark:text-zinc-400">
-                          @{comment.user.username}
-                        </span>
-                        <span className="text-sm text-zinc-500 dark:text-zinc-400">
-                          • {new Date(comment.createdAt).toLocaleDateString()}
-                        </span>
+              {startup.comments.map(
+                (comment: {
+                  id: number;
+                  content: string;
+                  createdAt: Date;
+                  user: { name: string | null; username: string };
+                }) => (
+                  <div
+                    key={comment.id}
+                    className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700"
+                  >
+                    <div className="flex items-start gap-3 mb-2">
+                      <div className="w-10 h-10 bg-zinc-200 dark:bg-zinc-700 rounded-full flex items-center justify-center">
+                        👤
                       </div>
-                      <p className="text-zinc-700 dark:text-zinc-300">{comment.content}</p>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                            {comment.user.name || comment.user.username}
+                          </span>
+                          <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                            @{comment.user.username}
+                          </span>
+                          <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                            • {new Date(comment.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-zinc-700 dark:text-zinc-300">
+                          {comment.content}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           )}
         </div>
@@ -303,7 +335,8 @@ export default async function StartupPage({ params }: StartupPageProps) {
         {/* ISR Notice */}
         <div className="text-center text-sm text-zinc-500 dark:text-zinc-400 mt-12 p-4 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
           <p>
-            ⚡ This page uses <strong>Incremental Static Regeneration (ISR)</strong>
+            ⚡ This page uses{" "}
+            <strong>Incremental Static Regeneration (ISR)</strong>
           </p>
           <p className="mt-1">Revalidates every 5 minutes for fresh content</p>
         </div>

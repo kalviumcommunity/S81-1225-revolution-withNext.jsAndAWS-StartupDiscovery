@@ -37,6 +37,7 @@ git commit --no-verify -m "message"
 ## Common Scenarios
 
 ### Scenario 1: Unused Variable Warning
+
 ```typescript
 // ❌ This will warn
 const unused = "value";
@@ -46,6 +47,7 @@ console.log("value");
 ```
 
 ### Scenario 2: Console Statement
+
 ```typescript
 // ⚠️ Warning (allowed but discouraged)
 console.log("debug");
@@ -56,6 +58,7 @@ logger.debug("debug");
 ```
 
 ### Scenario 3: Implicit Any
+
 ```typescript
 // ❌ Error - implicit any
 function process(data) {
@@ -69,9 +72,10 @@ function process(data: { value: string }) {
 ```
 
 ### Scenario 4: Formatting Issues
+
 ```typescript
 // ❌ Wrong quotes and spacing
-const obj = {name:'test',value:123}
+const obj = { name: "test", value: 123 };
 
 // ✅ Auto-fixed by Prettier
 const obj = { name: "test", value: 123 };
@@ -88,19 +92,23 @@ const obj = { name: "test", value: 123 };
 ## Troubleshooting
 
 ### Husky not running?
+
 ```bash
 npx husky install
 ```
 
 ### ESLint errors on legacy files?
+
 ```bash
 npm run lint:fix
 ```
 
 ### Prettier conflicts with ESLint?
+
 Already configured! `eslint-config-prettier` disables conflicting rules.
 
 ### Need to skip hooks temporarily?
+
 ```bash
 git commit --no-verify
 # Only use in emergencies!
@@ -109,10 +117,12 @@ git commit --no-verify
 ## VS Code Integration (Optional)
 
 Install these extensions for real-time feedback:
+
 - ESLint (`dbaeumer.vscode-eslint`)
 - Prettier (`esbenp.prettier-vscode`)
 
 Add to `.vscode/settings.json`:
+
 ```json
 {
   "editor.formatOnSave": true,
@@ -124,4 +134,5 @@ Add to `.vscode/settings.json`:
 ```
 
 ---
+
 **Need help?** Check `CODE_QUALITY.md` for detailed explanations.

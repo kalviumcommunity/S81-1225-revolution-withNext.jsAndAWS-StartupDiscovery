@@ -1,21 +1,34 @@
-import { sendSuccess, sendError, sendValidationError } from '@/lib/responseHandler';
-import { ERROR_CODES } from '@/lib/errorCodes';
-import { userCreateSchema, userUpdateSchema, userDeleteSchema } from '@/lib/schemas/userSchema';
-import { validateAuthHeader } from '@/lib/auth';
-import { ZodError } from 'zod';
-import prisma from '@/lib/prisma';
+import {
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from "@/lib/responseHandler";
+import { ERROR_CODES } from "@/lib/errorCodes";
+import {
+  userCreateSchema,
+  userUpdateSchema,
+  userDeleteSchema,
+} from "@/lib/schemas/userSchema";
+import { validateAuthHeader } from "@/lib/auth";
+import { ZodError } from "zod";
+import prisma from "@/lib/prisma";
 
 // Authentication helper with JWT verification and role retrieval
-function checkAuth(req: Request): { authorized: boolean; userId?: number; email?: string; role?: string } {
-  const authHeader = req.headers.get('authorization');
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+function checkAuth(req: Request): {
+  authorized: boolean;
+  userId?: number;
+  email?: string;
+  role?: string;
+} {
+  const authHeader = req.headers.get("authorization");
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return { authorized: false };
   }
-  
+
   try {
     const userData = validateAuthHeader(authHeader);
-    
+
     if (!userData) {
       // Invalid or expired JWT token
       return { authorized: false };
@@ -46,7 +59,7 @@ export async function GET(req: Request) {
   const auth = checkAuth(req);
   if (!auth.authorized || !auth.userId) {
     return sendError(
-      'Unauthorized. Valid JWT authentication required.',
+      "Unauthorized. Valid JWT authentication required.",
       ERROR_CODES.UNAUTHORIZED,
       401
     );
@@ -54,15 +67,15 @@ export async function GET(req: Request) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const page = Number(searchParams.get('page')) || 1;
-    const limit = Math.min(Number(searchParams.get('limit')) || 10, 100);
-    const role = searchParams.get('role');
-    const search = searchParams.get('search');
+    const page = Number(searchParams.get("page")) || 1;
+    const limit = Math.min(Number(searchParams.get("limit")) || 10, 100);
+    const role = searchParams.get("role");
+    const search = searchParams.get("search");
 
     // Validate pagination parameters
     if (page < 1 || limit < 1) {
       return sendError(
-        'Invalid pagination parameters',
+        "Invalid pagination parameters",
         ERROR_CODES.INVALID_PAGINATION,
         400
       );
@@ -70,15 +83,15 @@ export async function GET(req: Request) {
 
     // Build Prisma where clause
     const where: Record<string, unknown> = {};
-    
+
     if (role) {
       where.role = role;
     }
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
+        { name: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
       ];
     }
 
@@ -97,7 +110,7 @@ export async function GET(req: Request) {
         },
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
       }),
     ]);
 
@@ -115,15 +128,11 @@ export async function GET(req: Request) {
           hasPrevPage: page > 1,
         },
       },
-      'Users fetched successfully'
+      "Users fetched successfully"
     );
   } catch (error) {
-    console.error('Get users error:', error);
-    return sendError(
-      'Failed to fetch users',
-      ERROR_CODES.INTERNAL_ERROR,
-      500
-    );
+    console.error("Get users error:", error);
+    return sendError("Failed to fetch users", ERROR_CODES.INTERNAL_ERROR, 500);
   }
 }
 
@@ -138,16 +147,16 @@ export async function POST(req: Request) {
   const auth = checkAuth(req);
   if (!auth.authorized || !auth.userId) {
     return sendError(
-      'Unauthorized. Authentication required.',
+      "Unauthorized. Authentication required.",
       ERROR_CODES.UNAUTHORIZED,
       401
     );
   }
 
   // Require ADMIN role
-  if (auth.role !== 'ADMIN') {
+  if (auth.role !== "ADMIN") {
     return sendError(
-      'Forbidden. Only administrators can create user accounts.',
+      "Forbidden. Only administrators can create user accounts.",
       ERROR_CODES.FORBIDDEN,
       403
     );
@@ -166,7 +175,7 @@ export async function POST(req: Request) {
 
     if (existingUser) {
       return sendError(
-        'Email already in use',
+        "Email already in use",
         ERROR_CODES.EMAIL_ALREADY_EXISTS,
         409
       );
@@ -177,9 +186,9 @@ export async function POST(req: Request) {
       data: {
         name: data.name,
         email: data.email,
-        username: data.email.split('@')[0],
-        passwordHash: '', // No password for admin-created users
-        role: 'USER',
+        username: data.email.split("@")[0],
+        passwordHash: "", // No password for admin-created users
+        role: "USER",
       },
       select: {
         id: true,
@@ -191,18 +200,14 @@ export async function POST(req: Request) {
       },
     });
 
-    return sendSuccess(
-      { user: newUser },
-      'User created successfully',
-      201
-    );
+    return sendSuccess({ user: newUser }, "User created successfully", 201);
   } catch (error) {
     if (error instanceof ZodError) {
       return sendValidationError(error);
     }
-    console.error('Create user error:', error);
+    console.error("Create user error:", error);
     return sendError(
-      'Failed to create user',
+      "Failed to create user",
       ERROR_CODES.INVALID_REQUEST_BODY,
       400
     );
@@ -220,7 +225,7 @@ export async function PUT(req: Request) {
   const auth = checkAuth(req);
   if (!auth.authorized || !auth.userId) {
     return sendError(
-      'Unauthorized. Authentication required.',
+      "Unauthorized. Authentication required.",
       ERROR_CODES.UNAUTHORIZED,
       401
     );
@@ -235,7 +240,7 @@ export async function PUT(req: Request) {
     // Users can only update their own profile
     if (data.id !== auth.userId) {
       return sendError(
-        'Forbidden. You can only update your own profile.',
+        "Forbidden. You can only update your own profile.",
         ERROR_CODES.INSUFFICIENT_PERMISSIONS,
         403
       );
@@ -247,7 +252,7 @@ export async function PUT(req: Request) {
     });
 
     if (!user) {
-      return sendError('User not found', ERROR_CODES.RESOURCE_NOT_FOUND, 404);
+      return sendError("User not found", ERROR_CODES.RESOURCE_NOT_FOUND, 404);
     }
 
     // Check for duplicate email
@@ -258,7 +263,7 @@ export async function PUT(req: Request) {
 
       if (existingUser) {
         return sendError(
-          'Email already in use',
+          "Email already in use",
           ERROR_CODES.EMAIL_ALREADY_EXISTS,
           409
         );
@@ -285,17 +290,14 @@ export async function PUT(req: Request) {
       },
     });
 
-    return sendSuccess(
-      { user: updatedUser },
-      'User updated successfully'
-    );
+    return sendSuccess({ user: updatedUser }, "User updated successfully");
   } catch (error) {
     if (error instanceof ZodError) {
       return sendValidationError(error);
     }
-    console.error('Update user error:', error);
+    console.error("Update user error:", error);
     return sendError(
-      'Failed to update user',
+      "Failed to update user",
       ERROR_CODES.INVALID_REQUEST_BODY,
       400
     );
@@ -313,7 +315,7 @@ export async function DELETE(req: Request) {
   const auth = checkAuth(req);
   if (!auth.authorized || !auth.userId) {
     return sendError(
-      'Unauthorized. Authentication required.',
+      "Unauthorized. Authentication required.",
       ERROR_CODES.UNAUTHORIZED,
       401
     );
@@ -328,7 +330,7 @@ export async function DELETE(req: Request) {
     // Users can only delete their own account
     if (data.id !== auth.userId) {
       return sendError(
-        'Forbidden. You can only delete your own account.',
+        "Forbidden. You can only delete your own account.",
         ERROR_CODES.INSUFFICIENT_PERMISSIONS,
         403
       );
@@ -340,7 +342,7 @@ export async function DELETE(req: Request) {
     });
 
     if (!user) {
-      return sendError('User not found', ERROR_CODES.RESOURCE_NOT_FOUND, 404);
+      return sendError("User not found", ERROR_CODES.RESOURCE_NOT_FOUND, 404);
     }
 
     // Delete user
@@ -353,17 +355,14 @@ export async function DELETE(req: Request) {
       },
     });
 
-    return sendSuccess(
-      { user: deletedUser },
-      'User deleted successfully'
-    );
+    return sendSuccess({ user: deletedUser }, "User deleted successfully");
   } catch (error) {
     if (error instanceof ZodError) {
       return sendValidationError(error);
     }
-    console.error('Delete user error:', error);
+    console.error("Delete user error:", error);
     return sendError(
-      'Failed to delete user',
+      "Failed to delete user",
       ERROR_CODES.INVALID_REQUEST_BODY,
       400
     );

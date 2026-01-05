@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { ZodError } from 'zod';
+import { NextResponse } from "next/server";
+import { ZodError } from "zod";
 
 /**
  * Send a standardized success response
@@ -7,7 +7,11 @@ import { ZodError } from 'zod';
  * @param message - Success message
  * @param status - HTTP status code (default: 200)
  */
-export const sendSuccess = (data: unknown, message = 'Success', status = 200) => {
+export const sendSuccess = (
+  data: unknown,
+  message = "Success",
+  status = 200
+) => {
   return NextResponse.json(
     {
       success: true,
@@ -27,8 +31,8 @@ export const sendSuccess = (data: unknown, message = 'Success', status = 200) =>
  * @param details - Additional error details
  */
 export const sendError = (
-  message = 'Something went wrong',
-  code = 'INTERNAL_ERROR',
+  message = "Something went wrong",
+  code = "INTERNAL_ERROR",
   status = 500,
   details?: unknown
 ) => {
@@ -54,9 +58,9 @@ export const sendValidationError = (error: ZodError) => {
   return NextResponse.json(
     {
       success: false,
-      message: 'Validation Error',
+      message: "Validation Error",
       errors: error.issues.map((e) => ({
-        field: e.path.length > 0 ? e.path[e.path.length - 1] : 'unknown',
+        field: e.path.length > 0 ? e.path[e.path.length - 1] : "unknown",
         message: e.message,
       })),
       timestamp: new Date().toISOString(),

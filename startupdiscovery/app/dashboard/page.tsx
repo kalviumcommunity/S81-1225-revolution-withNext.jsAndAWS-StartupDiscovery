@@ -1,31 +1,32 @@
-import Link from 'next/link';
-import prisma from '@/lib/prisma';
+import Link from "next/link";
+import prisma from "@/lib/prisma";
 
 // ✅ Server-Side Rendering (SSR) - Always dynamic, no caching
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 async function getUserStats() {
   try {
     // In a real app, this would use authentication to get the current user
     // For demo purposes, we'll fetch stats for all users
-    const [totalStartups, totalUsers, totalVotes, recentStartups] = await Promise.all([
-      prisma.startup.count(),
-      prisma.user.count(),
-      prisma.vote.count(),
-      prisma.startup.findMany({
-        take: 5,
-        orderBy: { createdAt: 'desc' },
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          status: true,
-          voteCount: true,
-          viewCount: true,
-          createdAt: true,
-        },
-      }),
-    ]);
+    const [totalStartups, totalUsers, totalVotes, recentStartups] =
+      await Promise.all([
+        prisma.startup.count(),
+        prisma.user.count(),
+        prisma.vote.count(),
+        prisma.startup.findMany({
+          take: 5,
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            status: true,
+            voteCount: true,
+            viewCount: true,
+            createdAt: true,
+          },
+        }),
+      ]);
 
     return {
       totalStartups,
@@ -34,7 +35,7 @@ async function getUserStats() {
       recentStartups,
     };
   } catch (error) {
-    console.error('Failed to fetch user stats:', error);
+    console.error("Failed to fetch user stats:", error);
     return {
       totalStartups: 0,
       totalUsers: 0,
@@ -77,7 +78,9 @@ export default async function DashboardPage() {
           <div className="p-6 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Total Startups</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+                  Total Startups
+                </p>
                 <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
                   {stats.totalStartups}
                 </p>
@@ -89,7 +92,9 @@ export default async function DashboardPage() {
           <div className="p-6 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Total Users</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+                  Total Users
+                </p>
                 <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
                   {stats.totalUsers}
                 </p>
@@ -101,7 +106,9 @@ export default async function DashboardPage() {
           <div className="p-6 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Total Votes</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+                  Total Votes
+                </p>
                 <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
                   {stats.totalVotes}
                 </p>
@@ -127,37 +134,48 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {stats.recentStartups.map((startup: { id: number; title: string; slug: string; status: string; voteCount: number; viewCount: number; createdAt: Date }) => (
-                <div
-                  key={startup.id}
-                  className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 flex items-center justify-between"
-                >
-                  <div className="flex-1">
-                    <Link
-                      href={`/startups/${startup.slug}`}
-                      className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 hover:text-zinc-600 dark:hover:text-zinc-300"
-                    >
-                      {startup.title}
-                    </Link>
-                    <div className="flex items-center gap-4 mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${
-                          startup.status === 'PUBLISHED'
-                            ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                            : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
-                        }`}
+              {stats.recentStartups.map(
+                (startup: {
+                  id: number;
+                  title: string;
+                  slug: string;
+                  status: string;
+                  voteCount: number;
+                  viewCount: number;
+                  createdAt: Date;
+                }) => (
+                  <div
+                    key={startup.id}
+                    className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 flex items-center justify-between"
+                  >
+                    <div className="flex-1">
+                      <Link
+                        href={`/startups/${startup.slug}`}
+                        className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 hover:text-zinc-600 dark:hover:text-zinc-300"
                       >
-                        {startup.status}
-                      </span>
-                      <span>👁 {startup.viewCount} views</span>
-                      <span>▲ {startup.voteCount} votes</span>
-                      <span>
-                        Created: {new Date(startup.createdAt).toLocaleDateString()}
-                      </span>
+                        {startup.title}
+                      </Link>
+                      <div className="flex items-center gap-4 mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-medium ${
+                            startup.status === "PUBLISHED"
+                              ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
+                              : "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
+                          }`}
+                        >
+                          {startup.status}
+                        </span>
+                        <span>👁 {startup.viewCount} views</span>
+                        <span>▲ {startup.voteCount} votes</span>
+                        <span>
+                          Created:{" "}
+                          {new Date(startup.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           )}
         </div>
@@ -169,14 +187,15 @@ export default async function DashboardPage() {
           </h3>
           <div className="space-y-2 text-purple-800 dark:text-purple-200">
             <p>
-              <strong>This page uses SSR</strong> - rendered fresh on every request
+              <strong>This page uses SSR</strong> - rendered fresh on every
+              request
             </p>
             <p>✅ Always shows the most up-to-date data</p>
             <p>✅ Perfect for user-specific dashboards and real-time data</p>
             <p>✅ No stale cache - you always see current statistics</p>
             <p className="pt-2 text-sm">
-              Refresh this page to see the timestamp update - each request fetches fresh data
-              from the database
+              Refresh this page to see the timestamp update - each request
+              fetches fresh data from the database
             </p>
           </div>
         </div>
