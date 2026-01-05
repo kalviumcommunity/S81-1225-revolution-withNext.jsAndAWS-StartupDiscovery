@@ -12,7 +12,7 @@ erDiagram
     User ||--o{ Notification : receives
     User ||--o{ Follow : "follows (follower)"
     User ||--o{ Follow : "followed by (following)"
-    
+
     Startup ||--o{ StartupCategory : "belongs to"
     Startup ||--o{ StartupTag : "tagged with"
     Startup ||--o{ Comment : "has"
@@ -21,12 +21,12 @@ erDiagram
     Startup ||--o{ TeamMember : "has team"
     Startup ||--o{ Media : "has media"
     Startup ||--o{ Milestone : "achieves"
-    
+
     Category ||--o{ StartupCategory : "categorizes"
     Tag ||--o{ StartupTag : "tags"
-    
+
     Comment ||--o{ Comment : "has replies"
-    
+
     User {
         int id PK
         string email UK
@@ -41,7 +41,7 @@ erDiagram
         datetime updatedAt
         datetime lastLoginAt
     }
-    
+
     Startup {
         int id PK
         string title
@@ -63,7 +63,7 @@ erDiagram
         datetime updatedAt
         int userId FK
     }
-    
+
     Category {
         int id PK
         string name UK
@@ -73,7 +73,7 @@ erDiagram
         string color
         datetime createdAt
     }
-    
+
     Tag {
         int id PK
         string name UK
@@ -81,21 +81,21 @@ erDiagram
         int useCount
         datetime createdAt
     }
-    
+
     StartupCategory {
         int id PK
         int startupId FK
         int categoryId FK
         datetime createdAt
     }
-    
+
     StartupTag {
         int id PK
         int startupId FK
         int tagId FK
         datetime createdAt
     }
-    
+
     Comment {
         int id PK
         text content
@@ -105,7 +105,7 @@ erDiagram
         int startupId FK
         int parentId FK
     }
-    
+
     Vote {
         int id PK
         int value
@@ -113,21 +113,21 @@ erDiagram
         int userId FK
         int startupId FK
     }
-    
+
     Bookmark {
         int id PK
         datetime createdAt
         int userId FK
         int startupId FK
     }
-    
+
     Follow {
         int id PK
         datetime createdAt
         int followerId FK
         int followingId FK
     }
-    
+
     TeamMember {
         int id PK
         string name
@@ -139,7 +139,7 @@ erDiagram
         datetime createdAt
         int startupId FK
     }
-    
+
     Media {
         int id PK
         enum type
@@ -149,7 +149,7 @@ erDiagram
         datetime createdAt
         int startupId FK
     }
-    
+
     Milestone {
         int id PK
         string title
@@ -159,7 +159,7 @@ erDiagram
         datetime createdAt
         int startupId FK
     }
-    
+
     Session {
         string id PK
         int userId FK
@@ -169,7 +169,7 @@ erDiagram
         string ipAddress
         string userAgent
     }
-    
+
     Notification {
         int id PK
         enum type
@@ -186,6 +186,7 @@ erDiagram
 ## Key Relationships
 
 ### One-to-Many
+
 - User → Startup (one user creates many startups)
 - User → Comment (one user writes many comments)
 - User → Vote (one user casts many votes)
@@ -201,11 +202,13 @@ erDiagram
 - Comment → Comment (one comment has many replies - self-referencing)
 
 ### Many-to-Many (via Junction Tables)
+
 - Startup ↔ Category (via StartupCategory)
 - Startup ↔ Tag (via StartupTag)
 - User ↔ User (via Follow - self-referencing)
 
 ### Unique Constraints
+
 - User: email, username
 - Startup: slug
 - Category: name, slug
@@ -218,7 +221,9 @@ erDiagram
 - Follow: (followerId, followingId) composite
 
 ### Cascade Delete Rules
+
 All foreign key relationships use `ON DELETE CASCADE`:
+
 - Deleting a User removes all their Startups, Comments, Votes, Sessions, etc.
 - Deleting a Startup removes all associated Comments, Votes, TeamMembers, Media, etc.
 - Deleting a parent Comment removes all reply Comments
@@ -226,11 +231,13 @@ All foreign key relationships use `ON DELETE CASCADE`:
 ## Enums
 
 ### UserRole
+
 - USER
 - ADMIN
 - MODERATOR
 
 ### StartupStage
+
 - IDEA
 - MVP
 - BETA
@@ -239,17 +246,20 @@ All foreign key relationships use `ON DELETE CASCADE`:
 - SCALING
 
 ### StartupStatus
+
 - DRAFT
 - PUBLISHED
 - ARCHIVED
 - REJECTED
 
 ### MediaType
+
 - IMAGE
 - VIDEO
 - DOCUMENT
 
 ### NotificationType
+
 - NEW_COMMENT
 - NEW_VOTE
 - NEW_FOLLOWER
@@ -261,6 +271,7 @@ All foreign key relationships use `ON DELETE CASCADE`:
 ## Index Strategy
 
 ### High-Priority Indexes (Already Defined)
+
 - User: email, username, createdAt
 - Startup: userId, slug, status, publishedAt, createdAt, featured, industry
 - Category: slug
@@ -278,7 +289,9 @@ All foreign key relationships use `ON DELETE CASCADE`:
 - Notification: userId, isRead, createdAt
 
 ### Composite Indexes (Future Optimization)
+
 If query performance requires, consider adding:
+
 - `(status, publishedAt)` on Startup for published startup feeds
 - `(userId, createdAt)` on Startup for user's startup history
 - `(industry, featured)` on Startup for featured industry listings

@@ -17,6 +17,7 @@ npm install
 ```
 
 This will install:
+
 - `@prisma/client` - Prisma Client for database queries
 - `prisma` - Prisma CLI for migrations and schema management
 - `bcrypt` - For password hashing (used in seed script)
@@ -71,6 +72,7 @@ npm run prisma:seed
 ```
 
 This will create:
+
 - 6 categories (SaaS, E-commerce, FinTech, etc.)
 - 8 tags
 - 3 demo users
@@ -78,6 +80,7 @@ This will create:
 - Sample votes, comments, bookmarks, and follows
 
 **Demo User Credentials:**
+
 - Email: `alice@example.com` / Password: `password123`
 - Email: `bob@example.com` / Password: `password123`
 - Email: `admin@startupdiscovery.com` / Password: `password123`
@@ -111,6 +114,7 @@ npx prisma migrate reset
 ```
 
 This will:
+
 1. Drop the database
 2. Create a new database
 3. Run all migrations
@@ -135,7 +139,7 @@ npx prisma validate
 ### Import Prisma Client
 
 ```typescript
-import prisma from '@/lib/prisma';
+import prisma from "@/lib/prisma";
 ```
 
 ### Example Queries
@@ -144,7 +148,7 @@ import prisma from '@/lib/prisma';
 
 ```typescript
 const startups = await prisma.startup.findMany({
-  where: { status: 'PUBLISHED' },
+  where: { status: "PUBLISHED" },
   include: {
     user: {
       select: { name: true, avatarUrl: true },
@@ -153,7 +157,7 @@ const startups = await prisma.startup.findMany({
       include: { category: true },
     },
   },
-  orderBy: { publishedAt: 'desc' },
+  orderBy: { publishedAt: "desc" },
   take: 20,
 });
 ```
@@ -163,13 +167,13 @@ const startups = await prisma.startup.findMany({
 ```typescript
 const newStartup = await prisma.startup.create({
   data: {
-    title: 'My Awesome Startup',
-    slug: 'my-awesome-startup',
-    tagline: 'Building the future',
-    description: 'Full description here...',
-    stage: 'IDEA',
-    industry: 'SaaS',
-    status: 'DRAFT',
+    title: "My Awesome Startup",
+    slug: "my-awesome-startup",
+    tagline: "Building the future",
+    description: "Full description here...",
+    stage: "IDEA",
+    industry: "SaaS",
+    status: "DRAFT",
     userId: currentUserId,
     categories: {
       create: [{ categoryId: 1 }],
@@ -309,7 +313,7 @@ const perPage = 20;
 const startups = await prisma.startup.findMany({
   skip: (page - 1) * perPage,
   take: perPage,
-  orderBy: { createdAt: 'desc' },
+  orderBy: { createdAt: "desc" },
 });
 
 const total = await prisma.startup.count();
@@ -321,8 +325,8 @@ const total = await prisma.startup.count();
 const results = await prisma.startup.findMany({
   where: {
     OR: [
-      { title: { contains: searchTerm, mode: 'insensitive' } },
-      { description: { contains: searchTerm, mode: 'insensitive' } },
+      { title: { contains: searchTerm, mode: "insensitive" } },
+      { description: { contains: searchTerm, mode: "insensitive" } },
     ],
   },
 });

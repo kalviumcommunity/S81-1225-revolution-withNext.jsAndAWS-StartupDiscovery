@@ -4,9 +4,9 @@
 // Try to commit this file to see pre-commit hooks in action
 
 export function exampleFunction() {
-  console.log('This will trigger a warning')
-  const unusedVariable = 'This will trigger an error'
-  return 'test'
+  console.log("This will trigger a warning");
+  const unusedVariable = "This will trigger an error";
+  return "test";
 }
 
 // Uncomment to test implicit any error:

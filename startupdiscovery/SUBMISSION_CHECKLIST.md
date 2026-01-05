@@ -17,6 +17,7 @@
 - [ ] Generate client: `npx prisma generate`
 
 **Verify:**
+
 ```bash
 npm run db:quick-test  # Should pass all tests
 ```
@@ -32,6 +33,7 @@ npm run db:quick-test  # Should pass all tests
 - [ ] Review `lib/prisma.ts` (understand singleton pattern)
 
 **Verify:**
+
 ```bash
 npm run prisma:studio  # Opens localhost:5555
 # Can you navigate the database tables?
@@ -48,6 +50,7 @@ npm run prisma:studio  # Opens localhost:5555
 - [ ] Confirm relations are working (comments → user, startup → user)
 
 **Expected Output:**
+
 ```
 ✅ Successfully connected to database
 ✅ Database Statistics showing counts
@@ -63,38 +66,45 @@ npm run prisma:studio  # Opens localhost:5555
 Capture these screenshots:
 
 #### Screenshot 1: Migration Success
+
 - [ ] Run: `npx prisma migrate dev --name init`
 - [ ] Capture: Terminal output showing migration applied
 - [ ] Shows: "✔ Generated Prisma Client" message
 
 #### Screenshot 2: Prisma Studio
+
 - [ ] Run: `npm run prisma:studio`
 - [ ] Open: http://localhost:5555 in browser
 - [ ] Capture: Browser showing tables with data
 - [ ] Show: At least one table (users, startups, categories)
 
 #### Screenshot 3: Test Output
+
 - [ ] Run: `npm run db:test`
 - [ ] Capture: Terminal showing all tests passing
 - [ ] Shows: Database statistics, sample data, success message
 
 #### Screenshot 4: Quick Test
+
 - [ ] Run: `npm run db:quick-test`
 - [ ] Capture: Terminal output
 - [ ] Shows: Connection success, counts, sample data
 
 #### Screenshot 5: VSCode IntelliSense
+
 - [ ] Open: Any file that imports prisma (e.g., `scripts/quick-test.ts`)
 - [ ] Type: `prisma.` and wait for autocomplete
 - [ ] Capture: Autocomplete dropdown showing type-safe options
 - [ ] Shows: user, startup, category, etc. with types
 
 #### Screenshot 6: Schema File
+
 - [ ] Open: `prisma/schema.prisma` in VSCode
 - [ ] Capture: Part of schema showing models with relations
 - [ ] Shows: User model or Startup model with annotations
 
 **Optional Screenshots:**
+
 - [ ] `lib/prisma.ts` - Singleton pattern code
 - [ ] Seed script output
 - [ ] Database in PostgreSQL client (psql, pgAdmin, etc.)
@@ -110,6 +120,7 @@ Review these files to understand what to submit:
 - [ ] `PRISMA_SETUP_GUIDE.md` - Reference for explanations
 
 **Note key sections:**
+
 - [ ] What Prisma is and why use it
 - [ ] Schema definition with examples
 - [ ] Client initialization pattern
@@ -140,16 +151,19 @@ Write your own reflection (use template in `PRISMA_SETUP_GUIDE.md`):
 Prepare at least 2 code examples:
 
 #### Example 1: Simple Query
+
 - [ ] Create a simple query (e.g., fetch all users)
 - [ ] Show TypeScript types
 - [ ] Demonstrate autocomplete
 
 #### Example 2: Complex Query
+
 - [ ] Create a query with relations (e.g., startup with user, categories, counts)
 - [ ] Show type safety
 - [ ] Demonstrate relation loading
 
 **Bonus:**
+
 - [ ] Create/Update/Delete examples
 - [ ] Transaction example
 - [ ] Aggregation example
@@ -183,15 +197,18 @@ Prepare at least 2 code examples:
 In your submission, reference these files:
 
 ### Primary Documentation
+
 - [ ] `PRISMA_SETUP_GUIDE.md` - Complete guide
 - [ ] `KALVIUM_ASSIGNMENT_SUMMARY.md` - Assignment deliverables
 
 ### Supporting Documentation
+
 - [ ] `DATABASE_SCHEMA_VISUAL.md` - Schema diagrams
 - [ ] `PRISMA_QUICK_REFERENCE.md` - Command reference
 - [ ] `INSTALLATION_STEPS.md` - Setup instructions
 
 ### Code Files
+
 - [ ] `prisma/schema.prisma` - Your schema
 - [ ] `lib/prisma.ts` - Client initialization
 - [ ] `scripts/test-db.ts` - Test examples
@@ -204,6 +221,7 @@ In your submission, reference these files:
 Ensure you cover:
 
 ### Technical Implementation (40%)
+
 - [ ] ✅ Prisma installed correctly
 - [ ] ✅ Schema properly defined (13 models)
 - [ ] ✅ Client generated
@@ -212,6 +230,7 @@ Ensure you cover:
 - [ ] ✅ Seed data loads successfully
 
 ### Documentation (30%)
+
 - [ ] ✅ Clear explanations of what Prisma is
 - [ ] ✅ Setup steps documented
 - [ ] ✅ Schema explained
@@ -219,6 +238,7 @@ Ensure you cover:
 - [ ] ✅ README/guides created
 
 ### Code Quality (20%)
+
 - [ ] ✅ TypeScript used correctly
 - [ ] ✅ Type safety demonstrated
 - [ ] ✅ Code is clean and commented
@@ -226,6 +246,7 @@ Ensure you cover:
 - [ ] ✅ Error handling present
 
 ### Evidence (10%)
+
 - [ ] ✅ Screenshots captured
 - [ ] ✅ Test output shown
 - [ ] ✅ Working demo provided
@@ -236,6 +257,7 @@ Ensure you cover:
 ## ✅ Final Checks Before Submission
 
 ### Functionality
+
 - [ ] Database connection works
 - [ ] All migrations applied successfully
 - [ ] Seed data loads without errors
@@ -243,6 +265,7 @@ Ensure you cover:
 - [ ] Prisma Studio opens and shows data
 
 ### Documentation
+
 - [ ] All required sections present
 - [ ] Code examples included
 - [ ] Screenshots embedded
@@ -250,6 +273,7 @@ Ensure you cover:
 - [ ] Links to documentation files work
 
 ### Presentation
+
 - [ ] Submission is well-formatted
 - [ ] Screenshots are clear and readable
 - [ ] Code is properly highlighted
@@ -257,6 +281,7 @@ Ensure you cover:
 - [ ] Professional appearance
 
 ### Deliverables
+
 - [ ] ✅ Installation & Initialization (explained)
 - [ ] ✅ Schema Definition (13 models, complete)
 - [ ] ✅ Client Generation (command + explanation)
@@ -271,12 +296,14 @@ Ensure you cover:
 ## 📤 Submission Format
 
 ### GitHub Repository
+
 - [ ] All code committed to branch `Prisma-ORM-Setup`
 - [ ] All documentation files included
 - [ ] README updated with Prisma section
 - [ ] .env.example provided (not actual .env)
 
 ### Submission Document
+
 - [ ] Title and introduction
 - [ ] Table of contents
 - [ ] Each deliverable addressed
@@ -288,6 +315,7 @@ Ensure you cover:
 - [ ] References
 
 ### Optional Extras (Bonus Points)
+
 - [ ] Video walkthrough (2-3 minutes)
 - [ ] Live demo link (deployed)
 - [ ] Additional API endpoints using Prisma
@@ -332,13 +360,14 @@ npm run prisma:seed
 ✅ Evidence provided  
 ✅ Personal reflection included  
 ✅ Links to supporting docs  
-✅ Professional presentation  
+✅ Professional presentation
 
 ---
 
 ## ✨ Final Note
 
 **You have everything you need:**
+
 - ✅ Complete Prisma setup (production-ready)
 - ✅ Comprehensive documentation (2200+ lines)
 - ✅ Test scripts (8 scenarios)

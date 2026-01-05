@@ -9,6 +9,7 @@
 **Transaction = Multiple database operations that MUST all succeed or all fail together**
 
 ### Real-World Example:
+
 ```
 Imagine transferring money:
 1. Deduct $100 from Account A
@@ -35,7 +36,7 @@ Imagine transferring money:
 ### Example: Create Startup with Vote
 
 ```typescript
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -46,10 +47,10 @@ async function createStartupWithVote() {
       // Operation 1: Create startup
       prisma.startup.create({
         data: {
-          name: 'AI Assistant Pro',
-          slug: 'ai-assistant-pro',
-          tagline: 'Your personal AI helper',
-          description: 'Advanced AI-powered productivity tool',
+          name: "AI Assistant Pro",
+          slug: "ai-assistant-pro",
+          tagline: "Your personal AI helper",
+          description: "Advanced AI-powered productivity tool",
           userId: 1,
           categoryId: 1,
           fundingGoal: 50000,
@@ -66,14 +67,14 @@ async function createStartupWithVote() {
       }),
     ]);
 
-    console.log('✅ Transaction succeeded!');
-    console.log('Created startup:', startup.name);
-    console.log('Created vote:', vote.value);
+    console.log("✅ Transaction succeeded!");
+    console.log("Created startup:", startup.name);
+    console.log("Created vote:", vote.value);
 
     return { startup, vote };
   } catch (error) {
-    console.error('❌ Transaction failed - all operations rolled back');
-    console.error('Error:', error);
+    console.error("❌ Transaction failed - all operations rolled back");
+    console.error("Error:", error);
     throw error;
   }
 }
@@ -83,6 +84,7 @@ createStartupWithVote();
 ```
 
 **What happens:**
+
 - ✅ Both startup AND vote are created
 - ❌ OR neither is created (if any operation fails)
 - 🔄 Automatic rollback on failure
@@ -122,7 +124,7 @@ async function createStartupWithEngagement(
       // Step 2: Create initial comment (uses startup.id from step 1)
       const comment = await tx.comment.create({
         data: {
-          content: 'Excited to launch this project!',
+          content: "Excited to launch this project!",
           userId,
           startupId: startup.id, // ← Uses result from step 1
         },
@@ -153,26 +155,27 @@ async function createStartupWithEngagement(
       return { startup: updatedStartup, comment, bookmark };
     });
 
-    console.log('🎉 Transaction completed successfully!');
+    console.log("🎉 Transaction completed successfully!");
     return result;
   } catch (error) {
-    console.error('❌ Transaction failed - all operations rolled back');
-    console.error('Error:', error);
+    console.error("❌ Transaction failed - all operations rolled back");
+    console.error("Error:", error);
     throw error;
   }
 }
 
 // Run it
 createStartupWithEngagement(1, {
-  name: 'HealthTrack Pro',
-  slug: 'healthtrack-pro',
-  tagline: 'Track your health metrics',
-  description: 'Comprehensive health monitoring platform',
+  name: "HealthTrack Pro",
+  slug: "healthtrack-pro",
+  tagline: "Track your health metrics",
+  description: "Comprehensive health monitoring platform",
   categoryId: 4, // HealthTech
 });
 ```
 
 **Why interactive transaction?**
+
 - Each step uses results from previous steps
 - `startup.id` is needed for comment and bookmark
 - All 4 operations are atomic (all or nothing)
@@ -187,17 +190,17 @@ createStartupWithEngagement(1, {
 
 ```typescript
 async function demonstrateRollback() {
-  console.log('🧪 Testing transaction rollback...\n');
+  console.log("🧪 Testing transaction rollback...\n");
 
   try {
     await prisma.$transaction(async (tx) => {
       // Step 1: Create a startup (will succeed)
       const startup = await tx.startup.create({
         data: {
-          name: 'Test Startup',
-          slug: 'test-startup-' + Date.now(), // Unique slug
-          tagline: 'Testing rollback',
-          description: 'This startup should not persist',
+          name: "Test Startup",
+          slug: "test-startup-" + Date.now(), // Unique slug
+          tagline: "Testing rollback",
+          description: "This startup should not persist",
           userId: 1,
           categoryId: 1,
           fundingGoal: 10000,
@@ -220,9 +223,9 @@ async function demonstrateRollback() {
       // Step 3: INTENTIONALLY FAIL (duplicate email - violates unique constraint)
       const user = await tx.user.create({
         data: {
-          email: 'alice@example.com', // ← Already exists in database!
-          name: 'Duplicate Alice',
-          password: 'hashed_password',
+          email: "alice@example.com", // ← Already exists in database!
+          name: "Duplicate Alice",
+          password: "hashed_password",
         },
       });
 
@@ -231,14 +234,14 @@ async function demonstrateRollback() {
       return { startup, vote, user };
     });
 
-    console.log('🎉 Transaction completed (this should NOT print)');
+    console.log("🎉 Transaction completed (this should NOT print)");
   } catch (error) {
-    console.error('\n❌ Transaction failed as expected!');
-    console.error('Error message:', error.message);
-    console.log('\n🔄 ROLLBACK occurred:');
-    console.log('   ├─ Startup was NOT created (rolled back)');
-    console.log('   ├─ Vote was NOT created (rolled back)');
-    console.log('   └─ Database state unchanged ✅');
+    console.error("\n❌ Transaction failed as expected!");
+    console.error("Error message:", error.message);
+    console.log("\n🔄 ROLLBACK occurred:");
+    console.log("   ├─ Startup was NOT created (rolled back)");
+    console.log("   ├─ Vote was NOT created (rolled back)");
+    console.log("   └─ Database state unchanged ✅");
   }
 }
 
@@ -247,6 +250,7 @@ demonstrateRollback();
 ```
 
 **Output:**
+
 ```
 🧪 Testing transaction rollback...
 
@@ -263,6 +267,7 @@ Error message: Unique constraint failed on the fields: (`email`)
 ```
 
 **What happened:**
+
 1. Startup created ✅
 2. Vote created ✅
 3. User creation failed ❌ (duplicate email)
@@ -274,6 +279,7 @@ Error message: Unique constraint failed on the fields: (`email`)
 ## 4️⃣ Real-World Use Case: Upvote with Counter Update
 
 **Problem:** When a user upvotes a startup, we need to:
+
 1. Create a vote record
 2. Increment the startup's voteCount
 3. Both MUST succeed or both MUST fail
@@ -301,6 +307,7 @@ async function upvoteStartupDangerous(userId: number, startupId: number) {
 ```
 
 **Problem:**
+
 - If Step 2 fails, we have a vote record but counter is wrong
 - Database is in inconsistent state
 - Very hard to fix!
@@ -326,11 +333,11 @@ async function upvoteStartupSafe(userId: number, startupId: number) {
       return { vote, startup };
     });
 
-    console.log('✅ Upvote successful!');
+    console.log("✅ Upvote successful!");
     console.log(`Vote count is now: ${result.startup.voteCount}`);
     return result;
   } catch (error) {
-    console.error('❌ Upvote failed - no changes made');
+    console.error("❌ Upvote failed - no changes made");
     throw error;
   }
 }
@@ -340,6 +347,7 @@ upvoteStartupSafe(2, 1);
 ```
 
 **Benefits:**
+
 - Both operations succeed together ✅
 - Or both fail together ✅
 - Database always consistent ✅
@@ -430,21 +438,21 @@ async function createStartupComplete(input: CreateStartupInput) {
       };
     });
 
-    console.log('\n🎉 Complete startup setup successful!');
+    console.log("\n🎉 Complete startup setup successful!");
     return result;
   } catch (error) {
-    console.error('\n❌ Startup creation failed - all operations rolled back');
-    console.error('Error:', error);
+    console.error("\n❌ Startup creation failed - all operations rolled back");
+    console.error("Error:", error);
     throw error;
   }
 }
 
 // Run it
 createStartupComplete({
-  name: 'EcoTracker',
-  slug: 'ecotracker',
-  tagline: 'Track your carbon footprint',
-  description: 'Help save the planet by monitoring your environmental impact',
+  name: "EcoTracker",
+  slug: "ecotracker",
+  tagline: "Track your carbon footprint",
+  description: "Help save the planet by monitoring your environmental impact",
   userId: 1,
   categoryId: 1,
   tagIds: [1, 2, 3], // SaaS, AI, Sustainability tags
@@ -453,6 +461,7 @@ createStartupComplete({
 ```
 
 **Output:**
+
 ```
 ✅ Created startup: EcoTracker
 ✅ Added 3 tags
@@ -464,6 +473,7 @@ createStartupComplete({
 ```
 
 **If ANY step fails:**
+
 ```
 ❌ Startup creation failed - all operations rolled back
 
@@ -493,14 +503,14 @@ async function safeTransaction() {
     return result;
   } catch (error) {
     console.error('❌ Transaction failed:', error.message);
-    
+
     // Log for debugging
     if (error.code === 'P2002') {
       console.error('Unique constraint violation');
     } else if (error.code === 'P2003') {
       console.error('Foreign key constraint violation');
     }
-    
+
     throw error; // Re-throw for caller to handle
   }
 }
@@ -521,10 +531,10 @@ async function transactionWithErrorReturn(userId: number, startupId: number) {
 
     return { success: true, data: result };
   } catch (error) {
-    return { 
-      success: false, 
+    return {
+      success: false,
       error: error.message,
-      code: error.code 
+      code: error.code,
     };
   }
 }
@@ -532,9 +542,9 @@ async function transactionWithErrorReturn(userId: number, startupId: number) {
 // Usage
 const result = await transactionWithErrorReturn(1, 1);
 if (result.success) {
-  console.log('Vote created:', result.data);
+  console.log("Vote created:", result.data);
 } else {
-  console.error('Failed:', result.error);
+  console.error("Failed:", result.error);
 }
 ```
 
@@ -582,25 +592,30 @@ if (result.success) {
 ## 🎯 Key Takeaways
 
 ✅ **Transactions = Atomic Operations**
+
 - All succeed or all fail
 - No partial writes
 - Database consistency guaranteed
 
 ✅ **Two Transaction Styles**
+
 - Array: `prisma.$transaction([op1, op2])`
 - Interactive: `prisma.$transaction(async (tx) => {...})`
 
 ✅ **Automatic Rollback**
+
 - Any error → entire transaction rolled back
 - No manual cleanup needed
 - Database returns to original state
 
 ✅ **Error Handling Required**
+
 - Always use try-catch
 - Log errors for debugging
 - Re-throw or return error object
 
 ✅ **Use tx Parameter**
+
 - Inside interactive transaction, use `tx` not `prisma`
 - `tx.model.create()` not `prisma.model.create()`
 - Ensures operation is part of transaction
@@ -612,32 +627,32 @@ if (result.success) {
 ### Test File: `test-transactions.ts`
 
 ```typescript
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function runAllTests() {
-  console.log('🧪 Running transaction tests...\n');
+  console.log("🧪 Running transaction tests...\n");
 
   // Test 1: Successful transaction
-  console.log('Test 1: Successful transaction');
+  console.log("Test 1: Successful transaction");
   await createStartupWithEngagement(1, {
-    name: 'Test Success',
-    slug: 'test-success-' + Date.now(),
-    tagline: 'Should succeed',
-    description: 'Testing successful transaction',
+    name: "Test Success",
+    slug: "test-success-" + Date.now(),
+    tagline: "Should succeed",
+    description: "Testing successful transaction",
     categoryId: 1,
   });
 
   // Test 2: Failed transaction (rollback)
-  console.log('\nTest 2: Failed transaction (rollback)');
+  console.log("\nTest 2: Failed transaction (rollback)");
   await demonstrateRollback();
 
   // Test 3: Upvote with counter
-  console.log('\nTest 3: Upvote with counter');
+  console.log("\nTest 3: Upvote with counter");
   await upvoteStartupSafe(1, 1);
 
-  console.log('\n✅ All tests complete!');
+  console.log("\n✅ All tests complete!");
   await prisma.$disconnect();
 }
 
@@ -645,6 +660,7 @@ runAllTests().catch(console.error);
 ```
 
 **Run tests:**
+
 ```bash
 npx tsx test-transactions.ts
 ```
@@ -654,6 +670,6 @@ npx tsx test-transactions.ts
 **Assignment:** Kalvium Concept 2.16  
 **Topic:** Transactions  
 **Status:** ✅ Examples Complete  
-**Next:** Query Optimisation  
+**Next:** Query Optimisation
 
 Good luck! 🚀

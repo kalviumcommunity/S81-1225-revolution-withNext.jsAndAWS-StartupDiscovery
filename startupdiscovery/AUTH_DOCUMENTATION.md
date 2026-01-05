@@ -3,6 +3,7 @@
 ## Overview
 
 This document explains the implementation of secure user authentication using:
+
 - **bcrypt** for password hashing
 - **JWT (JSON Web Tokens)** for token-based sessions
 - **Prisma ORM** for database operations
@@ -45,25 +46,32 @@ Core functions for password and token management:
 
 ```typescript
 // Password Hashing
-export async function hashPassword(password: string): Promise<string>
+export async function hashPassword(password: string): Promise<string>;
 // Cost factor of 10 provides good security/performance balance
 // Example: "myPassword123" → "$2b$10$..."
 
 // Password Verification
-export async function comparePassword(password: string, hashedPassword: string): Promise<boolean>
+export async function comparePassword(
+  password: string,
+  hashedPassword: string
+): Promise<boolean>;
 // Returns true if password matches the hash
 
 // JWT Token Generation
-export function generateToken(userId: number, email: string): string
+export function generateToken(userId: number, email: string): string;
 // Creates HS256-signed token with 7-day expiry
 // Payload: { userId, email, iat }
 
 // JWT Token Verification
-export function verifyToken(token: string): { userId: number; email: string } | null
+export function verifyToken(
+  token: string
+): { userId: number; email: string } | null;
 // Returns decoded token data or null if invalid/expired
 
 // Authorization Header Processing
-export function validateAuthHeader(authHeader: string | null): { userId: number; email: string } | null
+export function validateAuthHeader(
+  authHeader: string | null
+): { userId: number; email: string } | null;
 // Extracts and validates Bearer token from header
 ```
 
@@ -78,11 +86,11 @@ export const signupSchema = z.object({
   email: z.string().email(),
   password: z
     .string()
-    .min(8, 'Must be 8+ characters')
-    .regex(/[A-Z]/, 'Must include uppercase')
-    .regex(/[a-z]/, 'Must include lowercase')
-    .regex(/[0-9]/, 'Must include number')
-    .regex(/[!@#$%^&*]/, 'Must include special char'),
+    .min(8, "Must be 8+ characters")
+    .regex(/[A-Z]/, "Must include uppercase")
+    .regex(/[a-z]/, "Must include lowercase")
+    .regex(/[0-9]/, "Must include number")
+    .regex(/[!@#$%^&*]/, "Must include special char"),
   age: z.number().int().positive().optional(),
 });
 
@@ -98,6 +106,7 @@ export const loginSchema = z.object({
 **POST** request to create a new user account.
 
 **Request Body:**
+
 ```json
 {
   "name": "Alice Johnson",
@@ -108,6 +117,7 @@ export const loginSchema = z.object({
 ```
 
 **Success Response (201 Created):**
+
 ```json
 {
   "success": true,
@@ -129,6 +139,7 @@ export const loginSchema = z.object({
 ```
 
 **Validation Error Response (400 Bad Request):**
+
 ```json
 {
   "success": false,
@@ -144,6 +155,7 @@ export const loginSchema = z.object({
 ```
 
 **Duplicate Email Response (409 Conflict):**
+
 ```json
 {
   "success": false,
@@ -159,6 +171,7 @@ export const loginSchema = z.object({
 **POST** request to authenticate and receive JWT token.
 
 **Request Body:**
+
 ```json
 {
   "email": "alice@example.com",
@@ -167,6 +180,7 @@ export const loginSchema = z.object({
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -187,6 +201,7 @@ export const loginSchema = z.object({
 ```
 
 **Invalid Credentials Response (401 Unauthorized):**
+
 ```json
 {
   "success": false,
@@ -202,17 +217,20 @@ export const loginSchema = z.object({
 All user endpoints require JWT authentication via the `Authorization` header.
 
 **Request Header:**
+
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 **GET /api/users** - List all users (requires authentication)
+
 ```bash
 curl -X GET http://localhost:3000/api/users \
   -H "Authorization: Bearer <JWT_TOKEN>"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -241,6 +259,7 @@ curl -X GET http://localhost:3000/api/users \
 ```
 
 **Missing/Invalid Token Response (401 Unauthorized):**
+
 ```json
 {
   "success": false,
@@ -254,11 +273,13 @@ curl -X GET http://localhost:3000/api/users \
 ## JWT Token Structure
 
 ### Token Format
+
 ```
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWxpY2VAZXhhbXBsZS5jb20iLCJpYXQiOjE3MDQzNjQ2MDB9.signature
 ```
 
 ### Decoded Payload
+
 ```json
 {
   "userId": 1,
@@ -269,6 +290,7 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWxpY2VAZXhhbXB
 ```
 
 ### Token Properties
+
 - **Header**: `{ "alg": "HS256", "typ": "JWT" }`
 - **Payload**: Contains userId, email, issued-at time (iat), expiration time (exp)
 - **Signature**: HMAC-SHA256 hash of header + payload + secret key
@@ -278,24 +300,28 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWxpY2VAZXhhbXB
 ## Security Features
 
 ### 1. Password Security
+
 - **Bcrypt Hashing**: Cost factor of 10 (2^10 iterations)
 - **Salting**: Automatically included in bcrypt
 - **Never Store Plain Text**: All passwords hashed before database storage
 - **Timing Attack Resistant**: bcrypt comparison is constant-time
 
 ### 2. Token Security
+
 - **JWT Signature**: Prevents tampering (signature verification required)
 - **Expiration**: Tokens expire after 7 days
 - **Payload Verification**: Signature is validated on each request
 - **Secret Key**: Should be long, random, stored in environment variables
 
 ### 3. Input Validation
+
 - **Email Format**: RFC 5322 compliant validation
 - **Password Strength**: Minimum 8 characters with mixed case, numbers, and symbols
 - **SQL Injection Prevention**: Prisma parameterized queries
 - **XSS Prevention**: JSON response encoding
 
 ### 4. Authorization
+
 - **Role-Based Access Control**: USER, ADMIN, MODERATOR roles
 - **User Isolation**: Users can only access their own data
 - **Permission Checks**: Role validation before sensitive operations
@@ -317,6 +343,7 @@ NODE_ENV=development
 ```
 
 **Important**: In production, generate a strong secret key:
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
@@ -329,15 +356,16 @@ Tokens are issued with a 7-day expiration. After expiration, users must log in a
 
 ```javascript
 // Token issued with expiry
-jwt.sign(payload, secret, { expiresIn: '7d' })
+jwt.sign(payload, secret, { expiresIn: "7d" });
 
 // On verification, JWT library automatically checks expiration
-jwt.verify(token, secret) // Throws if expired
+jwt.verify(token, secret); // Throws if expired
 ```
 
 ### Recommended Enhancements
 
 #### 1. Refresh Token Pattern
+
 ```typescript
 // Issue both access and refresh tokens
 {
@@ -350,11 +378,13 @@ jwt.verify(token, secret) // Throws if expired
 ```
 
 **Advantages:**
+
 - Access tokens are short-lived (reduces compromise window)
 - Refresh tokens are long-lived but limited to refresh operations
 - Users stay logged in for longer without frequent logins
 
 #### 2. Token Rotation
+
 ```typescript
 // On each refresh, issue new refresh token too
 // Invalidate old refresh token
@@ -362,6 +392,7 @@ jwt.verify(token, secret) // Throws if expired
 ```
 
 #### 3. Token Blacklisting
+
 ```typescript
 // On logout, add token to blacklist (Redis recommended)
 // Check blacklist before allowing token use
@@ -373,9 +404,13 @@ jwt.verify(token, secret) // Throws if expired
 ### Browser Storage Options
 
 #### Option 1: Secure HTTP-Only Cookies (Recommended)
+
 ```javascript
 // Server sets cookie (not accessible from JavaScript)
-res.setHeader('Set-Cookie', `token=${jwtToken}; HttpOnly; Secure; SameSite=Strict; Max-Age=604800`);
+res.setHeader(
+  "Set-Cookie",
+  `token=${jwtToken}; HttpOnly; Secure; SameSite=Strict; Max-Age=604800`
+);
 
 // Pros: Immune to XSS attacks
 // Cons: Must handle CSRF protection
@@ -383,9 +418,10 @@ res.setHeader('Set-Cookie', `token=${jwtToken}; HttpOnly; Secure; SameSite=Stric
 ```
 
 #### Option 2: localStorage
+
 ```javascript
-localStorage.setItem('token', jwtToken);
-const token = localStorage.getItem('token');
+localStorage.setItem("token", jwtToken);
+const token = localStorage.getItem("token");
 
 // Pros: Simple to implement, persists across tabs
 // Cons: Vulnerable to XSS attacks
@@ -393,9 +429,10 @@ const token = localStorage.getItem('token');
 ```
 
 #### Option 3: sessionStorage
+
 ```javascript
-sessionStorage.setItem('token', jwtToken);
-const token = sessionStorage.getItem('token');
+sessionStorage.setItem("token", jwtToken);
+const token = sessionStorage.getItem("token");
 
 // Pros: Cleared on tab close, simple to implement
 // Cons: Vulnerable to XSS, not persisted
@@ -403,6 +440,7 @@ const token = sessionStorage.getItem('token');
 ```
 
 #### Option 4: Memory Variable
+
 ```javascript
 let jwtToken = null;
 
@@ -412,6 +450,7 @@ let jwtToken = null;
 ```
 
 ### Recommendation for Production
+
 - **Client**: Store in secure HTTP-only cookies
 - **Server**: Maintain refresh token in database
 - **Validation**: Check token signature + database record + expiration
@@ -424,6 +463,7 @@ let jwtToken = null;
 **Problem**: JWT token exposed (GitHub repo, logs, browser tools)
 
 **Current System Response**:
+
 ```javascript
 // Token is valid until expiration (7 days)
 // No immediate way to revoke it
@@ -431,6 +471,7 @@ let jwtToken = null;
 ```
 
 **Recommended Improvements**:
+
 ```typescript
 // 1. Short-lived access tokens
 // Tokens expire in 1 hour, reducing compromise window
@@ -459,6 +500,7 @@ let jwtToken = null;
 **Problem**: User loses connection, comes back, token expired
 
 **Current System Response**:
+
 ```typescript
 // API returns 401 Unauthorized
 // User must log in again
@@ -466,6 +508,7 @@ let jwtToken = null;
 ```
 
 **Recommended Solution with Refresh Tokens**:
+
 ```typescript
 // Client receives 401 for access token
 // Client automatically uses refresh token to get new access token
@@ -485,6 +528,7 @@ Response: { accessToken: "new-jwt", refreshToken: "new-refresh" }
 **Problem**: User logs in on multiple devices, wants to log out of one
 
 **Current System Response**:
+
 ```typescript
 // Logout only clears client-side token
 // Token still valid until expiration
@@ -492,6 +536,7 @@ Response: { accessToken: "new-jwt", refreshToken: "new-refresh" }
 ```
 
 **Recommended Solution**:
+
 ```typescript
 // Store sessions in database
 model Session {
@@ -519,6 +564,7 @@ DELETE /api/auth/sessions/{id}
 **Problem**: User changes password, but existing tokens remain valid
 
 **Recommended Solution**:
+
 ```typescript
 // 1. Invalidate all existing tokens on password change
 DELETE all sessions for user
@@ -558,6 +604,7 @@ POST /api/auth/verify-session
 ### 1. Manual Testing with cURL
 
 **Test Signup:**
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/signup \
   -H "Content-Type: application/json" \
@@ -569,6 +616,7 @@ curl -X POST http://localhost:3000/api/auth/signup \
 ```
 
 **Test Login:**
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -579,6 +627,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 ```
 
 **Test Protected Route:**
+
 ```bash
 curl -X GET http://localhost:3000/api/users \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
@@ -591,19 +640,23 @@ See `test-auth.ps1` for comprehensive test suite.
 ## Troubleshooting
 
 ### "Invalid JWT"
+
 - Verify JWT_SECRET matches across restarts
 - Check token expiration date
 - Ensure Authorization header format: `Bearer <token>`
 
 ### "Email already exists"
+
 - User already registered
 - Try different email or login instead
 
 ### "Password must contain..."
+
 - Password doesn't meet complexity requirements
 - Must be 8+ chars with uppercase, lowercase, number, special char
 
 ### "Unauthorized"
+
 - Token missing from Authorization header
 - Token is invalid or expired
 - Must log in again

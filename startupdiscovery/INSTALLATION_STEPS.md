@@ -52,6 +52,7 @@ DATABASE_URL="postgresql://user:password@host:5432/database?schema=public"
 ```
 
 **For Docker PostgreSQL:**
+
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/startupdiscovery?schema=public"
 ```
@@ -156,26 +157,31 @@ startupdiscovery/
 ## 🎯 What Each File Does
 
 ### `prisma/schema.prisma`
+
 - Defines database structure (tables, columns, relations)
 - Source of truth for your data model
 - Used to generate TypeScript types
 
 ### `lib/prisma.ts`
+
 - Singleton Prisma Client instance
 - Prevents "too many connections" in development
 - Import this in your code: `import prisma from '@/lib/prisma'`
 
 ### `prisma/seed.ts`
+
 - Populates database with demo data
 - Useful for testing and development
 - Creates users, startups, categories, tags, comments, etc.
 
 ### `scripts/test-db.ts`
+
 - Comprehensive test suite
 - Verifies database connection
 - Shows complex query examples
 
 ### `scripts/quick-test.ts`
+
 - Quick sanity check
 - Confirms basic functionality
 - Good for CI/CD pipelines
@@ -209,11 +215,13 @@ npx prisma generate        # Generate client (build step)
 ### Error: "Can't reach database server"
 
 **Solution 1:** Check DATABASE_URL in `.env`
+
 ```bash
 cat .env | grep DATABASE_URL
 ```
 
 **Solution 2:** Ensure PostgreSQL is running
+
 ```bash
 # Check if running
 docker ps  # if using Docker
@@ -225,6 +233,7 @@ sudo systemctl start postgresql  # Linux
 ```
 
 **Solution 3:** Test connection manually
+
 ```bash
 psql -h localhost -U postgres -d startupdiscovery
 ```
@@ -262,36 +271,42 @@ npx prisma generate
 Capture these screenshots:
 
 ### 1. Schema File
+
 ```bash
 # Show your schema.prisma
 cat prisma/schema.prisma | head -50
 ```
 
 ### 2. Successful Migration
+
 ```bash
 npx prisma migrate dev --name init
 # Screenshot the terminal output
 ```
 
 ### 3. Prisma Studio
+
 ```bash
 npx prisma studio
 # Screenshot browser at localhost:5555 showing tables with data
 ```
 
 ### 4. Test Output
+
 ```bash
 npx tsx scripts/test-db.ts
 # Screenshot showing all tests passing
 ```
 
 ### 5. Sample Query
+
 ```bash
 npx tsx scripts/quick-test.ts
 # Screenshot showing data being fetched
 ```
 
 ### 6. VSCode IntelliSense
+
 - Open any file that imports prisma
 - Type `prisma.` and show autocomplete
 - Demonstrates type safety
@@ -336,17 +351,20 @@ npx prisma studio
 Include in your submission:
 
 ✅ Screenshots of:
+
 - Migration success
 - Prisma Studio with data
 - Test script output
 - VSCode autocomplete
 
 ✅ Documentation:
+
 - Link to PRISMA_SETUP_GUIDE.md
 - Link to DATABASE_SCHEMA_VISUAL.md
 - Link to your code using Prisma (API routes, etc.)
 
 ✅ Reflection (in PRISMA_SETUP_GUIDE.md):
+
 - What you learned
 - Benefits of Prisma
 - Challenges faced
@@ -359,10 +377,11 @@ Include in your submission:
 After setup is complete:
 
 1. **Use Prisma in API Routes**
+
    ```typescript
    // app/api/startups/route.ts
-   import prisma from '@/lib/prisma';
-   
+   import prisma from "@/lib/prisma";
+
    export async function GET() {
      const startups = await prisma.startup.findMany();
      return Response.json(startups);

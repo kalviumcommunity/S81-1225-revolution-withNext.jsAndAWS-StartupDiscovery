@@ -5,6 +5,7 @@
 **Important:** This document describes security fixes based on a legacy token whitelist approach. The current implementation has been migrated to industry-standard JWT (JSON Web Token) authentication with bcrypt password hashing. This document is maintained for historical reference only.
 
 **Current Authentication System:**
+
 - ✅ bcrypt password hashing (cost factor 10)
 - ✅ JWT token generation (HS256 signature)
 - ✅ Token expiration (7 days)
@@ -18,16 +19,19 @@ For current security documentation, see [README_AUTHENTICATION.md](./README_AUTH
 ## Legacy Vulnerabilities Fixed (Historical Context)
 
 ### 1. Authentication Bypass (Bearer Token Forgery)
+
 **Status:** SUPERSEDED - Now using JWT with signature verification  
 **Previous Issue:** Tokens were parsed using simple string splitting without any verification
+
 ```javascript
 // BEFORE (Vulnerable):
-const [userIdStr, role] = token.split(':');
+const [userIdStr, role] = token.split(":");
 const userId = parseInt(userIdStr, 10);
 // Any token in format "123:admin" would be accepted
 ```
 
 **Fix:** Implemented whitelist-based token validation
+
 ```javascript
 // AFTER (Secure):
 const validatedToken = validateToken(token);
@@ -37,6 +41,7 @@ if (!validatedToken) {
 ```
 
 **Implementation:** `lib/tokenValidator.ts`
+
 - Maintains a whitelist of valid tokens
 - Returns null for any token not in the whitelist
 - Prevents arbitrary token forgery (e.g., "999:admin")
@@ -46,25 +51,29 @@ if (!validatedToken) {
 ---
 
 ### 2. Unauthorized Role Assignment
+
 **Severity:** CRITICAL  
 **Issue:** Users could assign themselves admin roles during account creation
+
 ```javascript
 // BEFORE (Vulnerable):
 const newUser = {
   id: nextId++,
   name: data.name,
   email: data.email,
-  role: data.role,  // User could set role directly!
+  role: data.role, // User could set role directly!
   age: data.age,
 };
 ```
 
 **Fix:** Multiple layers of protection:
+
 1. Removed role field from `userCreateSchema`
 2. Default all new users to 'user' role
 3. Only admins can change roles via PUT endpoint
 
 **Changes:**
+
 - `lib/schemas/userSchema.ts`: Removed role enum from userCreateSchema
 - `app/api/users/route.ts`: Default role assignment and admin-only role updates
 
@@ -73,15 +82,18 @@ const newUser = {
 ---
 
 ### 3. Missing Token Signature Verification
+
 **Severity:** HIGH  
 **Issue:** No cryptographic validation of token authenticity
 
 **Fix:** Implemented secure token validation pattern
+
 - Whitelist approach validates tokens against known valid tokens
 - In production: Should use JWT with HMAC signature verification
 - Current implementation: Prevents token forgery through whitelist
 
 **Code:**
+
 ```javascript
 export function validateToken(token: string): { userId: number; role: string } | null {
   if (VALID_TOKENS[token]) {
@@ -94,17 +106,20 @@ export function validateToken(token: string): { userId: number; role: string } |
 ---
 
 ### 4. Error Information Leakage
+
 **Severity:** MEDIUM  
 **Issue:** Validation errors exposed full schema structure
+
 ```javascript
 // BEFORE (Vulnerable):
 errors: error.errors.map((e) => ({
-  field: e.path.join('.'),  // Would expose "data.user.profile.email"
+  field: e.path.join("."), // Would expose "data.user.profile.email"
   message: e.message,
-}))
+}));
 ```
 
 **Fix:** Sanitized error responses to hide schema structure
+
 ```javascript
 // AFTER (Secure):
 errors: error.issues.map((e: any) => ({
@@ -122,9 +137,11 @@ errors: error.issues.map((e: any) => ({
 ## Files Modified
 
 ### New Files Created
+
 - `lib/tokenValidator.ts` - Token validation and role hierarchy checking
 
 ### Files Updated
+
 1. **app/api/users/route.ts**
    - Updated checkAuth() to use validateToken()
    - Changed role assignment to default 'user' and admin-only updates
@@ -151,7 +168,9 @@ errors: error.issues.map((e: any) => ({
 ## Security Features Implemented
 
 ### 1. Token Validation Whitelist
+
 Located in `lib/tokenValidator.ts`:
+
 ```javascript
 const VALID_TOKENS: Record<string, { userId: number; role: string }> = {
   '1:user': { userId: 1, role: 'user' },
@@ -163,6 +182,7 @@ const VALID_TOKENS: Record<string, { userId: number; role: string }> = {
 ```
 
 ### 2. Role Hierarchy Checking
+
 ```javascript
 export function hasRole(userRole: string, requiredRole: string): boolean {
   const roleHierarchy = { admin: 3, moderator: 2, user: 1 };
@@ -173,12 +193,14 @@ export function hasRole(userRole: string, requiredRole: string): boolean {
 ```
 
 ### 3. Server-Side Role Assignment
+
 - Users cannot specify role during creation
 - Default role is always 'user'
 - Only admin users can change roles
 - Changes validated on every request
 
 ### 4. Error Sanitization
+
 - Validation errors show only field names
 - No exposure of internal schema structure
 - Prevents attackers from learning API structure
@@ -188,12 +210,14 @@ export function hasRole(userRole: string, requiredRole: string): boolean {
 ## Testing the Fixes
 
 ### Run Security Test Suite
+
 ```bash
 cd path/to/project
 .\test-security-fixes.ps1
 ```
 
 ### Tests Performed
+
 1. **Valid Token Test**: Confirms authorized requests work
 2. **Forged Token Test**: Confirms "999:admin" tokens are rejected
 3. **Invalid Token Format Test**: Confirms malformed tokens are rejected

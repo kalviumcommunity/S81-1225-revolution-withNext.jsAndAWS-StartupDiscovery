@@ -26,6 +26,7 @@ npx prisma migrate status
 ```
 
 **Expected Output:**
+
 ```
 Environment variables loaded from .env
 Prisma schema loaded from prisma/schema.prisma
@@ -38,11 +39,13 @@ Migrations pending:
 ```
 
 **Evidence Screenshot 1/8 - Migration Status**
+
 - Take screenshot of terminal showing above output
 - Shows migration has been applied
 - Proves database is connected
 
 **What to look for:**
+
 - ✅ "Following migrations have been applied"
 - ✅ At least one migration listed (20231227044526_init)
 - ✅ "Migrations pending: None"
@@ -58,6 +61,7 @@ npx prisma db seed
 ```
 
 **Expected Output:**
+
 ```
 🌱 Starting database seed...
 
@@ -106,12 +110,14 @@ npx prisma db seed
 ```
 
 **Evidence Screenshot 2/8 - Seed Script Output**
+
 - Take screenshot of complete terminal output
 - Should show all ✅ marks
 - Should show success message
 - Should show data summary
 
 **What to look for:**
+
 - ✅ No error messages
 - ✅ All entities created
 - ✅ "Database seeding completed successfully!"
@@ -131,13 +137,14 @@ Then navigate to Users table in browser (http://localhost:5555)
 
 **Expected Data:**
 
-| Email | Name | Role |
-|-------|------|------|
-| alice@example.com | Alice | FOUNDER |
-| bob@example.com | Bob | INVESTOR |
-| admin@example.com | Admin | ADMIN |
+| Email             | Name  | Role     |
+| ----------------- | ----- | -------- |
+| alice@example.com | Alice | FOUNDER  |
+| bob@example.com   | Bob   | INVESTOR |
+| admin@example.com | Admin | ADMIN    |
 
 **Evidence Screenshot 3/8 - Users Table in Studio**
+
 - Open Prisma Studio
 - Click on "User" table
 - Take screenshot showing:
@@ -147,6 +154,7 @@ Then navigate to Users table in browser (http://localhost:5555)
   - No duplicate rows
 
 **What to look for:**
+
 - ✅ Exactly 3 user records
 - ✅ Unique email addresses
 - ✅ Names populated (Alice, Bob, Admin)
@@ -166,12 +174,13 @@ Then navigate to Users table in browser (http://localhost:5555)
 
 **Expected Data:**
 
-| Name | Slug | Founder |
-|------|------|---------|
-| CloudSync Pro | cloudsync-pro | alice@example.com |
+| Name           | Slug           | Founder           |
+| -------------- | -------------- | ----------------- |
+| CloudSync Pro  | cloudsync-pro  | alice@example.com |
 | HealthTrack AI | healthtrack-ai | alice@example.com |
 
 **Evidence Screenshot 4/8 - Startups Table in Studio**
+
 - Click "Startup" table in Prisma Studio
 - Take screenshot showing:
   - 2 startups visible
@@ -180,6 +189,7 @@ Then navigate to Users table in browser (http://localhost:5555)
   - View counts and tags visible
 
 **What to look for:**
+
 - ✅ Exactly 2 startup records
 - ✅ Unique slug values
 - ✅ UserId is populated
@@ -198,6 +208,7 @@ Then navigate to Users table in browser (http://localhost:5555)
 ```
 
 **Expected Data:**
+
 1. SaaS
 2. E-commerce
 3. FinTech
@@ -206,6 +217,7 @@ Then navigate to Users table in browser (http://localhost:5555)
 6. B2B
 
 **Evidence Screenshot 5/8 - Categories Table in Studio**
+
 - Click "Category" table
 - Take screenshot showing:
   - 6 categories visible
@@ -214,6 +226,7 @@ Then navigate to Users table in browser (http://localhost:5555)
   - Color codes populated
 
 **What to look for:**
+
 - ✅ Exactly 6 category records
 - ✅ All names visible
 - ✅ Unique slug values
@@ -227,21 +240,25 @@ Then navigate to Users table in browser (http://localhost:5555)
 **What to verify:** Relationship tables properly populated
 
 **Evidence Screenshot 6/8 - Comments Table**
+
 - Click "Comment" table
 - Should show 2 comment records
 - Each linked to a User and Startup
 
 **Evidence Screenshot 7/8 - Votes Table**
+
 - Click "Vote" table
 - Should show 3 vote records
 - Each has userId, startupId, value
 
 **Evidence Screenshot 8/8 - Bookmarks Table**
+
 - Click "Bookmark" table
 - Should show 3 bookmark records
 - Each has userId, startupId
 
 **What to look for in each table:**
+
 - ✅ Data is present
 - ✅ Foreign keys populated
 - ✅ No null values where shouldn't be
@@ -259,6 +276,7 @@ npx prisma db seed
 ```
 
 **Expected Output:**
+
 ```
 🌱 Starting database seed...
 
@@ -278,6 +296,7 @@ npx prisma db seed
 **NO ERRORS** - this proves idempotency!
 
 **What to look for:**
+
 - ✅ No "Unique constraint failed" errors
 - ✅ No "duplicate key" errors
 - ✅ All items show "Created/verified"
@@ -285,6 +304,7 @@ npx prisma db seed
 - ✅ Same data counts as before
 
 **Why this matters:**
+
 - Idempotent = safe to run anytime
 - Don't create duplicates
 - Can run during CI/CD pipeline
@@ -301,6 +321,7 @@ cat prisma/schema.prisma
 ```
 
 **Expected Structure:**
+
 ```prisma
 datasource db {
   provider = "postgresql"
@@ -331,6 +352,7 @@ model Vote {
 ```
 
 **What to look for:**
+
 - ✅ PostgreSQL datasource configured
 - ✅ PrismaClient generator present
 - ✅ All models properly defined
@@ -375,6 +397,7 @@ model Vote {
 ## 🎯 Kalvium Submission Checklist
 
 **Technical Implementation (40%)**
+
 - [ ] Migrations file exists and is tracked in git
 - [ ] Migrations have been applied (verified in step 1)
 - [ ] Seed script runs without errors (verified in step 2)
@@ -383,6 +406,7 @@ model Vote {
 - [ ] Relationships are properly established
 
 **Documentation (30%)**
+
 - [ ] DATABASE_MIGRATIONS_GUIDE.md created (600+ lines)
 - [ ] DATABASE_MIGRATIONS_ASSIGNMENT.md created (5 deliverables)
 - [ ] MIGRATIONS_CHEAT_SHEET.md created (quick reference)
@@ -390,6 +414,7 @@ model Vote {
 - [ ] Code examples provided throughout
 
 **Code Quality (20%)**
+
 - [ ] seed.ts uses upsert/idempotent patterns
 - [ ] Proper error handling implemented
 - [ ] Code is well-commented
@@ -397,6 +422,7 @@ model Vote {
 - [ ] Follows Node.js conventions
 
 **Evidence (10%)**
+
 - [ ] 8 screenshots collected (see above)
 - [ ] Screenshots show working system
 - [ ] Screenshots demonstrate idempotency
@@ -444,6 +470,7 @@ npx prisma db seed
 5. **Name them clearly** - "01-migration-status.png", etc.
 
 **File naming for submission:**
+
 ```
 01-migration-status.png
 02-seed-script-output.png

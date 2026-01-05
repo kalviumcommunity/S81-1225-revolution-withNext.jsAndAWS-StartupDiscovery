@@ -90,13 +90,14 @@ model Startup {
   categoryId  Int
   createdAt   DateTime @default(now())
   voteCount   Int      @default(0)
-  
+
   user        User     @relation(fields: [userId], references: [id])
   category    Category @relation(fields: [categoryId], references: [id])
 }
 ```
 
 **Problem:**
+
 - Queries filtering by `userId` scan entire table
 - Queries filtering by `categoryId` scan entire table
 - Queries sorting by `createdAt` are slow
@@ -113,7 +114,7 @@ model Startup {
   categoryId  Int
   createdAt   DateTime @default(now())
   voteCount   Int      @default(0)
-  
+
   user        User     @relation(fields: [userId], references: [id])
   category    Category @relation(fields: [categoryId], references: [id])
 
@@ -127,6 +128,7 @@ model Startup {
 ```
 
 **Benefits:**
+
 - ✅ Queries by userId are 100x faster
 - ✅ Queries by categoryId are 100x faster
 - ✅ Sorting by createdAt is 50x faster
@@ -353,6 +355,7 @@ npx prisma migrate dev --name add_indexes
 ```
 
 **Expected Output:**
+
 ```
 Environment variables loaded from .env
 Prisma schema loaded from prisma/schema.prisma
@@ -379,6 +382,7 @@ cat prisma/migrations/20251230120000_add_indexes/migration.sql
 ```
 
 **Generated SQL:**
+
 ```sql
 -- CreateIndex
 CREATE INDEX "User_email_idx" ON "User"("email");
@@ -466,10 +470,12 @@ CREATE INDEX "Follow_followingId_idx" ON "Follow"("followingId");
 **SQL:** `CREATE INDEX "Startup_userId_idx" ON "Startup"("userId");`
 
 **Good for:**
+
 - `WHERE userId = 1`
 - `WHERE userId IN (1, 2, 3)`
 
 **Example Query:**
+
 ```typescript
 // Fast (uses index)
 const startups = await prisma.startup.findMany({
@@ -486,15 +492,17 @@ const startups = await prisma.startup.findMany({
 **SQL:** `CREATE INDEX "Startup_userId_createdAt_idx" ON "Startup"("userId", "createdAt");`
 
 **Good for:**
+
 - `WHERE userId = 1 ORDER BY createdAt`
 - `WHERE userId = 1 AND createdAt > '2024-01-01'`
 
 **Example Query:**
+
 ```typescript
 // Fast (uses composite index)
 const startups = await prisma.startup.findMany({
   where: { userId: 1 },
-  orderBy: { createdAt: 'desc' },
+  orderBy: { createdAt: "desc" },
 });
 ```
 
@@ -508,6 +516,7 @@ email String @unique
 `CREATE UNIQUE INDEX "User_email_key" ON "User"("email");`
 
 **Good for:**
+
 - Enforcing uniqueness
 - Fast lookups by email
 
@@ -525,7 +534,7 @@ const startups = await prisma.startup.findMany({
 
 // 2. ORDER BY clauses
 const startups = await prisma.startup.findMany({
-  orderBy: { createdAt: 'desc' }, // ← Uses createdAt index
+  orderBy: { createdAt: "desc" }, // ← Uses createdAt index
 });
 
 // 3. JOIN operations (relations)
@@ -537,7 +546,7 @@ const startups = await prisma.startup.findMany({
 
 // 4. Unique lookups
 const user = await prisma.user.findUnique({
-  where: { email: 'alice@example.com' }, // ← Uses unique index
+  where: { email: "alice@example.com" }, // ← Uses unique index
 });
 
 // 5. Aggregations
@@ -562,10 +571,7 @@ const startups = await prisma.$queryRaw`
 // 3. OR conditions (sometimes)
 const startups = await prisma.startup.findMany({
   where: {
-    OR: [
-      { userId: 1 },
-      { categoryId: 2 },
-    ],
+    OR: [{ userId: 1 }, { categoryId: 2 }],
   },
 });
 // Might not use indexes efficiently
@@ -574,7 +580,7 @@ const startups = await prisma.startup.findMany({
 const startups = await prisma.startup.findMany({
   where: {
     name: {
-      startsWith: '%test', // ← Can't use index
+      startsWith: "%test", // ← Can't use index
     },
   },
 });
@@ -595,6 +601,7 @@ curl http://localhost:3000/api/startups?userId=1
 ```
 
 **Log Output (Before Indexes):**
+
 ```
 prisma:query SELECT * FROM "Startup" WHERE "userId" = 1
 prisma:query Duration: 250ms
@@ -609,6 +616,7 @@ curl http://localhost:3000/api/startups?userId=1
 ```
 
 **Log Output (After Indexes):**
+
 ```
 prisma:query SELECT * FROM "Startup" WHERE "userId" = 1
 prisma:query Duration: 5ms
@@ -622,12 +630,14 @@ prisma:query Rows: 100
 ## 7️⃣ Index Trade-offs
 
 ### Benefits ✅
+
 - **Faster reads** - Queries use indexes instead of full scans
 - **Better sorting** - ORDER BY uses indexes
 - **Faster joins** - Relations use foreign key indexes
 - **Scalability** - Performance stays good as data grows
 
 ### Costs ❌
+
 - **Slower writes** - Every INSERT/UPDATE/DELETE updates indexes
 - **More storage** - Indexes take disk space (~10-20% of table size)
 - **Memory usage** - PostgreSQL caches indexes in memory
@@ -674,6 +684,7 @@ psql postgresql://user:password@localhost:5432/startupdiscovery
 ```
 
 **Output:**
+
 ```
 Indexes:
     "Startup_pkey" PRIMARY KEY, btree (id)
@@ -693,7 +704,7 @@ Indexes:
 
 ```sql
 -- See which indexes are being used
-SELECT 
+SELECT
   schemaname,
   tablename,
   indexname,
@@ -715,6 +726,7 @@ model Startup {
 ```
 
 Then:
+
 ```bash
 npx prisma migrate dev --name remove_unused_index
 ```
@@ -725,15 +737,15 @@ npx prisma migrate dev --name remove_unused_index
 
 ### Indexes Added to StartupDiscovery
 
-| Table | Indexes | Purpose |
-|-------|---------|---------|
-| **User** | email, role, createdAt | Login, filtering, sorting |
-| **Startup** | userId, categoryId, status, createdAt, voteCount + 3 composites | All common queries |
-| **StartupTag** | startupId, tagId | Junction table lookups |
-| **Comment** | startupId, userId, composite | Comments by startup/user |
-| **Vote** | startupId, userId, composite | Vote counts and lookups |
-| **Bookmark** | userId, startupId, composite | User's bookmarks |
-| **Follow** | followerId, followingId | Following relationships |
+| Table          | Indexes                                                         | Purpose                   |
+| -------------- | --------------------------------------------------------------- | ------------------------- |
+| **User**       | email, role, createdAt                                          | Login, filtering, sorting |
+| **Startup**    | userId, categoryId, status, createdAt, voteCount + 3 composites | All common queries        |
+| **StartupTag** | startupId, tagId                                                | Junction table lookups    |
+| **Comment**    | startupId, userId, composite                                    | Comments by startup/user  |
+| **Vote**       | startupId, userId, composite                                    | Vote counts and lookups   |
+| **Bookmark**   | userId, startupId, composite                                    | User's bookmarks          |
+| **Follow**     | followerId, followingId                                         | Following relationships   |
 
 ### Performance Impact
 
@@ -754,6 +766,6 @@ After Indexes:
 **Assignment:** Kalvium Concept 2.16  
 **Topic:** Database Indexes  
 **Status:** ✅ Complete  
-**Next:** Logging & Benchmarking  
+**Next:** Logging & Benchmarking
 
 Good luck! 🚀

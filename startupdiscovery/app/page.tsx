@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from "next/link";
 // import prisma from '@/lib/prisma';
 
 // ✅ Hybrid Rendering (ISR) - Revalidate every 60 seconds
@@ -25,7 +25,7 @@ async function getStartups(): Promise<Startup[]> {
   // Temporarily return empty array to avoid database requirement
   // Database configuration needed for full functionality
   return [];
-  
+
   /* Uncomment when DATABASE_URL is configured
   try {
     const startups = await prisma.startup.findMany({
@@ -73,7 +73,8 @@ export default async function Home() {
             🚀 StartupDiscovery
           </h1>
           <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
-            Discover innovative startups, connect with founders, and explore the next big ideas
+            Discover innovative startups, connect with founders, and explore the
+            next big ideas
           </p>
           <div className="mt-8 flex gap-4 justify-center">
             <Link
@@ -95,10 +96,12 @@ export default async function Home() {
         {startups.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-xl text-zinc-500 dark:text-zinc-400">
-              No startups available yet. Start Docker and run database migrations to see data.
+              No startups available yet. Start Docker and run database
+              migrations to see data.
             </p>
             <code className="mt-4 block text-sm text-zinc-600 dark:text-zinc-400">
-              docker-compose up -d &amp;&amp; npm run prisma:migrate &amp;&amp; npm run prisma:seed
+              docker-compose up -d &amp;&amp; npm run prisma:migrate &amp;&amp;
+              npm run prisma:seed
             </code>
           </div>
         ) : (
@@ -127,7 +130,9 @@ export default async function Home() {
                   </div>
                   <div className="flex flex-col items-center ml-4">
                     <div className="text-2xl">▲</div>
-                    <div className="text-sm font-semibold">{startup.voteCount}</div>
+                    <div className="text-sm font-semibold">
+                      {startup.voteCount}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-sm text-zinc-500 dark:text-zinc-400">
@@ -152,7 +157,8 @@ export default async function Home() {
         {/* ISR Indicator */}
         <div className="mt-16 text-center text-sm text-zinc-500 dark:text-zinc-400">
           <p>
-            ⚡ This page uses <strong>Incremental Static Regeneration (ISR)</strong>
+            ⚡ This page uses{" "}
+            <strong>Incremental Static Regeneration (ISR)</strong>
           </p>
           <p className="mt-1">Data refreshes every 60 seconds automatically</p>
         </div>

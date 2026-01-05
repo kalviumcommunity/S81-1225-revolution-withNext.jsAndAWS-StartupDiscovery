@@ -7,6 +7,7 @@ This project implements a professional-grade RESTful API structure using Next.js
 ## 🎯 Assignment Requirements Completed
 
 ### ✅ 1. API Folder Structure
+
 Created organized API routes under `app/api/` based on project entities:
 
 ```
@@ -21,28 +22,36 @@ app/
 ```
 
 ### ✅ 2. RESTful Endpoints and HTTP Verbs
+
 Each `route.ts` file implements multiple HTTP methods:
+
 - **GET**: Retrieve resources with pagination and filtering
 - **POST**: Create new resources
 - **PUT**: Update existing resources
 - **DELETE**: Remove resources
 
 ### ✅ 3. Pagination, Filtering, and Error Handling
+
 All endpoints include:
+
 - ✅ Pagination parameters (`page`, `limit`)
 - ✅ Resource-specific filters (role, status, priority, budget, etc.)
 - ✅ Comprehensive error responses with meaningful HTTP status codes
 - ✅ Input validation and business rule enforcement
 
 ### ✅ 4. Testing
+
 Created test documentation demonstrating:
+
 - ✅ All endpoints tested with curl examples
 - ✅ Successful and error responses documented
 - ✅ Pagination and filtering verified
 - ✅ 100% test coverage across 21 test cases
 
 ### ✅ 5. Documentation
+
 Comprehensive documentation including:
+
 - ✅ API hierarchy and endpoint listing
 - ✅ HTTP verbs supported by each endpoint
 - ✅ Sample curl/Postman requests
@@ -75,23 +84,27 @@ startupdiscovery/
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 20.x or higher
 - npm or yarn
 
 ### Installation
 
 1. **Clone the Repository**
+
 ```bash
 git clone https://github.com/kalviumcommunity/S81-1225-revolution-withNext.jsAndAWS-StartupDiscovery.git
 cd S81-1225-revolution-withNext.jsAndAWS-StartupDiscovery/startupdiscovery
 ```
 
 2. **Install Dependencies**
+
 ```bash
 npm install
 ```
 
 3. **Start Development Server**
+
 ```bash
 npm run dev
 ```
@@ -101,6 +114,7 @@ The API will be available at `http://localhost:3000`
 ## 📡 API Endpoints
 
 ### Users API (`/api/users`)
+
 - **GET** `/api/users` - Retrieve all users
 - **GET** `/api/users?page=1&limit=10` - Paginated users
 - **GET** `/api/users?role=admin` - Filter by role
@@ -110,6 +124,7 @@ The API will be available at `http://localhost:3000`
 - **DELETE** `/api/users` - Delete user
 
 ### Tasks API (`/api/tasks`)
+
 - **GET** `/api/tasks` - Retrieve all tasks
 - **GET** `/api/tasks?status=in-progress` - Filter by status
 - **GET** `/api/tasks?priority=high` - Filter by priority
@@ -119,6 +134,7 @@ The API will be available at `http://localhost:3000`
 - **DELETE** `/api/tasks` - Delete task
 
 ### Projects API (`/api/projects`)
+
 - **GET** `/api/projects` - Retrieve all projects
 - **GET** `/api/projects?status=active` - Filter by status
 - **GET** `/api/projects?minBudget=40000&maxBudget=60000` - Filter by budget
@@ -130,11 +146,13 @@ The API will be available at `http://localhost:3000`
 ## 📖 Quick Examples
 
 ### Get All Users
+
 ```bash
 curl -X GET http://localhost:3000/api/users
 ```
 
 ### Create a New User
+
 ```bash
 curl -X POST http://localhost:3000/api/users \
   -H "Content-Type: application/json" \
@@ -142,11 +160,13 @@ curl -X POST http://localhost:3000/api/users \
 ```
 
 ### Get Tasks with Filters
+
 ```bash
 curl -X GET "http://localhost:3000/api/tasks?status=in-progress&priority=high"
 ```
 
 ### Update a Project
+
 ```bash
 curl -X PUT http://localhost:3000/api/projects \
   -H "Content-Type: application/json" \
@@ -156,6 +176,7 @@ curl -X PUT http://localhost:3000/api/projects \
 ## 🧪 Testing
 
 ### Run All Tests
+
 ```bash
 # PowerShell
 .\test-api-endpoints.ps1
@@ -166,6 +187,7 @@ curl -X POST http://localhost:3000/api/users -H "Content-Type: application/json"
 ```
 
 ### Test Results
+
 - **Total Tests**: 21
 - **Passed**: 21 ✅
 - **Success Rate**: 100%
@@ -175,23 +197,27 @@ See [API_TEST_RESULTS.md](./API_TEST_RESULTS.md) for detailed test documentation
 ## 📚 Documentation
 
 Detailed documentation is available in:
+
 - **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)** - Complete API reference with all endpoints, parameters, and examples
 - **[API_TEST_RESULTS.md](./API_TEST_RESULTS.md)** - Test verification and results
 
 ## 🎨 Design Principles
 
 ### 1. Consistent Naming Conventions
+
 - ✅ Plural nouns for resource endpoints (`/users`, `/tasks`, `/projects`)
 - ✅ Lowercase with hyphens for multi-word resources
 - ✅ Clear, descriptive names indicating resource type
 
 ### 2. RESTful HTTP Methods
+
 - **GET**: Retrieve resources (read-only, idempotent)
 - **POST**: Create new resources (returns 201 Created)
 - **PUT**: Update existing resources (full update)
 - **DELETE**: Remove resources
 
 ### 3. Proper Status Codes
+
 - `200 OK` - Successful GET, PUT, DELETE
 - `201 Created` - Successful POST
 - `400 Bad Request` - Invalid input
@@ -200,11 +226,13 @@ Detailed documentation is available in:
 - `500 Internal Server Error` - Server-side error
 
 ### 4. Pagination & Filtering
+
 - Default pagination prevents overwhelming responses
 - Flexible filtering options for different use cases
 - Consistent query parameter naming across endpoints
 
 ### 5. Error Handling
+
 - Meaningful error messages
 - Multi-level validation
 - Consistent error response format
@@ -231,6 +259,7 @@ Detailed documentation is available in:
 
 **Example Scenario:**
 When a frontend developer needs to build a user management dashboard:
+
 - They immediately know to call `GET /api/users` for the list
 - They can easily add filters: `?role=admin&page=1&limit=10`
 - Creating a new user is intuitive: `POST /api/users` with the user data
@@ -247,6 +276,7 @@ This consistency reduces back-and-forth communication, decreases bugs, and accel
 ## 🔄 Continuous Improvement
 
 Future enhancements planned:
+
 - [ ] JWT Authentication & Authorization
 - [ ] Rate limiting for API protection
 - [ ] API versioning (`/api/v1/...`)
@@ -273,6 +303,7 @@ Future enhancements planned:
 ## 👨‍💻 Author
 
 **Kalvium S81 Assignment**
+
 - Project: Startup Discovery Platform
 - Assignment: RESTful API Implementation
 - Date: January 5, 2026

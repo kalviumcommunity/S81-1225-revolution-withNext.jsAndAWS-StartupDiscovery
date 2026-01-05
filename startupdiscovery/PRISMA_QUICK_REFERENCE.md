@@ -31,6 +31,7 @@ npx prisma init
 ## 🔄 Common Commands
 
 ### Generate Client
+
 ```bash
 npx prisma generate
 # or
@@ -38,6 +39,7 @@ npm run prisma:generate
 ```
 
 ### Run Migrations
+
 ```bash
 npx prisma migrate dev --name migration_name
 # or
@@ -45,6 +47,7 @@ npm run prisma:migrate
 ```
 
 ### Seed Database
+
 ```bash
 npx prisma db seed
 # or
@@ -52,6 +55,7 @@ npm run prisma:seed
 ```
 
 ### View Data
+
 ```bash
 npx prisma studio
 # or
@@ -59,6 +63,7 @@ npm run prisma:studio
 ```
 
 ### Reset Database (⚠️ Deletes all data)
+
 ```bash
 npx prisma migrate reset
 # or
@@ -70,53 +75,60 @@ npm run prisma:reset
 ## 📝 Query Examples
 
 ### Import Prisma Client
+
 ```typescript
-import prisma from '@/lib/prisma';
+import prisma from "@/lib/prisma";
 ```
 
 ### Find Many
+
 ```typescript
 const users = await prisma.user.findMany({
   where: { isVerified: true },
-  orderBy: { createdAt: 'desc' },
+  orderBy: { createdAt: "desc" },
   take: 10,
 });
 ```
 
 ### Find Unique
+
 ```typescript
 const user = await prisma.user.findUnique({
-  where: { email: 'user@example.com' },
+  where: { email: "user@example.com" },
 });
 ```
 
 ### Find First
+
 ```typescript
 const startup = await prisma.startup.findFirst({
-  where: { status: 'PUBLISHED' },
+  where: { status: "PUBLISHED" },
 });
 ```
 
 ### Create
+
 ```typescript
 const user = await prisma.user.create({
   data: {
-    email: 'newuser@example.com',
-    username: 'newuser',
-    passwordHash: 'hashed_password',
+    email: "newuser@example.com",
+    username: "newuser",
+    passwordHash: "hashed_password",
   },
 });
 ```
 
 ### Update
+
 ```typescript
 const updated = await prisma.user.update({
   where: { id: 1 },
-  data: { name: 'Updated Name' },
+  data: { name: "Updated Name" },
 });
 ```
 
 ### Delete
+
 ```typescript
 await prisma.user.delete({
   where: { id: 1 },
@@ -124,9 +136,10 @@ await prisma.user.delete({
 ```
 
 ### Count
+
 ```typescript
 const count = await prisma.user.count({
-  where: { role: 'ADMIN' },
+  where: { role: "ADMIN" },
 });
 ```
 
@@ -135,6 +148,7 @@ const count = await prisma.user.count({
 ## 🔗 Relations
 
 ### Include Relations
+
 ```typescript
 const startup = await prisma.startup.findUnique({
   where: { id: 1 },
@@ -153,6 +167,7 @@ const startup = await prisma.startup.findUnique({
 ```
 
 ### Select Specific Fields
+
 ```typescript
 const user = await prisma.user.findUnique({
   where: { id: 1 },
@@ -171,6 +186,7 @@ const user = await prisma.user.findUnique({
 ```
 
 ### Count Relations
+
 ```typescript
 const startups = await prisma.startup.findMany({
   include: {
@@ -190,29 +206,25 @@ const startups = await prisma.startup.findMany({
 ## 🔍 Advanced Queries
 
 ### Where Conditions
+
 ```typescript
 const startups = await prisma.startup.findMany({
   where: {
-    AND: [
-      { status: 'PUBLISHED' },
-      { featured: true },
-    ],
-    OR: [
-      { industry: 'SaaS' },
-      { industry: 'FinTech' },
-    ],
+    AND: [{ status: "PUBLISHED" }, { featured: true }],
+    OR: [{ industry: "SaaS" }, { industry: "FinTech" }],
     voteCount: {
       gte: 10,
     },
     title: {
-      contains: 'AI',
-      mode: 'insensitive',
+      contains: "AI",
+      mode: "insensitive",
     },
   },
 });
 ```
 
 ### Aggregations
+
 ```typescript
 const stats = await prisma.startup.aggregate({
   _avg: { voteCount: true },
@@ -223,9 +235,10 @@ const stats = await prisma.startup.aggregate({
 ```
 
 ### Group By
+
 ```typescript
 const byIndustry = await prisma.startup.groupBy({
-  by: ['industry'],
+  by: ["industry"],
   _count: {
     id: true,
   },
@@ -240,17 +253,31 @@ const byIndustry = await prisma.startup.groupBy({
 ## 🔐 Transactions
 
 ### Sequential Operations
+
 ```typescript
 const [user, startup] = await prisma.$transaction([
-  prisma.user.create({ data: { /* ... */ } }),
-  prisma.startup.create({ data: { /* ... */ } }),
+  prisma.user.create({
+    data: {
+      /* ... */
+    },
+  }),
+  prisma.startup.create({
+    data: {
+      /* ... */
+    },
+  }),
 ]);
 ```
 
 ### Interactive Transactions
+
 ```typescript
 await prisma.$transaction(async (tx) => {
-  const user = await tx.user.create({ data: { /* ... */ } });
+  const user = await tx.user.create({
+    data: {
+      /* ... */
+    },
+  });
   const startup = await tx.startup.create({
     data: {
       userId: user.id,
@@ -266,6 +293,7 @@ await prisma.$transaction(async (tx) => {
 ## 📊 Schema Patterns
 
 ### One-to-Many
+
 ```prisma
 model User {
   id       Int       @id @default(autoincrement())
@@ -280,6 +308,7 @@ model Startup {
 ```
 
 ### Many-to-Many (Explicit)
+
 ```prisma
 model Startup {
   id   Int              @id @default(autoincrement())
@@ -297,12 +326,13 @@ model StartupTag {
   tagId     Int
   startup   Startup @relation(fields: [startupId], references: [id])
   tag       Tag     @relation(fields: [tagId], references: [id])
-  
+
   @@unique([startupId, tagId])
 }
 ```
 
 ### Self-Relation
+
 ```prisma
 model Comment {
   id       Int       @id @default(autoincrement())
@@ -339,6 +369,7 @@ model Comment {
 ## 🐛 Troubleshooting
 
 ### Error: Can't reach database server
+
 ```bash
 # Check DATABASE_URL in .env
 # Ensure PostgreSQL is running
@@ -346,18 +377,21 @@ docker ps  # if using Docker
 ```
 
 ### Error: Table does not exist
+
 ```bash
 # Run migrations
 npx prisma migrate dev
 ```
 
 ### Error: Generated Prisma Client out of sync
+
 ```bash
 # Regenerate client
 npx prisma generate
 ```
 
 ### Too many database connections
+
 ```typescript
 // Use singleton pattern in lib/prisma.ts
 // See PRISMA_SETUP_GUIDE.md for implementation

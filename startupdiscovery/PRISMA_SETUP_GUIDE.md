@@ -76,6 +76,7 @@ npm install @prisma/client
 ```
 
 **What gets installed:**
+
 - `prisma` - CLI tool for migrations, introspection, and code generation
 - `@prisma/client` - Runtime library for database queries
 
@@ -89,6 +90,7 @@ npx prisma init --datasource-provider postgresql
 **Files Created:**
 
 1. **`prisma/schema.prisma`** - Your database schema definition file
+
    ```prisma
    generator client {
      provider = "prisma-client-js"
@@ -180,11 +182,11 @@ model User {
   comments      Comment[]
   votes         Vote[]
   bookmarks     Bookmark[]
-  
+
   // Self-referential many-to-many
   followers     Follow[]  @relation("UserFollowers")
   following     Follow[]  @relation("UserFollowing")
-  
+
   sessions      Session[]
   notifications Notification[]
 
@@ -203,6 +205,7 @@ enum UserRole {
 ```
 
 **Key Features:**
+
 - `@id @default(autoincrement())` - Auto-incrementing primary key
 - `@unique` - Ensures email and username are unique
 - `@default(now())` - Auto-sets timestamp on creation
@@ -221,21 +224,21 @@ model Startup {
   description String         @db.Text
   logoUrl     String?
   websiteUrl  String?
-  
+
   // Startup details
   stage       StartupStage   @default(IDEA)
   industry    String
   fundingGoal Decimal?       @db.Decimal(12, 2)
   location    String?
-  
+
   // Metrics
   viewCount   Int            @default(0)
   voteCount   Int            @default(0)
-  
+
   // Status
   status      StartupStatus  @default(DRAFT)
   featured    Boolean        @default(false)
-  
+
   // Timestamps
   publishedAt DateTime?
   createdAt   DateTime       @default(now())
@@ -243,7 +246,7 @@ model Startup {
 
   // Foreign key
   userId      Int
-  
+
   // Relations
   user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   categories  StartupCategory[]
@@ -349,7 +352,7 @@ model Comment {
   // Relations
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   startup   Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
-  
+
   // Self-referential relation for replies
   parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   Comment[] @relation("CommentReplies")
@@ -372,7 +375,7 @@ model Vote {
 
   userId    Int
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   startupId Int
   startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
 
@@ -424,6 +427,7 @@ const prisma = new PrismaClient()
 ```
 
 **When to Run:**
+
 - After changing `schema.prisma`
 - After pulling new schema changes from git
 - During build/deployment processes
@@ -448,14 +452,14 @@ Create a singleton Prisma Client instance to avoid connection issues in developm
 ### File: `lib/prisma.ts`
 
 ```typescript
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prismaClientSingleton = () => {
   return new PrismaClient({
     log:
-      process.env.NODE_ENV === 'development'
-        ? ['query', 'error', 'warn']
-        : ['error'],
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
   });
 };
 
@@ -467,7 +471,7 @@ const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 
 export default prisma;
 
-if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
+if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = prisma;
 ```
 
 ### Why This Pattern?
@@ -475,11 +479,13 @@ if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
 **Problem:** Next.js hot-reloading creates multiple Prisma Client instances, exhausting database connections.
 
 **Solution:** Store the client on `globalThis` in development:
+
 - ✅ Survives hot-reloads
 - ✅ Reuses existing connections
 - ✅ Prevents "too many connections" errors
 
 **Logging Configuration:**
+
 - **Development:** Logs queries, errors, warnings (helpful for debugging)
 - **Production:** Only logs errors (better performance)
 
@@ -487,7 +493,7 @@ if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
 
 ```typescript
 // In API routes or server components
-import prisma from '@/lib/prisma';
+import prisma from "@/lib/prisma";
 
 export async function GET() {
   const users = await prisma.user.findMany();
@@ -504,22 +510,22 @@ Let's verify everything works with a test script.
 ### Create: `scripts/test-db.ts`
 
 ```typescript
-import prisma from '../lib/prisma';
+import prisma from "../lib/prisma";
 
 async function testDatabaseConnection() {
-  console.log('🔍 Testing database connection...\n');
+  console.log("🔍 Testing database connection...\n");
 
   try {
     // Test 1: Check connection
     await prisma.$connect();
-    console.log('✅ Successfully connected to database\n');
+    console.log("✅ Successfully connected to database\n");
 
     // Test 2: Count records
     const userCount = await prisma.user.count();
     const startupCount = await prisma.startup.count();
     const categoryCount = await prisma.category.count();
 
-    console.log('📊 Database Statistics:');
+    console.log("📊 Database Statistics:");
     console.log(`   Users: ${userCount}`);
     console.log(`   Startups: ${startupCount}`);
     console.log(`   Categories: ${categoryCount}\n`);
@@ -535,7 +541,7 @@ async function testDatabaseConnection() {
       },
     });
 
-    console.log('👥 Sample Users:');
+    console.log("👥 Sample Users:");
     users.forEach((user) => {
       console.log(`   • ${user.username} (${user.email}) - ID: ${user.id}`);
     });
@@ -564,20 +570,22 @@ async function testDatabaseConnection() {
       },
     });
 
-    console.log('\n🚀 Sample Startups:');
+    console.log("\n🚀 Sample Startups:");
     startupsWithRelations.forEach((startup) => {
       console.log(`   • ${startup.title}`);
       console.log(`     By: ${startup.user.name || startup.user.username}`);
-      console.log(`     Comments: ${startup._count.comments}, Votes: ${startup._count.votes}`);
+      console.log(
+        `     Comments: ${startup._count.comments}, Votes: ${startup._count.votes}`
+      );
     });
 
-    console.log('\n✅ All database tests passed!');
+    console.log("\n✅ All database tests passed!");
   } catch (error) {
-    console.error('❌ Database connection failed:', error);
+    console.error("❌ Database connection failed:", error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();
-    console.log('\n🔌 Disconnected from database');
+    console.log("\n🔌 Disconnected from database");
   }
 }
 
@@ -716,27 +724,35 @@ npx tsx prisma/seed.ts
 Capture these screenshots:
 
 #### 1. Schema File
+
 - Screenshot of `schema.prisma` showing model definitions
 
 #### 2. Migration Success
+
 ```bash
 npx prisma migrate dev --name init
 ```
+
 - Capture terminal output showing successful migration
 
 #### 3. Database in Prisma Studio
+
 ```bash
 npx prisma studio
 ```
+
 - Screenshot showing tables with data in browser (http://localhost:5555)
 
 #### 4. Test Script Output
+
 ```bash
 npx tsx scripts/test-db.ts
 ```
+
 - Terminal output showing successful database queries
 
 #### 5. Sample Query in Code
+
 - Screenshot of API route or server action using Prisma
 - Show IntelliSense/autocomplete for type safety
 
@@ -760,12 +776,14 @@ npx tsx scripts/test-db.ts
 #### 1. Type Safety Eliminates Bugs
 
 **Before Prisma (Raw SQL):**
+
 ```typescript
-const users = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
+const users = await db.query("SELECT * FROM users WHERE id = ?", [userId]);
 // users: any - No type checking!
 ```
 
 **With Prisma:**
+
 ```typescript
 const user = await prisma.user.findUnique({ where: { id: userId } });
 // user: User | null - Fully typed!
@@ -807,15 +825,15 @@ const query = `
 
 // With Prisma: Clean and readable
 const startups = await prisma.startup.findMany({
-  where: { status: 'PUBLISHED' },
+  where: { status: "PUBLISHED" },
   include: {
     user: { select: { name: true } },
     _count: {
-      select: { comments: true, votes: true }
-    }
+      select: { comments: true, votes: true },
+    },
   },
-  orderBy: { createdAt: 'desc' },
-  take: 10
+  orderBy: { createdAt: "desc" },
+  take: 10,
 });
 ```
 
@@ -829,6 +847,7 @@ const startups = await prisma.startup.findMany({
 #### 5. Performance Optimization
 
 Prisma provides:
+
 - **Query optimization** - Efficient SQL generation
 - **Connection pooling** - Reuse database connections
 - **Batch operations** - Reduce round trips
@@ -844,6 +863,7 @@ Prisma provides:
 ### Real-World Applications
 
 This setup is production-ready for:
+
 - 🚀 Startup platforms
 - 📱 Social media apps
 - 🛒 E-commerce sites

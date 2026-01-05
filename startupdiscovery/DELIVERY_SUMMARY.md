@@ -99,6 +99,7 @@ These were already set up and working:
 ### 1️⃣ Prisma Installation & Initialization ✅
 
 **Commands Provided:**
+
 ```bash
 npm install prisma --save-dev
 npm install @prisma/client
@@ -106,6 +107,7 @@ npx prisma init
 ```
 
 **Files Explained:**
+
 - ✅ `prisma/schema.prisma` - Schema definition file
 - ✅ `.env` - DATABASE_URL configuration
 - ✅ What gets created and why
@@ -119,12 +121,14 @@ npx prisma init
 **Your Schema Includes:**
 
 **User Model** ✅
+
 - id, email (unique), username (unique), passwordHash
 - name, bio, avatarUrl, role, isVerified
 - createdAt, updatedAt, lastLoginAt
 - Relations to: Startups, Comments, Votes, Bookmarks, Follows, Sessions
 
 **Startup Model** ✅
+
 - id, title, slug (unique), tagline, description
 - stage, industry, fundingGoal, location
 - viewCount, voteCount, status, featured
@@ -133,24 +137,29 @@ npx prisma init
 - Relations to: User, Categories, Tags, Comments, Votes, Team, Media, Milestones
 
 **Category Model** ✅
+
 - id, name (unique), slug (unique), description, color
 - Many-to-many with Startup via StartupCategory
 
 **Tag Model** ✅
+
 - id, name (unique), slug (unique), useCount
 - Many-to-many with Startup via StartupTag
 
 **Comment Model** ✅
+
 - id, content, userId, startupId
 - parentId (for nested replies)
 - Self-referential relation for comment threads
 - createdAt, updatedAt
 
 **Vote Model** ✅
+
 - id, value, userId, startupId
 - Unique constraint on [userId, startupId]
 
 **Plus 7 More Models:**
+
 - ✅ Session (authentication)
 - ✅ Bookmark (saved startups)
 - ✅ Follow (user following)
@@ -160,6 +169,7 @@ npx prisma init
 - ✅ Notification (user alerts)
 
 **Schema Features:**
+
 - ✅ Primary Keys (@id @default(autoincrement()))
 - ✅ Foreign Keys (explicit relations)
 - ✅ Unique constraints (@unique)
@@ -176,11 +186,13 @@ npx prisma init
 ### 3️⃣ Generate Prisma Client ✅
 
 **Command:**
+
 ```bash
 npx prisma generate
 ```
 
 **Explanation Provided:**
+
 - ✅ What the command does
 - ✅ Where generated code goes (`node_modules/.prisma/client`)
 - ✅ When to run it
@@ -195,14 +207,16 @@ npx prisma generate
 **File:** `lib/prisma.ts` (already exists in your project)
 
 **Singleton Pattern Implementation:**
+
 ```typescript
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prismaClientSingleton = () => {
   return new PrismaClient({
-    log: process.env.NODE_ENV === 'development'
-      ? ['query', 'error', 'warn']
-      : ['error'],
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
   });
 };
 
@@ -214,10 +228,11 @@ const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 
 export default prisma;
 
-if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
+if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = prisma;
 ```
 
 **Why This Pattern?**
+
 - ✅ Prevents multiple instances in development
 - ✅ Survives Next.js hot-reloading
 - ✅ Avoids "too many connections" errors
@@ -232,12 +247,14 @@ if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
 **Two Test Scripts Created:**
 
 **Quick Test** (`scripts/quick-test.ts`):
+
 - ✅ Connection verification
 - ✅ Record counting
 - ✅ Simple findFirst queries
 - ✅ Basic relation includes
 
 **Full Test Suite** (`scripts/test-db.ts`):
+
 - ✅ Database connection test
 - ✅ Statistics (count all tables)
 - ✅ Sample users with relations
@@ -248,6 +265,7 @@ if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
 - ✅ Type-safe query demonstrations
 
 **How to Run:**
+
 ```bash
 npx tsx scripts/quick-test.ts
 npx tsx scripts/test-db.ts
@@ -258,6 +276,7 @@ npm run db:test
 ```
 
 **Expected Output:**
+
 - ✅ Success messages
 - ✅ Database statistics
 - ✅ Sample data display
@@ -316,24 +335,31 @@ npm run db:test
 ## 📚 How to Use This for Your Assignment
 
 ### Step 1: Review the Documentation
+
 Start with **KALVIUM_ASSIGNMENT_SUMMARY.md** for an overview.
 
 ### Step 2: Run the Setup
+
 Follow **INSTALLATION_STEPS.md** to:
+
 1. Configure your DATABASE_URL
 2. Run migrations
 3. Seed the database
 4. Test the setup
 
 ### Step 3: Capture Evidence
+
 Take screenshots of:
+
 - Migration success
 - Prisma Studio with data
 - Test script output
 - VSCode autocomplete
 
 ### Step 4: Submit
+
 Include in your submission:
+
 - Link to these documentation files
 - Screenshots
 - Code examples using Prisma
@@ -344,31 +370,37 @@ Include in your submission:
 ## 🎯 Key Benefits Highlighted
 
 ### 1. Type Safety
+
 **Before:**
+
 ```typescript
-const users = await db.query('SELECT * FROM users');
+const users = await db.query("SELECT * FROM users");
 // users: any ❌
 ```
 
 **After:**
+
 ```typescript
 const users = await prisma.user.findMany();
 // users: User[] ✅
 ```
 
 ### 2. Developer Experience
+
 - ✅ Auto-completion in VSCode
 - ✅ Compile-time error checking
 - ✅ Intuitive API
 - ✅ Clear error messages
 
 ### 3. Fewer Bugs
+
 - ✅ No SQL injection (parameterized queries)
 - ✅ No typos in column names
 - ✅ No missing joins
 - ✅ Relationship integrity enforced
 
 ### 4. Better Performance
+
 - ✅ Strategic indexes
 - ✅ Connection pooling
 - ✅ Optimized queries
@@ -433,28 +465,33 @@ startupdiscovery/
 After completing this setup, you now have:
 
 ✅ **Understanding of Prisma ORM**
+
 - What it is and how it works
 - Why it's better than raw SQL
 - When to use it
 
 ✅ **Database Modeling Skills**
+
 - Designing relational schemas
 - Many-to-many relationships
 - Self-referential relations
 - Indexing strategies
 
 ✅ **Type-Safe Development**
+
 - TypeScript integration
 - Auto-generated types
 - Compile-time safety
 
 ✅ **Production-Ready Setup**
+
 - Singleton pattern
 - Migration workflow
 - Seed data
 - Testing strategy
 
 ✅ **Professional Documentation**
+
 - Clear explanations
 - Visual diagrams
 - Code examples
@@ -489,6 +526,7 @@ After completing this setup, you now have:
 ## 📞 Support
 
 If you need help:
+
 1. Check **INSTALLATION_STEPS.md** for troubleshooting
 2. Review **PRISMA_QUICK_REFERENCE.md** for commands
 3. See **PRISMA_SETUP_GUIDE.md** for detailed explanations
@@ -503,4 +541,3 @@ If you need help:
 **Assignment Alignment:** 100%
 
 **Good luck with your Kalvium submission! 🚀**
-

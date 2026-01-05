@@ -15,6 +15,7 @@
 ### 1️⃣ Prisma Installation & Initialization ✓
 
 **Commands Executed:**
+
 ```bash
 npm install prisma --save-dev
 npm install @prisma/client
@@ -22,6 +23,7 @@ npx prisma init --datasource-provider postgresql
 ```
 
 **Files Created:**
+
 - ✅ `prisma/schema.prisma` - Database schema definition
 - ✅ `.env` - Environment variables with DATABASE_URL
 - ✅ `lib/prisma.ts` - Singleton Prisma Client instance
@@ -35,6 +37,7 @@ npx prisma init --datasource-provider postgresql
 **Comprehensive schema includes:**
 
 #### Core Models:
+
 - ✅ **User** - User accounts with authentication (id, email, username, password, role, timestamps)
 - ✅ **Startup** - Main startup entities (id, title, slug, description, stage, industry, metrics, userId, timestamps)
 - ✅ **Category** - Startup categorization (id, name, slug, description, color)
@@ -42,11 +45,13 @@ npx prisma init --datasource-provider postgresql
 - ✅ **Comment** - User feedback with nested replies (id, content, userId, startupId, parentId, timestamps)
 
 #### Engagement Models:
+
 - ✅ **Vote** - Upvote/downvote functionality
 - ✅ **Bookmark** - Save startups
 - ✅ **Follow** - User following system
 
 #### Supporting Models:
+
 - ✅ **Session** - Authentication sessions
 - ✅ **TeamMember** - Startup team information
 - ✅ **Media** - Images, videos, documents
@@ -54,6 +59,7 @@ npx prisma init --datasource-provider postgresql
 - ✅ **Notification** - User notifications
 
 **Schema Features:**
+
 - ✅ Primary keys with auto-increment
 - ✅ Foreign key relationships
 - ✅ One-to-many relations (User → Startups, Startup → Comments)
@@ -73,11 +79,13 @@ npx prisma init --datasource-provider postgresql
 ### 3️⃣ Prisma Client Generation ✓
 
 **Command:**
+
 ```bash
 npx prisma generate
 ```
 
 **What This Does:**
+
 - Reads `schema.prisma` file
 - Generates TypeScript types for all models
 - Creates type-safe database client
@@ -85,6 +93,7 @@ npx prisma generate
 - Provides full autocomplete/IntelliSense
 
 **Generated Code Location:**
+
 ```
 node_modules/
   └── .prisma/
@@ -95,6 +104,7 @@ node_modules/
 ```
 
 **Added to package.json:**
+
 ```json
 {
   "scripts": {
@@ -113,14 +123,14 @@ node_modules/
 **File:** `lib/prisma.ts`
 
 ```typescript
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prismaClientSingleton = () => {
   return new PrismaClient({
     log:
-      process.env.NODE_ENV === 'development'
-        ? ['query', 'error', 'warn']
-        : ['error'],
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
   });
 };
 
@@ -132,12 +142,13 @@ const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 
 export default prisma;
 
-if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
+if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = prisma;
 ```
 
 **Why This Pattern?**
 
 ❌ **Without Singleton (Problem):**
+
 ```typescript
 // ⚠️ Creates new instance on every hot-reload
 export const prisma = new PrismaClient();
@@ -145,6 +156,7 @@ export const prisma = new PrismaClient();
 ```
 
 ✅ **With Singleton (Solution):**
+
 ```typescript
 // ✅ Reuses instance across hot-reloads
 const prisma = globalThis.prismaGlobal ?? new PrismaClient();
@@ -152,6 +164,7 @@ const prisma = globalThis.prismaGlobal ?? new PrismaClient();
 ```
 
 **Benefits:**
+
 - ✅ Prevents connection pool exhaustion in development
 - ✅ Survives Next.js hot-reloading
 - ✅ Configurable logging (verbose in dev, minimal in prod)
@@ -166,33 +179,37 @@ const prisma = globalThis.prismaGlobal ?? new PrismaClient();
 Created comprehensive test scripts:
 
 #### **Quick Test** (`scripts/quick-test.ts`)
+
 Simple verification script:
+
 ```typescript
-import prisma from '../lib/prisma';
+import prisma from "../lib/prisma";
 
 async function quickTest() {
   // Connection test
   await prisma.$connect();
-  
+
   // Count records
   const userCount = await prisma.user.count();
   const startupCount = await prisma.startup.count();
-  
+
   // Fetch sample data
   const users = await prisma.user.findMany({ take: 3 });
-  
+
   // Complex query with relations
   const startups = await prisma.startup.findMany({
     include: {
       user: true,
-      _count: { select: { comments: true, votes: true } }
-    }
+      _count: { select: { comments: true, votes: true } },
+    },
   });
 }
 ```
 
 #### **Full Test Suite** (`scripts/test-db.ts`)
+
 Comprehensive test covering:
+
 1. ✅ Database connection verification
 2. ✅ Record counting (users, startups, categories, etc.)
 3. ✅ Simple queries with select
@@ -203,6 +220,7 @@ Comprehensive test covering:
 8. ✅ Recent activity queries
 
 **Run Tests:**
+
 ```bash
 # Quick test (basic verification)
 npx tsx scripts/quick-test.ts
@@ -216,6 +234,7 @@ npm run db:test
 ```
 
 **Expected Output:**
+
 ```
 🔍 Testing database connection...
 ✅ Successfully connected to PostgreSQL database
@@ -251,7 +270,9 @@ npm run db:test
 Created comprehensive documentation:
 
 #### **PRISMA_SETUP_GUIDE.md** (Detailed Guide)
+
 Complete guide covering:
+
 - ✅ What Prisma is and why use it
 - ✅ Installation steps with explanations
 - ✅ Schema definition with examples
@@ -268,7 +289,9 @@ Complete guide covering:
 **Length:** 600+ lines, beginner-friendly
 
 #### **PRISMA_QUICK_REFERENCE.md** (Cheat Sheet)
+
 Quick reference including:
+
 - ✅ Common commands
 - ✅ Query examples (CRUD operations)
 - ✅ Relation queries
@@ -281,7 +304,9 @@ Quick reference including:
 **Length:** 400+ lines, searchable reference
 
 #### **DATABASE_SCHEMA_VISUAL.md** (ER Diagram)
+
 Visual documentation:
+
 - ✅ ASCII ER diagram
 - ✅ Table summary with relationships
 - ✅ Relationship types visualization
@@ -293,7 +318,9 @@ Visual documentation:
 **Length:** 300+ lines with visual diagrams
 
 #### **INSTALLATION_STEPS.md** (Setup Guide)
+
 Step-by-step installation:
+
 - ✅ Prerequisites
 - ✅ Installation commands
 - ✅ Configuration steps
@@ -309,6 +336,7 @@ Step-by-step installation:
 ### What is Prisma and Why Use It?
 
 **Prisma** is a next-generation ORM that provides:
+
 - **Type Safety** - Auto-generated TypeScript types prevent errors
 - **Developer Experience** - Intuitive API, autocomplete, clear errors
 - **Database Migrations** - Version-controlled schema changes
@@ -317,9 +345,10 @@ Step-by-step installation:
 ### Benefits Over Traditional ORMs
 
 **Before Prisma (Raw SQL/Other ORMs):**
+
 ```typescript
 // ❌ No type safety
-const result = await db.query('SELECT * FROM users WHERE id = ?', [id]);
+const result = await db.query("SELECT * FROM users WHERE id = ?", [id]);
 // result: any - could be anything!
 
 // ❌ Complex joins are messy
@@ -333,6 +362,7 @@ const query = `
 ```
 
 **With Prisma:**
+
 ```typescript
 // ✅ Fully typed
 const user = await prisma.user.findUnique({ where: { id } });
@@ -342,8 +372,8 @@ const user = await prisma.user.findUnique({ where: { id } });
 const startup = await prisma.startup.findMany({
   include: {
     user: { select: { name: true } },
-    _count: { select: { comments: true } }
-  }
+    _count: { select: { comments: true } },
+  },
 });
 ```
 
@@ -381,6 +411,7 @@ const startup = await prisma.startup.findMany({
 ### Real-World Applications
 
 This setup is production-ready for:
+
 - 🚀 Startup directories/platforms
 - 📱 Social media applications
 - 🛒 E-commerce sites
@@ -391,21 +422,23 @@ This setup is production-ready for:
 ### Performance Insights
 
 **Query Optimization:**
+
 - Strategic indexes on frequently queried fields
 - Denormalized counters (viewCount, voteCount)
 - Efficient relation loading
 - Connection pooling
 
 **Example - Indexed Query:**
+
 ```typescript
 // Fast because of @@index([slug])
 const startup = await prisma.startup.findUnique({
-  where: { slug: 'my-startup' }
+  where: { slug: "my-startup" },
 });
 
 // Fast because of @@index([status, featured])
 const featured = await prisma.startup.findMany({
-  where: { status: 'PUBLISHED', featured: true }
+  where: { status: "PUBLISHED", featured: true },
 });
 ```
 
@@ -446,6 +479,7 @@ const featured = await prisma.startup.findMany({
 ### Database Design Decisions
 
 **Why These Models?**
+
 - **User** - Core authentication and ownership
 - **Startup** - Main entity of the platform
 - **Category/Tag** - Flexible organization (structured vs freeform)
@@ -456,6 +490,7 @@ const featured = await prisma.startup.findMany({
 - **Media/TeamMember/Milestone** - Rich startup profiles
 
 **Design Patterns Used:**
+
 1. **Junction Tables** - Many-to-many (StartupCategory, StartupTag)
 2. **Self-Referential** - Nested comments (parent/replies)
 3. **Soft Enums** - Type-safe status values
@@ -465,6 +500,7 @@ const featured = await prisma.startup.findMany({
 ### Indexing Strategy
 
 **Indexes Added:**
+
 ```prisma
 User:     @@index([email]), @@index([username])
 Startup:  @@index([slug]), @@index([status]), @@index([featured])
@@ -473,6 +509,7 @@ Vote:     @@index([userId, startupId])
 ```
 
 **Why?**
+
 - Email/username lookups during login
 - Slug lookups for startup pages
 - Filtering by status/featured
@@ -491,7 +528,7 @@ Vote:     @@index([userId, startupId])
 ✅ **Documentation** - 4 comprehensive markdown files (1500+ lines total)  
 ✅ **Code Quality** - TypeScript, proper formatting, comments  
 ✅ **Evidence** - Clear instructions for screenshot capture  
-✅ **Reflection** - Detailed learning outcomes and benefits analysis  
+✅ **Reflection** - Detailed learning outcomes and benefits analysis
 
 ---
 
@@ -550,6 +587,7 @@ npm run dev
 ## 🎉 Conclusion
 
 This assignment demonstrates:
+
 - ✅ Complete Prisma ORM setup
 - ✅ Production-ready database schema
 - ✅ Type-safe database operations
@@ -566,4 +604,3 @@ This assignment demonstrates:
 **Assignment:** Kalvium Backend - Prisma ORM Integration  
 **Date:** December 30, 2025  
 **Status:** ✅ Complete
-

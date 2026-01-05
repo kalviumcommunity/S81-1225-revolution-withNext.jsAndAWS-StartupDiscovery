@@ -139,14 +139,14 @@ npx ts-node -O '{"module":"commonjs"}' -e "
 
 ## ⚠️ Common Issues & Fixes
 
-| Issue | Fix |
-|-------|-----|
+| Issue                      | Fix                                                         |
+| -------------------------- | ----------------------------------------------------------- |
 | "Unique constraint failed" | Seed isn't idempotent. Use `upsert` or delete-before-create |
-| Migrations won't apply | Use `npx prisma migrate deploy` (not `migrate dev`) |
-| Can't access Prisma Studio | Port 5555 in use. Check: `lsof -i :5555` |
-| "No migrations found" | Run `npx prisma migrate dev --name init` first |
-| Database permission denied | Check DATABASE_URL in .env file |
-| Out of sync with team | Run `git pull` then `npx prisma migrate dev` |
+| Migrations won't apply     | Use `npx prisma migrate deploy` (not `migrate dev`)         |
+| Can't access Prisma Studio | Port 5555 in use. Check: `lsof -i :5555`                    |
+| "No migrations found"      | Run `npx prisma migrate dev --name init` first              |
+| Database permission denied | Check DATABASE_URL in .env file                             |
+| Out of sync with team      | Run `git pull` then `npx prisma migrate dev`                |
 
 ---
 
@@ -244,36 +244,39 @@ Before running migrations in production:
 ## 🔄 Idempotent Seed Patterns
 
 ### Pattern 1: Upsert (Simple)
+
 ```typescript
 await prisma.category.upsert({
-  where: { slug: 'saas' },
+  where: { slug: "saas" },
   update: {},
-  create: { name: 'SaaS', slug: 'saas' }
+  create: { name: "SaaS", slug: "saas" },
 });
 ```
 
 ### Pattern 2: Find First, Create If Needed
+
 ```typescript
 let category = await prisma.category.findFirst({
-  where: { slug: 'saas' }
+  where: { slug: "saas" },
 });
 if (!category) {
   category = await prisma.category.create({
-    data: { name: 'SaaS', slug: 'saas' }
+    data: { name: "SaaS", slug: "saas" },
   });
 }
 ```
 
 ### Pattern 3: Delete & Recreate (For Many-to-Many)
+
 ```typescript
 await prisma.vote.deleteMany({
-  where: { userId: 1 }
+  where: { userId: 1 },
 });
 await prisma.vote.createMany({
   data: [
     { userId: 1, startupId: 1, value: 1 },
     // ...
-  ]
+  ],
 });
 ```
 

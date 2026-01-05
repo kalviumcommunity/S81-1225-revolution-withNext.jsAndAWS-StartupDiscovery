@@ -1,14 +1,18 @@
-import { loginSchema } from '@/lib/schemas/authSchema';
-import { comparePassword, generateToken } from '@/lib/auth';
-import { sendSuccess, sendError, sendValidationError } from '@/lib/responseHandler';
-import { ERROR_CODES } from '@/lib/errorCodes';
-import { ZodError } from 'zod';
-import prisma from '@/lib/prisma';
+import { loginSchema } from "@/lib/schemas/authSchema";
+import { comparePassword, generateToken } from "@/lib/auth";
+import {
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from "@/lib/responseHandler";
+import { ERROR_CODES } from "@/lib/errorCodes";
+import { ZodError } from "zod";
+import prisma from "@/lib/prisma";
 
 /**
  * POST /api/auth/login
  * Authenticate user and issue JWT token
- * 
+ *
  * Body: {
  *   email: string (required, valid email),
  *   password: string (required)
@@ -28,7 +32,7 @@ export async function POST(req: Request) {
 
     if (!user) {
       return sendError(
-        'Invalid email or password',
+        "Invalid email or password",
         ERROR_CODES.UNAUTHORIZED,
         401
       );
@@ -37,10 +41,13 @@ export async function POST(req: Request) {
     // Verify password
     let isPasswordValid: boolean;
     try {
-      isPasswordValid = await comparePassword(validatedData.password, user.passwordHash);
+      isPasswordValid = await comparePassword(
+        validatedData.password,
+        user.passwordHash
+      );
     } catch (error) {
       return sendError(
-        'Failed to verify password',
+        "Failed to verify password",
         ERROR_CODES.INTERNAL_ERROR,
         500
       );
@@ -48,7 +55,7 @@ export async function POST(req: Request) {
 
     if (!isPasswordValid) {
       return sendError(
-        'Invalid email or password',
+        "Invalid email or password",
         ERROR_CODES.UNAUTHORIZED,
         401
       );
@@ -67,9 +74,9 @@ export async function POST(req: Request) {
           role: user.role,
         },
         token,
-        expiresIn: '7d',
+        expiresIn: "7d",
       },
-      'Login successful',
+      "Login successful",
       200
     );
   } catch (error) {
@@ -79,11 +86,11 @@ export async function POST(req: Request) {
 
     // Log error without exposing sensitive information
     if (error instanceof Error) {
-      console.error('Login error:', error.message);
+      console.error("Login error:", error.message);
     }
 
     return sendError(
-      'Failed to authenticate user',
+      "Failed to authenticate user",
       ERROR_CODES.INTERNAL_ERROR,
       500
     );
