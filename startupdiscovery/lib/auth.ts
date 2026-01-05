@@ -3,6 +3,17 @@ import jwt from "jsonwebtoken";
 import { NextRequest } from "next/server";
 
 /**
+ * JWT Payload interface for type safety
+ */
+interface JWTPayload {
+  userId: number;
+  email: string;
+  role: string;
+  iat?: number;
+  exp?: number;
+}
+
+/**
  * JWT Secret Key - In production, use environment variable
  * Should be a long, random string stored securely
  */
@@ -87,7 +98,7 @@ export function verifyToken(
   try {
     const decoded = jwt.verify(token, JWT_SECRET as string, {
       algorithms: ["HS256"],
-    }) as any;
+    }) as JWTPayload;
 
     if (
       typeof decoded === "object" &&
@@ -96,14 +107,14 @@ export function verifyToken(
       "role" in decoded
     ) {
       return {
-        userId: decoded.userId as number,
-        email: decoded.email as string,
-        role: decoded.role as string,
+        userId: decoded.userId,
+        email: decoded.email,
+        role: decoded.role,
       };
     }
 
     return null;
-  } catch (error) {
+  } catch {
     // Token is invalid, expired, or tampered with
     return null;
   }

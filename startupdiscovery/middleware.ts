@@ -80,7 +80,7 @@ function verifyJWT(
     }
 
     return null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

@@ -45,7 +45,7 @@ export async function POST(req: Request) {
         validatedData.password,
         user.passwordHash
       );
-    } catch (error) {
+    } catch {
       return sendError(
         "Failed to verify password",
         ERROR_CODES.INTERNAL_ERROR,

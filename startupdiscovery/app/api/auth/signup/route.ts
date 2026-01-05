@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     let hashedPassword: string;
     try {
       hashedPassword = await hashPassword(validatedData.password);
-    } catch (error) {
+    } catch {
       return sendError(
         "Failed to process password",
         ERROR_CODES.INTERNAL_ERROR,
