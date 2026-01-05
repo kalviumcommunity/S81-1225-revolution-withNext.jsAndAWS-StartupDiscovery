@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { sendSuccess, sendError } from '@/lib/responseHandler';
+import { ERROR_CODES } from '@/lib/errorCodes';
 
 // Authentication helper
 function checkAuth(req: Request): { authorized: boolean; user?: { id: number; role: string } } {
@@ -84,10 +86,7 @@ export async function GET(req: Request) {
   // Require authentication
   const auth = checkAuth(req);
   if (!auth.authorized) {
-    return NextResponse.json(
-      { error: 'Unauthorized. Authentication required.' },
-      { status: 401 }
-    );
+    return sendError('Authentication required', ERROR_CODES.UNAUTHORIZED, 401);
   }
 
   try {
@@ -101,28 +100,22 @@ export async function GET(req: Request) {
 
     // Validate pagination parameters
     if (page < 1 || limit < 1 || limit > 100) {
-      return NextResponse.json(
-        { error: 'Invalid pagination parameters. Page must be >= 1, limit must be between 1 and 100.' },
-        { status: 400 }
-      );
+      return sendError('Invalid pagination parameters', ERROR_CODES.INVALID_PAGINATION, 400, 
+        { details: 'Page must be >= 1, limit must be between 1 and 100' });
     }
 
     // Validate status if provided
     const validStatuses = ['pending', 'in-progress', 'completed'];
     if (status && !validStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
-        { status: 400 }
-      );
+      return sendError('Invalid status value', ERROR_CODES.INVALID_INPUT, 400,
+        { validValues: validStatuses });
     }
 
     // Validate priority if provided
     const validPriorities = ['low', 'medium', 'high'];
     if (priority && !validPriorities.includes(priority)) {
-      return NextResponse.json(
-        { error: `Invalid priority. Must be one of: ${validPriorities.join(', ')}` },
-        { status: 400 }
-      );
+      return sendError('Invalid priority value', ERROR_CODES.INVALID_INPUT, 400,
+        { validValues: validPriorities });
     }
 
     // Filter tasks based on query parameters
@@ -158,9 +151,8 @@ export async function GET(req: Request) {
     const endIndex = startIndex + limit;
     const paginatedTasks = filteredTasks.slice(startIndex, endIndex);
 
-    return NextResponse.json({
-      success: true,
-      data: paginatedTasks,
+    return sendSuccess({
+      tasks: paginatedTasks,
       pagination: {
         page,
         limit,
@@ -169,12 +161,10 @@ export async function GET(req: Request) {
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,
       },
-    });
+    }, 'Tasks retrieved successfully');
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    return sendError('Internal server error', ERROR_CODES.INTERNAL_SERVER_ERROR, 500,
+      { details: error instanceof Error ? error.message : 'Unknown error' });
   }
 }
 
@@ -187,10 +177,7 @@ export async function POST(req: Request) {
   // Require authentication
   const auth = checkAuth(req);
   if (!auth.authorized) {
-    return NextResponse.json(
-      { error: 'Unauthorized. Authentication required.' },
-      { status: 401 }
-    );
+    return sendError('Authentication required', ERROR_CODES.UNAUTHORIZED, 401);
   }
 
   try {
@@ -198,28 +185,22 @@ export async function POST(req: Request) {
 
     // Validate required fields
     if (!data.title || !data.description) {
-      return NextResponse.json(
-        { error: 'Missing required fields: title and description are required' },
-        { status: 400 }
-      );
+      return sendError('Missing required fields', ERROR_CODES.MISSING_REQUIRED_FIELD, 400,
+        { requiredFields: ['title', 'description'] });
     }
 
     // Validate status if provided
     const validStatuses = ['pending', 'in-progress', 'completed'];
     if (data.status && !validStatuses.includes(data.status)) {
-      return NextResponse.json(
-        { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
-        { status: 400 }
-      );
+      return sendError('Invalid status value', ERROR_CODES.INVALID_INPUT, 400,
+        { validValues: validStatuses });
     }
 
     // Validate priority if provided
     const validPriorities = ['low', 'medium', 'high'];
     if (data.priority && !validPriorities.includes(data.priority)) {
-      return NextResponse.json(
-        { error: `Invalid priority. Must be one of: ${validPriorities.join(', ')}` },
-        { status: 400 }
-      );
+      return sendError('Invalid priority value', ERROR_CODES.INVALID_INPUT, 400,
+        { validValues: validPriorities });
     }
 
     const newTask = {
@@ -234,15 +215,10 @@ export async function POST(req: Request) {
 
     tasks.push(newTask);
 
-    return NextResponse.json(
-      { success: true, message: 'Task created successfully', data: newTask },
-      { status: 201 }
-    );
+    return sendSuccess({ task: newTask }, 'Task created successfully', 201);
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Invalid request body', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 400 }
-    );
+    return sendError('Invalid request body', ERROR_CODES.INVALID_REQUEST_BODY, 400,
+      { details: error instanceof Error ? error.message : 'Unknown error' });
   }
 }
 
@@ -255,10 +231,7 @@ export async function PUT(req: Request) {
   // Require authentication
   const auth = checkAuth(req);
   if (!auth.authorized) {
-    return NextResponse.json(
-      { error: 'Unauthorized. Authentication required.' },
-      { status: 401 }
-    );
+    return sendError('Authentication required', ERROR_CODES.UNAUTHORIZED, 401);
   }
 
   try {
@@ -279,19 +252,15 @@ export async function PUT(req: Request) {
     // Validate status if provided
     const validStatuses = ['pending', 'in-progress', 'completed'];
     if (data.status && !validStatuses.includes(data.status)) {
-      return NextResponse.json(
-        { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
-        { status: 400 }
-      );
+      return sendError('Invalid status value', ERROR_CODES.INVALID_INPUT, 400,
+        { validValues: validStatuses });
     }
 
     // Validate priority if provided
     const validPriorities = ['low', 'medium', 'high'];
     if (data.priority && !validPriorities.includes(data.priority)) {
-      return NextResponse.json(
-        { error: `Invalid priority. Must be one of: ${validPriorities.join(', ')}` },
-        { status: 400 }
-      );
+      return sendError('Invalid priority value', ERROR_CODES.INVALID_INPUT, 400,
+        { validValues: validPriorities });
     }
 
     // Update task
@@ -304,16 +273,10 @@ export async function PUT(req: Request) {
       ...(data.assignedTo && { assignedTo: data.assignedTo }),
     };
 
-    return NextResponse.json({
-      success: true,
-      message: 'Task updated successfully',
-      data: tasks[taskIndex],
-    });
+    return sendSuccess({ task: tasks[taskIndex] }, 'Task updated successfully');
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Invalid request body', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 400 }
-    );
+    return sendError('Invalid request body', ERROR_CODES.INVALID_REQUEST_BODY, 400,
+      { details: error instanceof Error ? error.message : 'Unknown error' });
   }
 }
 
@@ -326,10 +289,7 @@ export async function DELETE(req: Request) {
   // Require authentication
   const auth = checkAuth(req);
   if (!auth.authorized) {
-    return NextResponse.json(
-      { error: 'Unauthorized. Authentication required.' },
-      { status: 401 }
-    );
+    return sendError('Authentication required', ERROR_CODES.UNAUTHORIZED, 401);
   }
 
   try {
@@ -337,28 +297,23 @@ export async function DELETE(req: Request) {
 
     // Validate required ID
     if (!data.id) {
-      return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
+      return sendError('Task ID is required', ERROR_CODES.MISSING_REQUIRED_FIELD, 400,
+        { requiredFields: ['id'] });
     }
 
     // Find task index
     const taskIndex = tasks.findIndex((task) => task.id === data.id);
 
     if (taskIndex === -1) {
-      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+      return sendError('Task not found', ERROR_CODES.RESOURCE_NOT_FOUND, 404);
     }
 
     // Remove task
     const deletedTask = tasks.splice(taskIndex, 1)[0];
 
-    return NextResponse.json({
-      success: true,
-      message: 'Task deleted successfully',
-      data: deletedTask,
-    });
+    return sendSuccess({ task: deletedTask }, 'Task deleted successfully');
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Invalid request body', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 400 }
-    );
+    return sendError('Invalid request body', ERROR_CODES.INVALID_REQUEST_BODY, 400,
+      { details: error instanceof Error ? error.message : 'Unknown error' });
   }
 }
