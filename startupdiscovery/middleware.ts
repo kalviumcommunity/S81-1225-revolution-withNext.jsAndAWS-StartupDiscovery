@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
 // Get JWT secret from environment variable
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is not set.");
-}
+const getJWTSecret = (): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET environment variable is not set.");
+  }
+  return secret;
+};
 
 /**
  * Role-based access control configuration
@@ -62,7 +65,7 @@ function verifyJWT(
   token: string
 ): { userId: number; email: string; role: string } | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET!, {
+    const decoded = jwt.verify(token, getJWTSecret(), {
       algorithms: ["HS256"],
     });
 

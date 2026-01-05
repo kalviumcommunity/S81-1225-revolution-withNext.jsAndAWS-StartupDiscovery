@@ -17,12 +17,16 @@ interface JWTPayload {
  * JWT Secret Key - In production, use environment variable
  * Should be a long, random string stored securely
  */
-const JWT_SECRET = process.env.JWT_SECRET as string;
-if (!JWT_SECRET) {
-  throw new Error(
-    "JWT_SECRET environment variable is not set. Please set it in your .env.local file."
-  );
-}
+const getJWTSecret = (): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error(
+      "JWT_SECRET environment variable is not set. Please set it in your .env.local file."
+    );
+  }
+  return secret;
+};
+
 const JWT_EXPIRY = process.env.JWT_EXPIRY || "7d"; // Token expires in 7 days
 
 /**
@@ -74,7 +78,7 @@ export function generateToken(
         role,
         iat: Math.floor(Date.now() / 1000), // Issued at
       },
-      JWT_SECRET as string,
+      getJWTSecret(),
       {
         expiresIn: JWT_EXPIRY,
         algorithm: "HS256",
@@ -96,7 +100,7 @@ export function verifyToken(
   token: string
 ): { userId: number; email: string; role: string } | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET as string, {
+    const decoded = jwt.verify(token, getJWTSecret(), {
       algorithms: ["HS256"],
     }) as JWTPayload;
 
