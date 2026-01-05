@@ -7,7 +7,7 @@ export const userCreateSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters long"),
   email: z.string().email("Invalid email address"),
   role: z.enum(['admin', 'moderator', 'user'], {
-    errorMap: () => ({ message: "Role must be one of: admin, moderator, user" }),
+    message: "Role must be one of: admin, moderator, user",
   }),
   age: z.number().min(18, "User must be 18 or older").optional(),
 });
@@ -20,7 +20,7 @@ export const userUpdateSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters long").optional(),
   email: z.string().email("Invalid email address").optional(),
   role: z.enum(['admin', 'moderator', 'user'], {
-    errorMap: () => ({ message: "Role must be one of: admin, moderator, user" }),
+    message: "Role must be one of: admin, moderator, user",
   }).optional(),
   age: z.number().min(18, "User must be 18 or older").optional(),
 });

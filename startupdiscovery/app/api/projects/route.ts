@@ -35,7 +35,18 @@ function checkAuth(req: Request): { authorized: boolean; user?: { id: number; ro
 }
 
 // Mock data store (in production, this would be a database)
-let projects = [
+const projects: Array<{
+  id: number;
+  name: string;
+  description: string;
+  status: string;
+  category: string;
+  budget: number;
+  startDate: string;
+  endDate: string | null;
+  teamSize: number;
+  owner: string;
+}> = [
   {
     id: 1,
     name: 'Startup Discovery Platform',
@@ -230,7 +241,7 @@ export async function POST(req: Request) {
     // Validate input with Zod schema
     const data = projectCreateSchema.parse(body);
 
-    const newProject = {
+    const newProject: typeof projects[0] = {
       id: nextId++,
       name: data.name,
       description: data.description,
@@ -238,7 +249,7 @@ export async function POST(req: Request) {
       category: data.category,
       budget: data.budget,
       startDate: data.startDate,
-      endDate: data.endDate || null,
+      endDate: data.endDate ?? null,
       teamSize: data.teamSize,
       owner: data.owner,
     };

@@ -7,7 +7,7 @@ export const projectCreateSchema = z.object({
   name: z.string().min(3, "Project name must be at least 3 characters long"),
   description: z.string().min(10, "Description must be at least 10 characters long"),
   status: z.enum(['planning', 'active', 'on-hold', 'completed', 'cancelled'], {
-    errorMap: () => ({ message: "Status must be one of: planning, active, on-hold, completed, cancelled" }),
+    message: "Status must be one of: planning, active, on-hold, completed, cancelled",
   }).optional().default('planning'),
   category: z.string().min(2, "Category must be at least 2 characters long"),
   budget: z.number().positive("Budget must be a positive number"),
@@ -40,7 +40,7 @@ export const projectUpdateSchema = z.object({
   name: z.string().min(3, "Project name must be at least 3 characters long").optional(),
   description: z.string().min(10, "Description must be at least 10 characters long").optional(),
   status: z.enum(['planning', 'active', 'on-hold', 'completed', 'cancelled'], {
-    errorMap: () => ({ message: "Status must be one of: planning, active, on-hold, completed, cancelled" }),
+    message: "Status must be one of: planning, active, on-hold, completed, cancelled",
   }).optional(),
   category: z.string().min(2, "Category must be at least 2 characters long").optional(),
   budget: z.number().positive("Budget must be a positive number").optional(),
