@@ -77,8 +77,9 @@ export async function POST(req: Request) {
       return sendValidationError(error);
     }
 
+    // Log error without exposing sensitive information
     if (error instanceof Error) {
-      console.error('Login error:', error);
+      console.error('Login error:', error.message);
     }
 
     return sendError(

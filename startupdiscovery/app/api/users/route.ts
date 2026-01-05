@@ -68,7 +68,7 @@ export async function GET(req: Request) {
     }
 
     // Build Prisma where clause
-    const where: any = {};
+    const where: Record<string, unknown> = {};
     
     if (role) {
       where.role = role;
@@ -256,7 +256,7 @@ export async function PUT(req: Request) {
     }
 
     // Prepare update data
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (data.name) updateData.name = data.name;
     if (data.email) updateData.email = data.email;
     if (data.age !== undefined) updateData.age = data.age;

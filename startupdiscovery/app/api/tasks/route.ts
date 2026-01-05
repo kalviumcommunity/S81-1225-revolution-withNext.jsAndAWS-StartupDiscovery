@@ -26,7 +26,7 @@ function checkAuth(req: Request): { authorized: boolean; userId?: number; userRo
 }
 
 // Mock data store (in production, this would be a database)
-let tasks = [
+const tasks = [
   {
     id: 1,
     title: 'Design API architecture',

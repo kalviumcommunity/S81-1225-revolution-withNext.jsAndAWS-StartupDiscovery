@@ -6,7 +6,10 @@ import { NextRequest } from 'next/server';
  * JWT Secret Key - In production, use environment variable
  * Should be a long, random string stored securely
  */
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production-12345';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is not set. Please set it in your .env.local file.');
+}
 const JWT_EXPIRY = process.env.JWT_EXPIRY || '7d'; // Token expires in 7 days
 
 /**
@@ -49,8 +52,8 @@ export function generateToken(userId: number, email: string): string {
       JWT_SECRET,
       {
         expiresIn: JWT_EXPIRY,
-        algorithm: 'HS256' as const,
-      } as any
+        algorithm: 'HS256',
+      } as jwt.SignOptions
     );
     return token;
   } catch (error) {
