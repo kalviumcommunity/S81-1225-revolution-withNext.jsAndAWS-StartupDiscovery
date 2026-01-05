@@ -1,5 +1,23 @@
 import { NextResponse } from 'next/server';
 
+// Authentication helper
+function checkAuth(req: Request): { authorized: boolean; user?: { id: number; role: string } } {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { authorized: false };
+  }
+  try {
+    const token = authHeader.substring(7);
+    const [userId, role] = token.split(':');
+    return {
+      authorized: true,
+      user: { id: parseInt(userId) || 1, role: role || 'user' },
+    };
+  } catch {
+    return { authorized: false };
+  }
+}
+
 // Mock data store (in production, this would be a database)
 let tasks = [
   {
@@ -63,6 +81,15 @@ let nextId = 6;
  * - search: Search in title and description
  */
 export async function GET(req: Request) {
+  // Require authentication
+  const auth = checkAuth(req);
+  if (!auth.authorized) {
+    return NextResponse.json(
+      { error: 'Unauthorized. Authentication required.' },
+      { status: 401 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const page = Number(searchParams.get('page')) || 1;
@@ -157,6 +184,15 @@ export async function GET(req: Request) {
  * Body: { title: string, description: string, status?: string, priority?: string, assignedTo?: string }
  */
 export async function POST(req: Request) {
+  // Require authentication
+  const auth = checkAuth(req);
+  if (!auth.authorized) {
+    return NextResponse.json(
+      { error: 'Unauthorized. Authentication required.' },
+      { status: 401 }
+    );
+  }
+
   try {
     const data = await req.json();
 
@@ -216,6 +252,15 @@ export async function POST(req: Request) {
  * Body: { id: number, title?: string, description?: string, status?: string, priority?: string, assignedTo?: string }
  */
 export async function PUT(req: Request) {
+  // Require authentication
+  const auth = checkAuth(req);
+  if (!auth.authorized) {
+    return NextResponse.json(
+      { error: 'Unauthorized. Authentication required.' },
+      { status: 401 }
+    );
+  }
+
   try {
     const data = await req.json();
 
@@ -278,6 +323,15 @@ export async function PUT(req: Request) {
  * Body: { id: number }
  */
 export async function DELETE(req: Request) {
+  // Require authentication
+  const auth = checkAuth(req);
+  if (!auth.authorized) {
+    return NextResponse.json(
+      { error: 'Unauthorized. Authentication required.' },
+      { status: 401 }
+    );
+  }
+
   try {
     const data = await req.json();
 
