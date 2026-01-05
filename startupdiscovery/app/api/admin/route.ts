@@ -22,21 +22,14 @@ export async function GET(req: Request) {
     }
 
     // Get admin statistics
-    const [
-      totalUsers,
-      adminCount,
-      moderatorCount,
-      userCount,
-      totalProjects,
-      totalTasks,
-    ] = await Promise.all([
-      prisma.user.count(),
-      prisma.user.count({ where: { role: "ADMIN" } }),
-      prisma.user.count({ where: { role: "MODERATOR" } }),
-      prisma.user.count({ where: { role: "USER" } }),
-      prisma.project.count(),
-      prisma.task.count(),
-    ]);
+    const [totalUsers, adminCount, moderatorCount, userCount, totalStartups] =
+      await Promise.all([
+        prisma.user.count(),
+        prisma.user.count({ where: { role: "ADMIN" } }),
+        prisma.user.count({ where: { role: "MODERATOR" } }),
+        prisma.user.count({ where: { role: "USER" } }),
+        prisma.startup.count(),
+      ]);
 
     // Get recent users
     const recentUsers = await prisma.user.findMany({
@@ -62,8 +55,7 @@ export async function GET(req: Request) {
             MODERATOR: moderatorCount,
             USER: userCount,
           },
-          totalProjects,
-          totalTasks,
+          totalStartups,
         },
         recentUsers,
         timestamp: new Date().toISOString(),
