@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { ZodError } from 'zod';
 
 /**
  * Send a standardized success response
@@ -42,5 +43,24 @@ export const sendError = (
       timestamp: new Date().toISOString(),
     },
     { status }
+  );
+};
+
+/**
+ * Send a validation error response from Zod errors
+ * Note: Sanitized to prevent exposing internal schema structure
+ */
+export const sendValidationError = (error: ZodError) => {
+  return NextResponse.json(
+    {
+      success: false,
+      message: 'Validation Error',
+      errors: error.issues.map((e: any) => ({
+        field: e.path.length > 0 ? e.path[e.path.length - 1] : 'unknown',
+        message: e.message,
+      })),
+      timestamp: new Date().toISOString(),
+    },
+    { status: 400 }
   );
 };
