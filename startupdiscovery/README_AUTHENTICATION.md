@@ -296,7 +296,6 @@ startupdiscovery/
 │   ├── auth.ts                      # Password & JWT utilities
 │   ├── responseHandler.ts           # Standardized API responses
 │   ├── errorCodes.ts                # Error code catalog
-│   ├── tokenValidator.ts            # Token validation (legacy)
 │   ├── prisma.ts                    # Prisma client singleton
 │   └── schemas/
 │       ├── authSchema.ts            # Signup/login validation

@@ -39,14 +39,15 @@ export async function comparePassword(password: string, hashedPassword: string):
 
 /**
  * Generate JWT token for authenticated user
- * Token contains user ID and email
+ * Token contains user ID, email, and role
  */
-export function generateToken(userId: number, email: string): string {
+export function generateToken(userId: number, email: string, role: string = 'USER'): string {
   try {
     const token = jwt.sign(
       {
         userId,
         email,
+        role,
         iat: Math.floor(Date.now() / 1000), // Issued at
       },
       JWT_SECRET,
@@ -65,16 +66,17 @@ export function generateToken(userId: number, email: string): string {
  * Verify and decode JWT token
  * Returns decoded token data or null if invalid
  */
-export function verifyToken(token: string): { userId: number; email: string } | null {
+export function verifyToken(token: string): { userId: number; email: string; role: string } | null {
   try {
     const decoded = jwt.verify(token, JWT_SECRET, {
       algorithms: ['HS256'],
     });
 
-    if (typeof decoded === 'object' && 'userId' in decoded && 'email' in decoded) {
+    if (typeof decoded === 'object' && 'userId' in decoded && 'email' in decoded && 'role' in decoded) {
       return {
         userId: decoded.userId as number,
         email: decoded.email as string,
+        role: decoded.role as string,
       };
     }
 
@@ -99,7 +101,7 @@ export function extractBearerToken(authHeader: string | null): string | null {
 /**
  * Validate Authorization header and extract user data
  * Returns user data if valid, null if invalid
- */
+ */; role: string
 export function validateAuthHeader(authHeader: string | null): { userId: number; email: string } | null {
   const token = extractBearerToken(authHeader);
 
@@ -114,7 +116,7 @@ export function validateAuthHeader(authHeader: string | null): { userId: number;
  * Middleware to check JWT in request
  * Can be used in API routes to protect endpoints
  */
-export function checkJWTAuth(req: NextRequest): { authorized: boolean; userId?: number; email?: string } {
+export function checkJWTAuth(req: NextRequest): { authorized: boolean; userId?: number; email?: string; role?: string } {
   const authHeader = req.headers.get('authorization');
   const userData = validateAuthHeader(authHeader);
 
@@ -126,5 +128,6 @@ export function checkJWTAuth(req: NextRequest): { authorized: boolean; userId?: 
     authorized: true,
     userId: userData.userId,
     email: userData.email,
+    role: userData.role,
   };
 }

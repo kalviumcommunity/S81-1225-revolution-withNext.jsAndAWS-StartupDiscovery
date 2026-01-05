@@ -5,8 +5,8 @@ import { validateAuthHeader } from '@/lib/auth';
 import { ZodError } from 'zod';
 import prisma from '@/lib/prisma';
 
-// Authentication helper with JWT verification
-function checkAuth(req: Request): { authorized: boolean; userId?: number; email?: string } {
+// Authentication helper with JWT verification and role retrieval
+function checkAuth(req: Request): { authorized: boolean; userId?: number; email?: string; role?: string } {
   const authHeader = req.headers.get('authorization');
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -25,6 +25,7 @@ function checkAuth(req: Request): { authorized: boolean; userId?: number; email?
       authorized: true,
       userId: userData.userId,
       email: userData.email,
+      role: userData.role, // Include role from token
     };
   } catch {
     return { authorized: false };
@@ -128,7 +129,7 @@ export async function GET(req: Request) {
 
 /**
  * POST /api/users
- * Create a new user (default role: 'user')
+ * Create a new user (admin only)
  * Body: { name: string, email: string, age?: number }
  * Note: Use /api/auth/signup for self-registration with password
  */
@@ -140,6 +141,15 @@ export async function POST(req: Request) {
       'Unauthorized. Authentication required.',
       ERROR_CODES.UNAUTHORIZED,
       401
+    );
+  }
+
+  // Require ADMIN role
+  if (auth.role !== 'ADMIN') {
+    return sendError(
+      'Forbidden. Only administrators can create user accounts.',
+      ERROR_CODES.FORBIDDEN,
+      403
     );
   }
 

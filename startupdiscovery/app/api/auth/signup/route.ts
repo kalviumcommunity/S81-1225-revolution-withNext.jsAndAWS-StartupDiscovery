@@ -4,6 +4,7 @@ import { sendSuccess, sendError, sendValidationError } from '@/lib/responseHandl
 import { ERROR_CODES } from '@/lib/errorCodes';
 import { ZodError } from 'zod';
 import prisma from '@/lib/prisma';
+import crypto from 'crypto';
 
 /**
  * POST /api/auth/signup
@@ -48,12 +49,38 @@ export async function POST(req: Request) {
       );
     }
 
+    // Generate unique username with collision handling
+    const baseUsername = validatedData.email.split('@')[0];
+    let username = baseUsername;
+    let usernameExists = await prisma.user.findUnique({
+      where: { username },
+    });
+
+    // If username exists, append random suffix until unique
+    let attempts = 0;
+    while (usernameExists && attempts < 10) {
+      const suffix = crypto.randomBytes(3).toString('hex');
+      username = `${baseUsername}${suffix}`;
+      usernameExists = await prisma.user.findUnique({
+        where: { username },
+      });
+      attempts++;
+    }
+
+    if (usernameExists) {
+      return sendError(
+        'Unable to generate unique username. Please try again.',
+        ERROR_CODES.INTERNAL_ERROR,
+        500
+      );
+    }
+
     // Create user in database
     const newUser = await prisma.user.create({
       data: {
         name: validatedData.name,
         email: validatedData.email,
-        username: validatedData.email.split('@')[0], // Use email prefix as username
+        username,
         passwordHash: hashedPassword,
         role: 'USER', // Default role
       },
@@ -68,7 +95,7 @@ export async function POST(req: Request) {
     });
 
     // Generate JWT token for immediate login after signup
-    const token = generateToken(newUser.id, newUser.email);
+    const token = generateToken(newUser.id, newUser.email, newUser.role);
 
     return sendSuccess(
       {
