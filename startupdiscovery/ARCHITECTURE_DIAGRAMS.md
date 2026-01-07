@@ -476,18 +476,21 @@ Result: Only affected subscribers re-render!
 ## 📋 Checklist: Using State Management
 
 When you need to use authentication state:
+
 - ✅ Create "use client" component
 - ✅ Import: `import { useAuth } from "@/hooks"`
 - ✅ Destructure: `const { user, login, logout } = useAuth()`
 - ✅ Use in JSX: `{user && <p>Welcome {user}</p>}`
 
 When you need to use UI state:
+
 - ✅ Create "use client" component
 - ✅ Import: `import { useUI } from "@/hooks"`
 - ✅ Destructure: `const { theme, toggleTheme } = useUI()`
 - ✅ Use in JSX: `onClick={toggleTheme}`
 
 When you need both:
+
 - ✅ Create "use client" component
 - ✅ Import both: `import { useAuth, useUI } from "@/hooks"`
 - ✅ Use together in same component
@@ -564,16 +567,16 @@ Test Examples:
 
 ## 🎯 This Architecture Enables
 
-| Capability | How |
-|-----------|-----|
-| **No Prop Drilling** | Components directly access context via hooks |
-| **Centralized State** | Single source of truth for auth and UI |
-| **Easy Testing** | Mock providers, test hooks independently |
-| **Performance** | Memoization + context splitting |
-| **Scalability** | Easy to add more contexts as app grows |
-| **Type Safety** | TypeScript interfaces for all state |
-| **Code Organization** | Clear separation of concerns |
-| **Developer Experience** | Clean API via custom hooks |
+| Capability               | How                                          |
+| ------------------------ | -------------------------------------------- |
+| **No Prop Drilling**     | Components directly access context via hooks |
+| **Centralized State**    | Single source of truth for auth and UI       |
+| **Easy Testing**         | Mock providers, test hooks independently     |
+| **Performance**          | Memoization + context splitting              |
+| **Scalability**          | Easy to add more contexts as app grows       |
+| **Type Safety**          | TypeScript interfaces for all state          |
+| **Code Organization**    | Clear separation of concerns                 |
+| **Developer Experience** | Clean API via custom hooks                   |
 
 ---
 

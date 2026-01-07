@@ -97,7 +97,7 @@ toggleTheme(); // Switches between "light" and "dark"
 ```typescript
 const { setTheme } = useUI();
 
-setTheme("dark");  // Set to dark
+setTheme("dark"); // Set to dark
 setTheme("light"); // Set to light
 ```
 
@@ -122,7 +122,7 @@ toggleNotifications(); // Enable/disable
 ```typescript
 const { modalOpen, toggleModal } = useUI();
 
-toggleModal(true);  // Open modal
+toggleModal(true); // Open modal
 toggleModal(false); // Close modal
 ```
 
@@ -280,19 +280,19 @@ Both contexts log their actions to the console:
 
 ```javascript
 // Auth logging
-"✅ User logged in: john_doe (john@example.com)"
-"🔓 User logged out"
-"❌ Error cleared"
+"✅ User logged in: john_doe (john@example.com)";
+"🔓 User logged out";
+"❌ Error cleared";
 
 // UI logging
-"🎨 Theme toggled to: dark"
-"📂 Sidebar closed"
-"📂 Sidebar opened"
-"🔔 Notifications enabled"
-"🔔 Notifications disabled"
-"📦 Modal opened"
-"📦 Modal closed"
-"🔄 UI state reset"
+"🎨 Theme toggled to: dark";
+"📂 Sidebar closed";
+"📂 Sidebar opened";
+"🔔 Notifications enabled";
+"🔔 Notifications disabled";
+"📦 Modal opened";
+"📦 Modal closed";
+"🔄 UI state reset";
 ```
 
 **How to view**: Open browser dev tools → Console → Look for log messages
@@ -361,7 +361,7 @@ export default function Page() {
 }
 
 // ✅ Correct - add "use client" directive
-"use client";
+("use client");
 
 export default function Page() {
   const { user } = useAuth(); // Works!
@@ -383,16 +383,17 @@ login("new_user", "email@example.com");
 ## 📖 See Full Documentation
 
 For comprehensive guides and examples:
+
 - [STATE_MANAGEMENT_GUIDE.md](./STATE_MANAGEMENT_GUIDE.md) - 800+ line guide
 - [app/state-management/page.tsx](./app/state-management/page.tsx) - Interactive demo
 
 ## 🎯 File Locations
 
-| File | Purpose |
-|------|---------|
-| `context/AuthContext.tsx` | Authentication state |
-| `context/UIContext.tsx` | UI state |
-| `hooks/useAuth.ts` | Auth hook |
-| `hooks/useUI.ts` | UI state hook |
-| `app/layout.tsx` | Provider setup |
-| `app/state-management/page.tsx` | Demo page |
+| File                            | Purpose              |
+| ------------------------------- | -------------------- |
+| `context/AuthContext.tsx`       | Authentication state |
+| `context/UIContext.tsx`         | UI state             |
+| `hooks/useAuth.ts`              | Auth hook            |
+| `hooks/useUI.ts`                | UI state hook        |
+| `app/layout.tsx`                | Provider setup       |
+| `app/state-management/page.tsx` | Demo page            |
