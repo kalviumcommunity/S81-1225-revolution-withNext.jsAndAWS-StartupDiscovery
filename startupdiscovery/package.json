@@ -13,6 +13,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "type-check": "tsc --noEmit",
     "prepare": "husky",
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
