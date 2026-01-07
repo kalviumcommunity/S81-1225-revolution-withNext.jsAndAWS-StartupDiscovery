@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import { LayoutWrapper } from "@/components";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -48,70 +49,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* Navigation Header */}
-        <header className="bg-white shadow-sm sticky top-0 z-50">
-          <nav className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold text-blue-600">
-              StartUp Discovery
-            </Link>
-
-            <ul className="hidden md:flex items-center gap-8">
-              <li>
-                <Link
-                  href="/"
-                  className="text-gray-700 hover:text-blue-600 transition"
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/startups"
-                  className="text-gray-700 hover:text-blue-600 transition"
-                >
-                  Startups
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/users"
-                  className="text-gray-700 hover:text-blue-600 transition"
-                >
-                  Browse Users
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/login"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                >
-                  Sign In
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/dashboard"
-                  className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition"
-                >
-                  Dashboard
-                </Link>
-              </li>
-            </ul>
-
-            {/* Mobile menu button */}
-            <div className="md:hidden">
-              <Link
-                href="/login"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm"
-              >
-                Sign In
-              </Link>
-            </div>
-          </nav>
-        </header>
-
-        {/* Main Content */}
-        {children}
+        <LayoutWrapper showHeader showSidebar headerTitle="Startup Discovery">
+          {children}
+        </LayoutWrapper>
 
         {/* Footer */}
         <footer className="bg-gray-900 text-gray-300 mt-16">
