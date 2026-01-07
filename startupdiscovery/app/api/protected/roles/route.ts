@@ -124,7 +124,7 @@ export async function PATCH(req: Request) {
     // Update user role
     const updatedUser = await prisma.user.update({
       where: { id: validatedData.userId },
-      data: { role: newRole },
+      data: { role: newRole as any },
       select: {
         id: true,
         email: true,
