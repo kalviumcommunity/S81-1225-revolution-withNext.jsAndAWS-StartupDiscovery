@@ -5,6 +5,7 @@
 ### Layout Components
 
 #### 1. LayoutWrapper (Main Layout)
+
 Wraps pages with Header, Sidebar, and consistent styling.
 
 ```tsx
@@ -13,24 +14,24 @@ import { LayoutWrapper } from "@/components";
 export default function DashboardPage() {
   return (
     <LayoutWrapper showHeader showSidebar headerTitle="Dashboard">
-      <div className="p-6">
-        {/* Your page content */}
-      </div>
+      <div className="p-6">{/* Your page content */}</div>
     </LayoutWrapper>
   );
 }
 ```
 
 #### 2. Header (Top Navigation)
+
 Sticky navigation with active link detection.
 
 ```tsx
 import { Header } from "@/components";
 
-<Header title="My App" showNav />
+<Header title="My App" showNav />;
 ```
 
 #### 3. Sidebar (Secondary Navigation)
+
 Collapsible navigation for desktop/mobile.
 
 ```tsx
@@ -43,7 +44,7 @@ import { Sidebar } from "@/components";
     { label: "Dashboard", href: "/dashboard", icon: "📊" },
     { label: "Settings", href: "/settings", icon: "⚙️" },
   ]}
-/>
+/>;
 ```
 
 ---
@@ -51,6 +52,7 @@ import { Sidebar } from "@/components";
 ## UI Components
 
 ### 1. Button
+
 5 variants, 3 sizes, multiple states.
 
 ```tsx
@@ -82,6 +84,7 @@ import { Button } from "@/components";
 ---
 
 ### 2. Card
+
 Container with optional sections.
 
 ```tsx
@@ -123,6 +126,7 @@ import { Card, Button } from "@/components";
 ---
 
 ### 3. Input
+
 Form input with labels, errors, helper text.
 
 ```tsx
@@ -245,13 +249,8 @@ export default function ProfilePage() {
 
         {/* Info cards */}
         <div className="grid md:grid-cols-2 gap-6 mt-8">
-          <Card
-            title="Account Status"
-            description="Your account information"
-          >
-            <p className="text-sm text-gray-600">
-              Active since January 2024
-            </p>
+          <Card title="Account Status" description="Your account information">
+            <p className="text-sm text-gray-600">Active since January 2024</p>
           </Card>
 
           <Card
@@ -259,9 +258,7 @@ export default function ProfilePage() {
             description="Password and 2FA settings"
             footer={<Button label="Configure" variant="secondary" size="sm" />}
           >
-            <p className="text-sm text-gray-600">
-              2FA is currently disabled
-            </p>
+            <p className="text-sm text-gray-600">2FA is currently disabled</p>
           </Card>
         </div>
       </div>
@@ -300,6 +297,7 @@ All components accept `className` prop for custom styling:
 ## TypeScript Props Reference
 
 ### Button Props
+
 ```typescript
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   label?: string;
@@ -312,6 +310,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 ```
 
 ### Card Props
+
 ```typescript
 interface CardProps {
   title?: string;
@@ -327,6 +326,7 @@ interface CardProps {
 ```
 
 ### Input Props
+
 ```typescript
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -339,6 +339,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 ```
 
 ### LayoutWrapper Props
+
 ```typescript
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -353,6 +354,7 @@ interface LayoutWrapperProps {
 ## Accessibility Features Built-In
 
 ✅ **All Components Include**:
+
 - Semantic HTML tags
 - ARIA attributes
 - Keyboard navigation (Tab, Enter, Space)
@@ -379,6 +381,7 @@ Explore all variants, sizes, and states in the Storybook UI.
 ## Common Patterns
 
 ### Form Section
+
 ```tsx
 <Card title="Contact Information" variant="outlined">
   <div className="space-y-4">
@@ -394,6 +397,7 @@ Explore all variants, sizes, and states in the Storybook UI.
 ```
 
 ### Feature Grid
+
 ```tsx
 <div className="grid md:grid-cols-3 gap-6">
   <Card
@@ -413,6 +417,7 @@ Explore all variants, sizes, and states in the Storybook UI.
 ```
 
 ### Action Section
+
 ```tsx
 <Card variant="elevated" title="Actions">
   <div className="flex gap-2 flex-wrap">
@@ -426,9 +431,17 @@ Explore all variants, sizes, and states in the Storybook UI.
 ---
 
 ## Import Statement
+
 ```typescript
 // Import specific components
-import { Header, Sidebar, LayoutWrapper, Button, Card, Input } from "@/components";
+import {
+  Header,
+  Sidebar,
+  LayoutWrapper,
+  Button,
+  Card,
+  Input,
+} from "@/components";
 
 // Or use barrel export
 import * as Components from "@/components";
