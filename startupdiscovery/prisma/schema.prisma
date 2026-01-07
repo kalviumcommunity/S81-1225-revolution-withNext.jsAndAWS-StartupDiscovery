@@ -51,13 +51,17 @@ enum UserRole {
 }
 
 model Session {
-  id        String   @id @default(cuid())
-  userId    Int
-  token     String   @unique
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  ipAddress String?
-  userAgent String?
+  id                String   @id @default(cuid())
+  userId            Int
+  token             String   @unique
+  expiresAt         DateTime
+  createdAt         DateTime @default(now())
+  ipAddress         String?
+  userAgent         String?
+  refreshTokenHash  String?  @unique // Make it queryable
+  tokenVersion      Int      @default(1) // For token rotation tracking
+  isRevoked         Boolean  @default(false) // For logout/security invalidation
+  revokedAt         DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
