@@ -29,6 +29,7 @@ USER (Level 1)
 The system uses an Action-based permission model with 18 distinct actions:
 
 #### User Management Actions
+
 - `CREATE_USER` - Create new user accounts
 - `READ_USER` - View user information
 - `UPDATE_USER` - Modify user details (own profile or any as Admin)
@@ -36,6 +37,7 @@ The system uses an Action-based permission model with 18 distinct actions:
 - `MANAGE_ROLES` - Assign or modify user roles
 
 #### Startup Management Actions
+
 - `CREATE_STARTUP` - Create new startups
 - `READ_STARTUP` - View startup information
 - `UPDATE_STARTUP` - Edit startups (own or any as moderator+)
@@ -43,6 +45,7 @@ The system uses an Action-based permission model with 18 distinct actions:
 - `PUBLISH_STARTUP` - Publish startup to public
 
 #### Content Management Actions
+
 - `CREATE_COMMENT` - Add comments to startups
 - `READ_COMMENT` - View comments
 - `UPDATE_COMMENT` - Edit comments (own or as moderator+)
@@ -50,6 +53,7 @@ The system uses an Action-based permission model with 18 distinct actions:
 - `MODERATE_CONTENT` - Moderate user-generated content
 
 #### Analytics & System Actions
+
 - `VIEW_ANALYTICS` - Access analytics and reports
 - `VIEW_REPORTS` - View system reports
 - `EXPORT_DATA` - Export data from the system
@@ -58,30 +62,30 @@ The system uses an Action-based permission model with 18 distinct actions:
 
 ### Permission Mapping
 
-| Action | ADMIN | MODERATOR | USER |
-|--------|-------|-----------|------|
-| CREATE_USER | ✅ | ❌ | ❌ |
-| READ_USER | ✅ | ✅ | ✅ |
-| UPDATE_USER | ✅ | ✅ | ✅* |
-| DELETE_USER | ✅ | ❌ | ❌ |
-| MANAGE_ROLES | ✅ | ❌ | ❌ |
-| CREATE_STARTUP | ✅ | ✅ | ✅ |
-| READ_STARTUP | ✅ | ✅ | ✅ |
-| UPDATE_STARTUP | ✅ | ✅ | ✅* |
-| DELETE_STARTUP | ✅ | ✅ | ❌ |
-| PUBLISH_STARTUP | ✅ | ✅ | ❌ |
-| CREATE_COMMENT | ✅ | ✅ | ✅ |
-| READ_COMMENT | ✅ | ✅ | ✅ |
-| UPDATE_COMMENT | ✅ | ✅ | ✅* |
-| DELETE_COMMENT | ✅ | ✅ | ❌ |
-| MODERATE_CONTENT | ✅ | ✅ | ❌ |
-| VIEW_ANALYTICS | ✅ | ✅ | ❌ |
-| VIEW_REPORTS | ✅ | ✅ | ❌ |
-| EXPORT_DATA | ✅ | ❌ | ❌ |
-| MANAGE_SETTINGS | ✅ | ❌ | ❌ |
-| MANAGE_AUDIT_LOGS | ✅ | ❌ | ❌ |
+| Action            | ADMIN | MODERATOR | USER |
+| ----------------- | ----- | --------- | ---- |
+| CREATE_USER       | ✅    | ❌        | ❌   |
+| READ_USER         | ✅    | ✅        | ✅   |
+| UPDATE_USER       | ✅    | ✅        | ✅\* |
+| DELETE_USER       | ✅    | ❌        | ❌   |
+| MANAGE_ROLES      | ✅    | ❌        | ❌   |
+| CREATE_STARTUP    | ✅    | ✅        | ✅   |
+| READ_STARTUP      | ✅    | ✅        | ✅   |
+| UPDATE_STARTUP    | ✅    | ✅        | ✅\* |
+| DELETE_STARTUP    | ✅    | ✅        | ❌   |
+| PUBLISH_STARTUP   | ✅    | ✅        | ❌   |
+| CREATE_COMMENT    | ✅    | ✅        | ✅   |
+| READ_COMMENT      | ✅    | ✅        | ✅   |
+| UPDATE_COMMENT    | ✅    | ✅        | ✅\* |
+| DELETE_COMMENT    | ✅    | ✅        | ❌   |
+| MODERATE_CONTENT  | ✅    | ✅        | ❌   |
+| VIEW_ANALYTICS    | ✅    | ✅        | ❌   |
+| VIEW_REPORTS      | ✅    | ✅        | ❌   |
+| EXPORT_DATA       | ✅    | ❌        | ❌   |
+| MANAGE_SETTINGS   | ✅    | ❌        | ❌   |
+| MANAGE_AUDIT_LOGS | ✅    | ❌        | ❌   |
 
-*Can only perform on own resources (determined by ownership check)
+\*Can only perform on own resources (determined by ownership check)
 
 ## Implementation Components
 
@@ -90,7 +94,13 @@ The system uses an Action-based permission model with 18 distinct actions:
 Defines roles, actions, and permission mappings:
 
 ```typescript
-import { UserRole, Action, rolePermissions, getRolePermissions, hasPermission } from "@/lib/rbac";
+import {
+  UserRole,
+  Action,
+  rolePermissions,
+  getRolePermissions,
+  hasPermission,
+} from "@/lib/rbac";
 
 // Check if a role has a specific permission
 const canDelete = hasPermission("ADMIN", Action.DELETE_USER); // true
@@ -98,6 +108,7 @@ const canModerate = hasPermission("USER", Action.MODERATE_CONTENT); // false
 ```
 
 **Key Functions:**
+
 - `getRolePermissions(role)` - Get all actions for a role (including inherited)
 - `hasPermission(role, action)` - Check if role can perform action
 - `getManagedRoles(role)` - Get roles that a role can manage
@@ -116,7 +127,12 @@ import {
 } from "@/lib/rbac";
 
 // Check permission and return result
-const result = checkPermission(context, Action.DELETE_STARTUP, "startup", startupId);
+const result = checkPermission(
+  context,
+  Action.DELETE_STARTUP,
+  "startup",
+  startupId
+);
 if (!result.allowed) {
   console.log("Denied:", result.reason);
 }
@@ -131,10 +147,17 @@ try {
 }
 
 // Check permission + ownership
-enforceOwnerPermission(context, Action.UPDATE_STARTUP, "startup", startupId, ownerId);
+enforceOwnerPermission(
+  context,
+  Action.UPDATE_STARTUP,
+  "startup",
+  startupId,
+  ownerId
+);
 ```
 
 **Context Object:**
+
 ```typescript
 interface PermissionCheckContext {
   userId: number;
@@ -150,7 +173,11 @@ interface PermissionCheckContext {
 Logs all permission checks for security monitoring:
 
 ```typescript
-import { getAuditLogs, getAuditSummary, getHighRiskActivities } from "@/lib/rbac";
+import {
+  getAuditLogs,
+  getAuditSummary,
+  getHighRiskActivities,
+} from "@/lib/rbac";
 
 // Get all audit logs
 const logs = getAuditLogs();
@@ -168,6 +195,7 @@ const suspicious = getHighRiskActivities();
 ```
 
 **Audit Log Format:**
+
 ```typescript
 interface AuditLog {
   userId: number;
@@ -185,6 +213,7 @@ interface AuditLog {
 ```
 
 **Console Output Example:**
+
 ```
 ✅ [RBAC_AUDIT] admin@example.com (ADMIN) → create_user on user: ALLOWED
 ❌ [RBAC_AUDIT] user@example.com (USER) → delete_user on user#5: DENIED (Role USER does not have delete_user permission)
@@ -196,16 +225,19 @@ interface AuditLog {
 ### User Management
 
 #### `GET /api/protected/users`
+
 - **Permission Required**: `READ_USER`
 - **Minimum Role**: MODERATOR
 - **Returns**: List of all users with role and activity stats
 
 #### `DELETE /api/protected/users/[id]`
+
 - **Permission Required**: `DELETE_USER`
 - **Minimum Role**: ADMIN
 - **Audit**: Logs deletion attempt
 
 #### `PATCH /api/protected/roles`
+
 - **Permission Required**: `MANAGE_ROLES`
 - **Minimum Role**: ADMIN
 - **Features**:
@@ -216,16 +248,19 @@ interface AuditLog {
 ### Startup Management
 
 #### `POST /api/protected/startups`
+
 - **Permission Required**: `CREATE_STARTUP`
 - **Minimum Role**: USER
 - **Validates**: Slug format and required fields
 
 #### `PATCH /api/protected/startups/[id]`
+
 - **Permission Required**: `UPDATE_STARTUP`
 - **Ownership Check**: User or Moderator+
 - **Audit**: Logs all update attempts
 
 #### `DELETE /api/protected/startups/[id]`
+
 - **Permission Required**: `DELETE_STARTUP`
 - **Ownership Check**: Own startup or Admin
 - **Returns**: 404 if startup not found
@@ -233,17 +268,20 @@ interface AuditLog {
 ### Comment Management
 
 #### `POST /api/protected/comments`
+
 - **Permission Required**: `CREATE_COMMENT`
 - **Minimum Role**: USER
 - **Validates**: Startup exists
 
 #### `DELETE /api/protected/comments/[id]`
+
 - **Permission Required**: `DELETE_COMMENT`
 - **Ownership Check**: Own comment or Moderator+
 
 ### Analytics & Audit
 
 #### `GET /api/protected/audit-logs`
+
 - **Permission Required**: `MANAGE_ROLES`
 - **Minimum Role**: ADMIN
 - **Query Parameters**:
@@ -253,11 +291,13 @@ interface AuditLog {
   - `limit` - Results to return (max 1000)
 
 #### `POST /api/protected/audit-logs/summary`
+
 - **Permission Required**: `MANAGE_ROLES`
 - **Minimum Role**: ADMIN
 - **Returns**: Statistics and high-risk activities
 
 #### `GET /api/protected/analytics`
+
 - **Permission Required**: `VIEW_ANALYTICS`
 - **Minimum Role**: ADMIN
 - **Returns**: System-wide analytics
@@ -279,7 +319,12 @@ interface AuditLog {
 
 ```typescript
 class PermissionDeniedError extends Error {
-  constructor(reason: string, action: Action, resource: string, resourceId?: number) {
+  constructor(
+    reason: string,
+    action: Action,
+    resource: string,
+    resourceId?: number
+  ) {
     super(`Permission denied: ${reason}`);
     this.action = action;
     this.resource = resource;
@@ -312,7 +357,7 @@ import { enforcePermission, Action, PermissionDeniedError } from "@/lib/rbac";
 export async function DELETE(req: Request) {
   // Extract and verify token
   const decoded = verifyAccessToken(token);
-  
+
   const context = {
     userId: decoded.userId,
     userEmail: decoded.email,
@@ -341,53 +386,63 @@ export async function DELETE(req: Request) {
 ### Test Case 1: Admin Can Delete Users
 
 **Setup:**
+
 - User: admin@example.com (ADMIN)
 - Action: DELETE /api/protected/users/2
 - Target User ID: 2 (regular user)
 
 **Expected Result:**
+
 - ✅ 200 OK - User deleted
 - ✅ Audit log: "admin@example.com (ADMIN) → delete_user on user#2: ALLOWED"
 
 ### Test Case 2: User Cannot Delete Users
 
 **Setup:**
+
 - User: user@example.com (USER)
 - Action: DELETE /api/protected/users/2
 
 **Expected Result:**
+
 - ❌ 403 Forbidden
 - ✅ Audit log: "user@example.com (USER) → delete_user on user#2: DENIED (Role USER does not have delete_user permission)"
 
 ### Test Case 3: User Can Update Own Startup
 
 **Setup:**
+
 - User: user@example.com (USER)
 - Action: PATCH /api/protected/startups/5
 - Startup Owner: user@example.com (userId: 1)
 
 **Expected Result:**
+
 - ✅ 200 OK - Startup updated
 - ✅ Audit log: "user@example.com (USER) → update_startup on startup#5: ALLOWED (Own resource)"
 
 ### Test Case 4: User Cannot Update Others' Startups
 
 **Setup:**
+
 - User: user@example.com (USER, userId: 1)
 - Action: PATCH /api/protected/startups/6
 - Startup Owner: admin@example.com (userId: 2)
 
 **Expected Result:**
+
 - ❌ 403 Forbidden
 - ✅ Audit log: "user@example.com (USER) → update_startup on startup#6: DENIED (Only admins and moderators can modify other users' startups)"
 
 ### Test Case 5: Moderator Can Moderate Content
 
 **Setup:**
+
 - User: mod@example.com (MODERATOR)
 - Action: DELETE /api/protected/comments/10
 
 **Expected Result:**
+
 - ✅ 200 OK - Comment deleted
 - ✅ Audit log: "mod@example.com (MODERATOR) → delete_comment on comment#10: ALLOWED"
 
@@ -416,12 +471,19 @@ if (adminCount === 1 && currentRole === "ADMIN") {
 
 ```typescript
 // Only allow update if owner or admin
-enforceOwnerPermission(context, Action.UPDATE_STARTUP, "startup", startupId, ownerId);
+enforceOwnerPermission(
+  context,
+  Action.UPDATE_STARTUP,
+  "startup",
+  startupId,
+  ownerId
+);
 ```
 
 ### 4. Comprehensive Audit Logging
 
 Every permission check is logged with:
+
 - User identity (email, role)
 - Action attempted
 - Resource and resource ID
@@ -433,6 +495,7 @@ Every permission check is logged with:
 ### 5. High-Risk Activity Detection
 
 The system detects suspicious patterns:
+
 - Multiple failed attempts (>3 denied in 5 minutes)
 - Privilege escalation attempts
 - Bulk operations by single user
@@ -464,6 +527,7 @@ To extend beyond USER/ADMIN/MODERATOR:
 ## Scalability
 
 ### Current Design
+
 - Suitable for small to medium deployments
 - In-memory audit logs (no persistence)
 - Direct permission mapping (no policy engine)
@@ -471,6 +535,7 @@ To extend beyond USER/ADMIN/MODERATOR:
 ### Future Evolution
 
 **Phase 1**: Migrate audit logs to database
+
 ```sql
 CREATE TABLE audit_logs (
   id SERIAL PRIMARY KEY,
@@ -487,11 +552,13 @@ CREATE TABLE audit_logs (
 ```
 
 **Phase 2**: Implement attribute-based access control (ABAC)
+
 - Add context attributes (time, location, resource type, etc.)
 - Use policy engine for flexible permission evaluation
 - Support dynamic permission assignment
 
 **Phase 3**: Role inheritance with custom policies
+
 - Allow role composition
 - Support conditional permissions
 - Implement temporary access grants
@@ -499,11 +566,13 @@ CREATE TABLE audit_logs (
 ## Testing and Validation
 
 ### Type Safety
+
 - All permission checks are TypeScript-validated
 - `Action` enum ensures only valid actions are used
 - `UserRole` type ensures only valid roles are checked
 
 ### Quality Checks
+
 - ESLint: ✅ No violations
 - TypeScript: ✅ Strict mode, 0 errors
 - Prettier: ✅ 100% formatted
@@ -606,6 +675,7 @@ curl -X PATCH http://localhost:3000/api/protected/roles \
 ## Summary
 
 The RBAC system provides:
+
 - ✅ Three-tier role hierarchy (ADMIN > MODERATOR > USER)
 - ✅ 18 fine-grained actions for resource-specific control
 - ✅ Ownership checks for personal resources
@@ -617,6 +687,7 @@ The RBAC system provides:
 - ✅ Ready for production with database audit log migration
 
 **Status**: ✅ Phase 10 Complete
+
 - All API endpoints protected with RBAC
 - Audit logging fully functional
 - Quality checks: 0 errors
