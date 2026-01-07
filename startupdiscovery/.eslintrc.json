@@ -8,12 +8,7 @@
     "no-console": "warn",
     "semi": ["error", "always"],
     "quotes": ["error", "double"],
-    "prettier/prettier": [
-      "error",
-      {
-        "singleQuote": false,
-        "semi": true
-      }
-    ]
+    "react/no-unescaped-entities": "off",
+    "prettier/prettier": ["error", { "singleQuote": false, "semi": true }]
   }
 }
