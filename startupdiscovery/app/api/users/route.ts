@@ -12,10 +12,19 @@ import {
 import { validateAuthHeader } from "@/lib/auth";
 import { handleError } from "@/lib/errorHandler";
 import { Logger } from "@/lib/logger";
+import {
+  cacheAside,
+  generateCacheKey,
+  invalidateCacheByTag,
+} from "@/lib/cache";
 import { ZodError } from "zod";
 import prisma from "@/lib/prisma";
 
 const logger = new Logger("UsersAPI");
+
+// Cache configuration
+const CACHE_TTL = 300; // 5 minutes
+const USERS_CACHE_TAG = "users";
 
 // Authentication helper with JWT verification and role retrieval
 function checkAuth(req: Request): {
@@ -85,52 +94,74 @@ export async function GET(req: Request) {
       );
     }
 
-    // Build Prisma where clause
-    const where: Record<string, unknown> = {};
+    // Generate cache key based on query parameters
+    const cacheKey = generateCacheKey(
+      "users",
+      page,
+      limit,
+      role || "all",
+      search || "all"
+    );
 
-    if (role) {
-      where.role = role;
-    }
+    // Use cache-aside pattern
+    const cachedData = await cacheAside(
+      cacheKey,
+      async () => {
+        // Build Prisma where clause
+        const where: Record<string, unknown> = {};
 
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { email: { contains: search, mode: "insensitive" } },
-      ];
-    }
+        if (role) {
+          where.role = role;
+        }
 
-    // Get total count and paginated results
-    const [totalItems, userList] = await Promise.all([
-      prisma.user.count({ where }),
-      prisma.user.findMany({
-        where,
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          username: true,
-          role: true,
-          createdAt: true,
-        },
-        skip: (page - 1) * limit,
-        take: limit,
-        orderBy: { createdAt: "desc" },
-      }),
-    ]);
+        if (search) {
+          where.OR = [
+            { name: { contains: search, mode: "insensitive" } },
+            { email: { contains: search, mode: "insensitive" } },
+          ];
+        }
 
-    const totalPages = Math.ceil(totalItems / limit);
+        // Get total count and paginated results
+        const [totalItems, userList] = await Promise.all([
+          prisma.user.count({ where }),
+          prisma.user.findMany({
+            where,
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              username: true,
+              role: true,
+              createdAt: true,
+            },
+            skip: (page - 1) * limit,
+            take: limit,
+            orderBy: { createdAt: "desc" },
+          }),
+        ]);
 
+        const totalPages = Math.ceil(totalItems / limit);
+
+        return {
+          users: userList,
+          pagination: {
+            page,
+            limit,
+            totalItems,
+            totalPages,
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1,
+          },
+        };
+      },
+      { ttl: CACHE_TTL, tags: [USERS_CACHE_TAG] }
+    );
+
+    void Math.ceil(cachedData.pagination.totalItems / limit); // Pagination info available in response
     return sendSuccess(
       {
-        users: userList,
-        pagination: {
-          page,
-          limit,
-          totalItems,
-          totalPages,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1,
-        },
+        users: cachedData.users,
+        pagination: cachedData.pagination,
       },
       "Users fetched successfully"
     );
@@ -207,6 +238,9 @@ export async function POST(req: Request) {
         createdAt: true,
       },
     });
+
+    // Invalidate users list cache
+    await invalidateCacheByTag(USERS_CACHE_TAG);
 
     return sendSuccess({ user: newUser }, "User created successfully", 201);
   } catch (error) {
@@ -298,6 +332,9 @@ export async function PUT(req: Request) {
       },
     });
 
+    // Invalidate users list cache
+    await invalidateCacheByTag(USERS_CACHE_TAG);
+
     return sendSuccess({ user: updatedUser }, "User updated successfully");
   } catch (error) {
     if (error instanceof ZodError) {
@@ -362,6 +399,9 @@ export async function DELETE(req: Request) {
         email: true,
       },
     });
+
+    // Invalidate users list cache
+    await invalidateCacheByTag(USERS_CACHE_TAG);
 
     return sendSuccess({ user: deletedUser }, "User deleted successfully");
   } catch (error) {
