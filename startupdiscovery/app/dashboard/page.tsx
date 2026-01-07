@@ -1,221 +1,160 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import prisma from "@/lib/prisma";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
-// ✅ Server-Side Rendering (SSR) - Always dynamic, no caching
-export const dynamic = "force-dynamic";
-
-async function getUserStats() {
-  try {
-    // In a real app, this would use authentication to get the current user
-    // For demo purposes, we'll fetch stats for all users
-    const [totalStartups, totalUsers, totalVotes, recentStartups] =
-      await Promise.all([
-        prisma.startup.count(),
-        prisma.user.count(),
-        prisma.vote.count(),
-        prisma.startup.findMany({
-          take: 5,
-          orderBy: { createdAt: "desc" },
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            status: true,
-            voteCount: true,
-            viewCount: true,
-            createdAt: true,
-          },
-        }),
-      ]);
-
-    return {
-      totalStartups,
-      totalUsers,
-      totalVotes,
-      recentStartups,
-    };
-  } catch (error) {
-    console.error("Failed to fetch user stats:", error);
-    return {
-      totalStartups: 0,
-      totalUsers: 0,
-      totalVotes: 0,
-      recentStartups: [],
-    };
-  }
+interface User {
+  name: string;
+  email: string;
+  role: string;
 }
 
-export default async function DashboardPage() {
-  const stats = await getUserStats();
-  const currentTime = new Date().toLocaleString();
+export default function DashboardPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  return (
-    <div className="min-h-screen bg-linear-to-b from-zinc-50 to-white dark:from-zinc-900 dark:to-black">
-      <main className="container mx-auto px-4 py-16 max-w-6xl">
-        <div className="mb-8">
-          <Link
-            href="/"
-            className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50"
-          >
-            ← Back to Home
-          </Link>
-        </div>
+  useEffect(() => {
+    const checkAuth = async () => {
+      // Check if user is authenticated
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
 
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-2">
-            Dashboard
-          </h1>
-          <p className="text-zinc-600 dark:text-zinc-400">
-            Real-time platform statistics and activity
-          </p>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
-            Last updated: <strong>{currentTime}</strong>
-          </p>
-        </div>
+      // Mock user data (in real app, would fetch from API)
+      setUser({
+        name: "John Doe",
+        email: "john@example.com",
+        role: "Founder",
+      });
+      setIsLoading(false);
+    };
 
-        {/* Stats Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          <div className="p-6 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-                  Total Startups
-                </p>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-                  {stats.totalStartups}
-                </p>
-              </div>
-              <div className="text-4xl">🚀</div>
-            </div>
-          </div>
+    checkAuth();
+  }, [router]);
 
-          <div className="p-6 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-                  Total Users
-                </p>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-                  {stats.totalUsers}
-                </p>
-              </div>
-              <div className="text-4xl">👥</div>
-            </div>
-          </div>
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    document.cookie = "token=; path=/; max-age=0";
+    router.push("/login");
+  };
 
-          <div className="p-6 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-                  Total Votes
-                </p>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-                  {stats.totalVotes}
-                </p>
-              </div>
-              <div className="text-4xl">▲</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50 mb-6">
-            Recent Startups
-          </h2>
-          {stats.recentStartups.length === 0 ? (
-            <div className="text-center py-12 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700">
-              <p className="text-zinc-500 dark:text-zinc-400">
-                No startups yet. Start Docker and seed the database to see data.
-              </p>
-              <code className="mt-4 block text-sm text-zinc-600 dark:text-zinc-400">
-                docker-compose up -d &amp;&amp; npm run prisma:seed
-              </code>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {stats.recentStartups.map(
-                (startup: {
-                  id: number;
-                  title: string;
-                  slug: string;
-                  status: string;
-                  voteCount: number;
-                  viewCount: number;
-                  createdAt: Date;
-                }) => (
-                  <div
-                    key={startup.id}
-                    className="p-4 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 flex items-center justify-between"
-                  >
-                    <div className="flex-1">
-                      <Link
-                        href={`/startups/${startup.slug}`}
-                        className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 hover:text-zinc-600 dark:hover:text-zinc-300"
-                      >
-                        {startup.title}
-                      </Link>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                        <span
-                          className={`px-2 py-1 rounded text-xs font-medium ${
-                            startup.status === "PUBLISHED"
-                              ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
-                              : "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
-                          }`}
-                        >
-                          {startup.status}
-                        </span>
-                        <span>👁 {startup.viewCount} views</span>
-                        <span>▲ {startup.voteCount} votes</span>
-                        <span>
-                          Created:{" "}
-                          {new Date(startup.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* SSR Info Panel */}
-        <div className="p-8 bg-purple-50 dark:bg-purple-950 rounded-xl border border-purple-200 dark:border-purple-800">
-          <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-100 mb-4">
-            ⚡ Server-Side Rendering (SSR)
-          </h3>
-          <div className="space-y-2 text-purple-800 dark:text-purple-200">
-            <p>
-              <strong>This page uses SSR</strong> - rendered fresh on every
-              request
-            </p>
-            <p>✅ Always shows the most up-to-date data</p>
-            <p>✅ Perfect for user-specific dashboards and real-time data</p>
-            <p>✅ No stale cache - you always see current statistics</p>
-            <p className="pt-2 text-sm">
-              Refresh this page to see the timestamp update - each request
-              fetches fresh data from the database
-            </p>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mt-8 flex gap-4 justify-center">
-          <Link
-            href="/"
-            className="px-6 py-3 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-lg font-medium hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors"
-          >
-            Browse Startups
-          </Link>
-          <Link
-            href="/about"
-            className="px-6 py-3 border-2 border-zinc-300 dark:border-zinc-700 rounded-lg font-medium hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors"
-          >
-            Learn More
-          </Link>
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
         </div>
       </main>
-    </div>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-gray-50">
+      <Breadcrumbs items={[{ label: "Dashboard", href: "/dashboard" }]} />
+
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
+            <p className="text-gray-600">Welcome back, {user?.name}!</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            Sign Out
+          </button>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="text-gray-600 text-sm">Total Views</div>
+            <div className="text-3xl font-bold text-gray-900 mt-2">2,543</div>
+            <div className="text-green-600 text-sm mt-2">
+              +12% from last week
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="text-gray-600 text-sm">Total Votes</div>
+            <div className="text-3xl font-bold text-gray-900 mt-2">1,284</div>
+            <div className="text-green-600 text-sm mt-2">
+              +8% from last week
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="text-gray-600 text-sm">Followers</div>
+            <div className="text-3xl font-bold text-gray-900 mt-2">342</div>
+            <div className="text-green-600 text-sm mt-2">
+              +5% from last week
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="text-gray-600 text-sm">Featured</div>
+            <div className="text-3xl font-bold text-gray-900 mt-2">Yes</div>
+            <div className="text-blue-600 text-sm mt-2">
+              You&apos;re featured! 🌟
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Quick Actions
+          </h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            <Link
+              href="/startups/create"
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-600 hover:bg-blue-50 transition text-center"
+            >
+              <div className="text-2xl mb-2">📝</div>
+              <div className="font-semibold text-gray-900">Create Startup</div>
+            </Link>
+            <Link
+              href="/users"
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-600 hover:bg-blue-50 transition text-center"
+            >
+              <div className="text-2xl mb-2">👥</div>
+              <div className="font-semibold text-gray-900">Browse Users</div>
+            </Link>
+            <Link
+              href="/profile"
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-600 hover:bg-blue-50 transition text-center"
+            >
+              <div className="text-2xl mb-2">⚙️</div>
+              <div className="font-semibold text-gray-900">Edit Profile</div>
+            </Link>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            User Profile
+          </h2>
+          <div className="space-y-4">
+            <div className="flex justify-between py-3 border-b border-gray-200">
+              <span className="text-gray-600">Name</span>
+              <span className="font-semibold text-gray-900">{user?.name}</span>
+            </div>
+            <div className="flex justify-between py-3 border-b border-gray-200">
+              <span className="text-gray-600">Email</span>
+              <span className="font-semibold text-gray-900">{user?.email}</span>
+            </div>
+            <div className="flex justify-between py-3">
+              <span className="text-gray-600">Role</span>
+              <span className="font-semibold text-gray-900">{user?.role}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
