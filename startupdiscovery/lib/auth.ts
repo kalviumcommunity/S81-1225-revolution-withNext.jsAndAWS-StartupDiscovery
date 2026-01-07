@@ -14,20 +14,57 @@ interface JWTPayload {
 }
 
 /**
- * JWT Secret Key - In production, use environment variable
- * Should be a long, random string stored securely
+ * Access Token Payload - for short-lived API requests
  */
-const getJWTSecret = (): string => {
-  const secret = process.env.JWT_SECRET;
+interface AccessTokenPayload extends JWTPayload {
+  type: "access";
+}
+
+/**
+ * Refresh Token Payload - for obtaining new access tokens
+ */
+interface RefreshTokenPayload {
+  userId: number;
+  email: string;
+  type: "refresh";
+  tokenVersion: number; // For token rotation tracking
+  iat?: number;
+  exp?: number;
+}
+
+/**
+ * JWT Secret Keys - In production, use environment variables
+ * Should be long, random strings stored securely
+ */
+const getAccessTokenSecret = (): string => {
+  const secret = process.env.JWT_ACCESS_SECRET;
   if (!secret) {
     throw new Error(
-      "JWT_SECRET environment variable is not set. Please set it in your .env.local file."
+      "JWT_ACCESS_SECRET environment variable is not set. Please set it in your .env.local file."
     );
   }
   return secret;
 };
 
-const JWT_EXPIRY = process.env.JWT_EXPIRY || "7d"; // Token expires in 7 days
+const getRefreshTokenSecret = (): string => {
+  const secret = process.env.JWT_REFRESH_SECRET;
+  if (!secret) {
+    throw new Error(
+      "JWT_REFRESH_SECRET environment variable is not set. Please set it in your .env.local file."
+    );
+  }
+  return secret;
+};
+
+const getJWTSecret = (): string => {
+  // Fallback to access secret for backward compatibility
+  return getAccessTokenSecret();
+};
+
+// Token expiry times
+const ACCESS_TOKEN_EXPIRY = "15m"; // Short-lived: 15 minutes
+const REFRESH_TOKEN_EXPIRY = "7d"; // Long-lived: 7 days
+const JWT_EXPIRY = process.env.JWT_EXPIRY || "7d"; // Fallback for backward compatibility
 
 /**
  * Hash password using bcrypt
@@ -173,5 +210,173 @@ export function checkJWTAuth(req: NextRequest): {
     userId: userData.userId,
     email: userData.email,
     role: userData.role,
+  };
+}
+
+/**
+ * Generate Access Token (short-lived, 15 minutes)
+ * Used for API authentication - should be stored in memory or secure cookie
+ */
+export function generateAccessToken(
+  userId: number,
+  email: string,
+  role: string = "USER"
+): string {
+  try {
+    const token = jwt.sign(
+      {
+        userId,
+        email,
+        role,
+        type: "access",
+        iat: Math.floor(Date.now() / 1000),
+      } as AccessTokenPayload,
+      getAccessTokenSecret(),
+      {
+        expiresIn: ACCESS_TOKEN_EXPIRY,
+        algorithm: "HS256",
+      } as jwt.SignOptions
+    );
+    return token;
+  } catch (error) {
+    throw new Error(
+      `Access token generation failed: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
+/**
+ * Generate Refresh Token (long-lived, 7 days)
+ * Used to obtain new access tokens - stored in secure HTTP-only cookie
+ */
+export function generateRefreshToken(
+  userId: number,
+  email: string,
+  tokenVersion: number = 1
+): string {
+  try {
+    const token = jwt.sign(
+      {
+        userId,
+        email,
+        type: "refresh",
+        tokenVersion,
+        iat: Math.floor(Date.now() / 1000),
+      } as RefreshTokenPayload,
+      getRefreshTokenSecret(),
+      {
+        expiresIn: REFRESH_TOKEN_EXPIRY,
+        algorithm: "HS256",
+      } as jwt.SignOptions
+    );
+    return token;
+  } catch (error) {
+    throw new Error(
+      `Refresh token generation failed: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
+/**
+ * Verify Access Token
+ * Returns decoded token data or null if invalid/expired
+ */
+export function verifyAccessToken(token: string): {
+  userId: number;
+  email: string;
+  role: string;
+  type: string;
+} | null {
+  try {
+    const decoded = jwt.verify(token, getAccessTokenSecret(), {
+      algorithms: ["HS256"],
+    }) as AccessTokenPayload;
+
+    // Ensure this is an access token
+    if (decoded.type !== "access") {
+      return null;
+    }
+
+    if (
+      typeof decoded === "object" &&
+      "userId" in decoded &&
+      "email" in decoded &&
+      "role" in decoded
+    ) {
+      return {
+        userId: decoded.userId,
+        email: decoded.email,
+        role: decoded.role,
+        type: decoded.type,
+      };
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Verify Refresh Token
+ * Returns decoded token data or null if invalid/expired
+ */
+export function verifyRefreshToken(token: string): {
+  userId: number;
+  email: string;
+  tokenVersion: number;
+  type: string;
+} | null {
+  try {
+    const decoded = jwt.verify(token, getRefreshTokenSecret(), {
+      algorithms: ["HS256"],
+    }) as RefreshTokenPayload;
+
+    // Ensure this is a refresh token
+    if (decoded.type !== "refresh") {
+      return null;
+    }
+
+    if (
+      typeof decoded === "object" &&
+      "userId" in decoded &&
+      "email" in decoded &&
+      "tokenVersion" in decoded
+    ) {
+      return {
+        userId: decoded.userId,
+        email: decoded.email,
+        tokenVersion: decoded.tokenVersion,
+        type: decoded.type,
+      };
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Generate both Access and Refresh tokens
+ * Called after successful login/signup
+ */
+export function generateTokenPair(
+  userId: number,
+  email: string,
+  role: string = "USER",
+  tokenVersion: number = 1
+): {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: string;
+} {
+  const accessToken = generateAccessToken(userId, email, role);
+  const refreshToken = generateRefreshToken(userId, email, tokenVersion);
+
+  return {
+    accessToken,
+    refreshToken,
+    expiresIn: ACCESS_TOKEN_EXPIRY,
   };
 }

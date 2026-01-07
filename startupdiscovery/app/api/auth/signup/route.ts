@@ -1,10 +1,6 @@
 import { signupSchema } from "@/lib/schemas/authSchema";
-import { hashPassword, generateToken } from "@/lib/auth";
-import {
-  sendSuccess,
-  sendError,
-  sendValidationError,
-} from "@/lib/responseHandler";
+import { hashPassword, generateTokenPair } from "@/lib/auth";
+import { sendError, sendValidationError } from "@/lib/responseHandler";
 import { ERROR_CODES } from "@/lib/errorCodes";
 import { ZodError } from "zod";
 import prisma from "@/lib/prisma";
@@ -13,6 +9,7 @@ import crypto from "crypto";
 /**
  * POST /api/auth/signup
  * Register a new user with email and password
+ * Issues token pair immediately after signup
  *
  * Body: {
  *   name: string (required),
@@ -87,6 +84,7 @@ export async function POST(req: Request) {
         username,
         passwordHash: hashedPassword,
         role: "USER", // Default role
+        lastLoginAt: new Date(), // Set login time for new user
       },
       select: {
         id: true,
@@ -98,17 +96,71 @@ export async function POST(req: Request) {
       },
     });
 
-    // Generate JWT token for immediate login after signup
-    const token = generateToken(newUser.id, newUser.email, newUser.role);
+    // Generate token pair for immediate login after signup
+    const { accessToken, refreshToken, expiresIn } = generateTokenPair(
+      newUser.id,
+      newUser.email,
+      newUser.role
+    );
 
-    return sendSuccess(
-      {
-        user: newUser,
-        token,
-        expiresIn: "7d",
+    // Hash refresh token for secure storage
+    const refreshTokenHash = crypto
+      .createHash("sha256")
+      .update(refreshToken)
+      .digest("hex");
+
+    // Get client IP and User-Agent for session tracking
+    const xForwardedFor = req.headers.get("x-forwarded-for");
+    const ipAddress = xForwardedFor
+      ? xForwardedFor.split(",")[0].trim()
+      : req.headers.get("x-real-ip") || "unknown";
+    const userAgent = req.headers.get("user-agent") || undefined;
+
+    // Create session record with token hash and version
+    const session = await prisma.session.create({
+      data: {
+        userId: newUser.id,
+        token: accessToken, // Store access token reference
+        refreshTokenHash, // Store hash of refresh token
+        tokenVersion: 1, // Start at version 1
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000), // Access token expiry
+        ipAddress,
+        userAgent,
+        isRevoked: false,
       },
-      "User registered successfully",
-      201
+    });
+
+    console.log(
+      `[AUTH] User ${newUser.email} registered and logged in. Session: ${session.id}`
+    );
+
+    // Set secure HTTP-only cookies
+    const headers = new Headers();
+    headers.set(
+      "Set-Cookie",
+      [
+        // Access Token Cookie (15 minutes)
+        `accessToken=${accessToken}; HttpOnly; ${process.env.NODE_ENV === "production" ? "Secure" : ""}; SameSite=Lax; Max-Age=${15 * 60}; Path=/`,
+        // Refresh Token Cookie (7 days)
+        `refreshToken=${refreshToken}; HttpOnly; ${process.env.NODE_ENV === "production" ? "Secure" : ""}; SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}; Path=/`,
+      ].join("\n")
+    );
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "User registered successfully",
+        data: {
+          user: newUser,
+          expiresIn,
+          tokenVersion: 1,
+          sessionId: session.id,
+        },
+      }),
+      {
+        status: 201,
+        headers,
+      }
     );
   } catch (error) {
     if (error instanceof ZodError) {
