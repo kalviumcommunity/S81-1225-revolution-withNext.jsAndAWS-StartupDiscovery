@@ -17,65 +17,62 @@ const logger = new Logger("FilesAPI");
  * GET /api/files
  * List all uploaded files with pagination
  */
-export async function GET(request: NextRequest) {
-  return withErrorHandler(async () => {
-    const _request = request; // Use request in closure
-    const searchParams = _request.nextUrl.searchParams;
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const limit = Math.min(
-      100,
-      parseInt(searchParams.get("limit") || "10", 10)
-    );
-    const skip = (page - 1) * limit;
+export const GET = withErrorHandler(async (req: Request) => {
+  const request = req as NextRequest;
+  const searchParams = request.nextUrl.searchParams;
+  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const limit = Math.min(
+    100,
+    parseInt(searchParams.get("limit") || "10", 10)
+  );
+  const skip = (page - 1) * limit;
 
-    logger.info("Fetching files", { page, limit });
+  logger.info("Fetching files", { page, limit });
 
-    const [files, total] = await Promise.all([
-      prisma.media.findMany({
-        skip,
-        take: limit,
-        orderBy: { createdAt: "desc" },
-        include: {
-          startup: {
-            select: {
-              id: true,
-              title: true,
-              slug: true,
-            },
+  const [files, total] = await Promise.all([
+    prisma.media.findMany({
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+      include: {
+        startup: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
           },
         },
-      }),
-      prisma.media.count(),
-    ]);
-
-    logger.info("Files fetched successfully", { count: files.length, total });
-
-    return NextResponse.json({
-      success: true,
-      data: files,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-        hasMore: skip + limit < total,
       },
-    });
+    }),
+    prisma.media.count(),
+  ]);
+
+  logger.info("Files fetched successfully", { count: files.length, total });
+
+  return NextResponse.json({
+    success: true,
+    data: files,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+      hasMore: skip + limit < total,
+    },
   });
-}
+});
 
 /**
  * POST /api/files
  * Store file metadata after successful S3 upload
  */
-export async function POST(request: NextRequest) {
-  return withErrorHandler(async () => {
-    const _request = request; // Use request in closure
-    const body = await _request.json();
-    const { filename, fileUrl, fileType, fileSize, startupId } = body;
+export const POST = withErrorHandler(async (req: Request) => {
+  const request = req as NextRequest;
+  const body = await request.json();
+  const { filename, fileUrl, fileType, fileSize, startupId } = body;
 
-    logger.info("Creating file metadata", {
-      filename,
+  logger.info("Creating file metadata", {
+    filename,
       fileType,
       startupId,
     });
@@ -167,5 +164,4 @@ export async function POST(request: NextRequest) {
         },
       });
     }
-  });
-}
+});

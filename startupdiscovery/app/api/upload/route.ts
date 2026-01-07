@@ -44,14 +44,13 @@ const ALLOWED_MIME_TYPES = [
  * POST /api/upload
  * Generate a pre-signed URL for direct S3 upload
  */
-export async function POST(request: NextRequest) {
-  return withErrorHandler(async () => {
-    const _request = request; // Use in closure
-    const requestId = _request.headers.get("x-request-id") || "";
+export const POST = withErrorHandler(async (req: Request) => {
+  const request = req as NextRequest;
+  const requestId = request.headers.get("x-request-id") || "";
 
-    // Parse request body
-    const body = await _request.json();
-    const { filename, fileType, fileSize } = body;
+  // Parse request body
+  const body = await request.json();
+  const { filename, fileType, fileSize } = body;
 
     logger.info("File upload request received", {
       filename,
@@ -130,8 +129,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
-  });
-}
+});
 
 /**
  * OPTIONS /api/upload
