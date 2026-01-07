@@ -29,10 +29,7 @@ function getTimestamp(): string {
 /**
  * Log info level message
  */
-export function logInfo(
-  message: string,
-  meta?: Record<string, unknown>
-): void {
+export function logInfo(message: string, meta?: Record<string, unknown>): void {
   const entry: LogEntry = {
     level: "info",
     message,
@@ -45,10 +42,7 @@ export function logInfo(
 /**
  * Log warning level message
  */
-export function logWarn(
-  message: string,
-  meta?: Record<string, unknown>
-): void {
+export function logWarn(message: string, meta?: Record<string, unknown>): void {
   const entry: LogEntry = {
     level: "warn",
     message,

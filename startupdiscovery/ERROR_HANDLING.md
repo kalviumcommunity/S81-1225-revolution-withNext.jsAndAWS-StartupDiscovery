@@ -17,6 +17,7 @@ The application implements a centralized error handling system with structured l
 ## Logger Utility
 
 ### Purpose
+
 Provides structured logging in JSON format for easier monitoring, debugging, and integration with external logging services.
 
 ### Implementation
@@ -31,31 +32,36 @@ export interface LogEntry {
   timestamp: string;
 }
 
-export function logInfo(message: string, meta?: Record<string, unknown>): void
-export function logWarn(message: string, meta?: Record<string, unknown>): void
-export function logError(message: string, meta?: Record<string, unknown>): void
-export function logDebug(message: string, meta?: Record<string, unknown>): void
+export function logInfo(message: string, meta?: Record<string, unknown>): void;
+export function logWarn(message: string, meta?: Record<string, unknown>): void;
+export function logError(message: string, meta?: Record<string, unknown>): void;
+export function logDebug(message: string, meta?: Record<string, unknown>): void;
 
 export class Logger {
-  constructor(context: string)
-  info(message: string, meta?: Record<string, unknown>): void
-  warn(message: string, meta?: Record<string, unknown>): void
-  error(message: string, meta?: Record<string, unknown>): void
-  debug(message: string, meta?: Record<string, unknown>): void
+  constructor(context: string);
+  info(message: string, meta?: Record<string, unknown>): void;
+  warn(message: string, meta?: Record<string, unknown>): void;
+  error(message: string, meta?: Record<string, unknown>): void;
+  debug(message: string, meta?: Record<string, unknown>): void;
 }
 ```
 
 ### Usage Examples
 
 **Simple Function Usage:**
+
 ```typescript
 import { logInfo, logError } from "@/lib/logger";
 
-logInfo("User created successfully", { userId: 123, email: "user@example.com" });
+logInfo("User created successfully", {
+  userId: 123,
+  email: "user@example.com",
+});
 logError("Database connection failed", { code: "ECONNREFUSED" });
 ```
 
 **Logger Class Usage:**
+
 ```typescript
 import { Logger } from "@/lib/logger";
 
@@ -84,7 +90,9 @@ Each log entry is output as a single-line JSON object:
 ## Error Handler
 
 ### Purpose
+
 Provides centralized error handling that:
+
 - Logs all errors in structured format
 - Shows detailed errors in development
 - Hides sensitive information in production
@@ -107,16 +115,17 @@ export interface ErrorContext {
 export function handleError(
   error: unknown,
   context: ErrorContext = {}
-): NextResponse<ErrorResponse>
+): NextResponse<ErrorResponse>;
 
 export function withErrorHandler(
   handler: (req: Request, context?: any) => Promise<NextResponse>
-): (req: Request, context?: any) => Promise<NextResponse>
+): (req: Request, context?: any) => Promise<NextResponse>;
 ```
 
 ### Key Features
 
 #### 1. Development Environment
+
 - Shows actual error messages and stack traces
 - Helps developers quickly identify and fix issues
 - Includes full context in logs
@@ -131,6 +140,7 @@ export function withErrorHandler(
 ```
 
 #### 2. Production Environment
+
 - Shows generic, user-friendly error message
 - Hides stack traces and implementation details
 - Prevents information leakage
@@ -144,7 +154,9 @@ export function withErrorHandler(
 ```
 
 #### 3. Sensitive Data Redaction
+
 Automatically detects and redacts sensitive patterns:
+
 - Passwords
 - API keys and tokens
 - Database URLs
@@ -152,13 +164,14 @@ Automatically detects and redacts sensitive patterns:
 
 ```typescript
 // Before redaction
-"Database connection failed: postgresql://admin:secretpass@localhost:5432/db"
+"Database connection failed: postgresql://admin:secretpass@localhost:5432/db";
 
 // After redaction
-"Database connection failed: database_url: [REDACTED]"
+"Database connection failed: database_url: [REDACTED]";
 ```
 
 #### 4. Structured Error Logging
+
 ```json
 {
   "level": "error",
@@ -179,6 +192,7 @@ Automatically detects and redacts sensitive patterns:
 ### Usage
 
 **Direct Usage:**
+
 ```typescript
 import { handleError } from "@/lib/errorHandler";
 
@@ -197,6 +211,7 @@ export async function GET(req: Request) {
 ```
 
 **With Error Wrapper:**
+
 ```typescript
 import { withErrorHandler } from "@/lib/errorHandler";
 
@@ -257,17 +272,20 @@ export async function POST(req: Request) {
 ### Development Environment
 
 **Start server in development mode:**
+
 ```bash
 npm run dev
 ```
 
 **Test with error simulation:**
+
 ```bash
 # This will return detailed error info
 curl http://localhost:3000/api/users -H "Authorization: Bearer invalid_token"
 ```
 
 **Expected Response (Development):**
+
 ```json
 {
   "success": false,
@@ -278,6 +296,7 @@ curl http://localhost:3000/api/users -H "Authorization: Bearer invalid_token"
 ```
 
 **Console Log (Development):**
+
 ```json
 {
   "level": "error",
@@ -298,16 +317,19 @@ curl http://localhost:3000/api/users -H "Authorization: Bearer invalid_token"
 ### Production Environment
 
 **Start server in production mode:**
+
 ```bash
 NODE_ENV=production npm run dev
 ```
 
 **Test with same error:**
+
 ```bash
 curl http://localhost:3000/api/users -H "Authorization: Bearer invalid_token"
 ```
 
 **Expected Response (Production):**
+
 ```json
 {
   "success": false,
@@ -317,6 +339,7 @@ curl http://localhost:3000/api/users -H "Authorization: Bearer invalid_token"
 ```
 
 **Console Log (Production):**
+
 ```json
 {
   "level": "error",
@@ -339,12 +362,14 @@ curl http://localhost:3000/api/users -H "Authorization: Bearer invalid_token"
 ### 1. Centralized Error Handling
 
 **Benefits:**
+
 - Consistent error responses across all routes
 - Single point of control for error formatting
 - Easier to maintain and update error handling logic
 - Reduces code duplication
 
 **Impact:**
+
 - Frontend developers know exactly what error format to expect
 - New developers can follow the established pattern
 - Changes to error handling only need to be made once
@@ -352,19 +377,21 @@ curl http://localhost:3000/api/users -H "Authorization: Bearer invalid_token"
 ### 2. Structured Logging
 
 **Benefits:**
+
 - Machine-readable format for automated analysis
 - Easy to parse and aggregate logs
 - Better integration with logging services (CloudWatch, Splunk, ELK)
 - Structured context helps faster debugging
 
 **Real-world Example:**
+
 ```typescript
 // With structured logging, you can query all errors for a specific user:
 logger.error("Payment processing failed", {
   userId: 123,
   amount: 99.99,
   paymentMethod: "credit_card",
-  errorCode: "CARD_DECLINED"
+  errorCode: "CARD_DECLINED",
 });
 
 // Then grep/query: `| grep userId: 123`
@@ -373,6 +400,7 @@ logger.error("Payment processing failed", {
 ### 3. Security in Production
 
 **Benefits:**
+
 - Prevents information leakage to end users
 - Protects internal system architecture details
 - Reduces attack surface by hiding implementation details
@@ -381,30 +409,36 @@ logger.error("Payment processing failed", {
 **Security Scenarios:**
 
 **Vulnerable (Without Error Handling):**
+
 ```json
 {
   "error": "FOREIGN KEY constraint failed on users.account_id (accounts.id)"
 }
 ```
+
 Attacker learns about database schema and relationships.
 
 **Secure (With Error Handling):**
+
 ```json
 {
   "message": "Something went wrong. Please try again later."
 }
 ```
+
 Attacker learns nothing about system internals.
 
 ### 4. Developer Experience
 
 **Development Benefits:**
+
 - Full error context available for debugging
 - Stack traces point to exact failure location
 - Structured logs help identify patterns
 - Request IDs enable request tracing
 
 **Example Debugging Workflow:**
+
 ```
 User reports: "I got an error when creating a user"
 ↓
@@ -420,36 +454,44 @@ Issue identified and fixed in minutes
 ## Scalability
 
 ### Current Implementation
+
 Uses console.log/console.error with JSON formatting for simple, zero-dependency logging.
 
 ### Future Enhancements
 
 #### 1. AWS CloudWatch Integration
+
 ```typescript
-import { CloudWatchLogs } from 'aws-sdk';
+import { CloudWatchLogs } from "aws-sdk";
 
 const logger = new CloudWatchLogs({
-  region: 'us-east-1',
-  logGroupName: '/aws/lambda/startup-discovery'
+  region: "us-east-1",
+  logGroupName: "/aws/lambda/startup-discovery",
 });
 
-export async function logError(message: string, meta?: Record<string, unknown>) {
-  const entry: LogEntry = { /* ... */ };
+export async function logError(
+  message: string,
+  meta?: Record<string, unknown>
+) {
+  const entry: LogEntry = {
+    /* ... */
+  };
   await logger.putLogEvents({
-    logGroupName: 'startup-discovery',
-    logStreamName: 'errors',
-    logEvents: [{ message: JSON.stringify(entry), timestamp: Date.now() }]
+    logGroupName: "startup-discovery",
+    logStreamName: "errors",
+    logEvents: [{ message: JSON.stringify(entry), timestamp: Date.now() }],
   });
 }
 ```
 
 #### 2. Pino Logger Integration
+
 ```typescript
-import pino from 'pino';
+import pino from "pino";
 
 const logger = pino({
   transport: {
-    target: 'pino-pretty',
+    target: "pino-pretty",
     options: {
       colorize: true,
     },
@@ -462,6 +504,7 @@ export function logError(message: string, meta?: Record<string, unknown>) {
 ```
 
 #### 3. Sentry Integration
+
 ```typescript
 import * as Sentry from "@sentry/nextjs";
 
@@ -474,17 +517,21 @@ export function handleError(error: unknown, context: ErrorContext) {
 ```
 
 #### 4. ELK Stack Integration
+
 ```typescript
-import elasticsearch from '@elastic/elasticsearch';
+import elasticsearch from "@elastic/elasticsearch";
 
 const client = new elasticsearch.Client({
-  node: 'https://elasticsearch:9200'
+  node: "https://elasticsearch:9200",
 });
 
-export async function logError(message: string, meta?: Record<string, unknown>) {
+export async function logError(
+  message: string,
+  meta?: Record<string, unknown>
+) {
   await client.index({
-    index: 'logs',
-    document: { level: 'error', message, meta, timestamp: new Date() }
+    index: "logs",
+    document: { level: "error", message, meta, timestamp: new Date() },
   });
 }
 ```
@@ -492,19 +539,23 @@ export async function logError(message: string, meta?: Record<string, unknown>) 
 ### Scaling Considerations
 
 **Volume:**
+
 - With proper batching, can handle 1000+ log entries/second
 - CloudWatch can store and query unlimited logs
 
 **Retention:**
+
 - Configure CloudWatch retention policies (7 days, 30 days, or indefinite)
 - Archive old logs to S3 for cost efficiency
 
 **Cost:**
+
 - AWS CloudWatch Logs: ~$0.50 per GB ingested
 - For 1GB/day: ~$15/month
 - Sentry: Free tier includes 5,000 events/month
 
 **Monitoring:**
+
 - Set CloudWatch alarms for error rate thresholds
 - Alert when error rate exceeds 1% of total requests
 - Dashboard to visualize error trends over time
@@ -512,26 +563,30 @@ export async function logError(message: string, meta?: Record<string, unknown>) 
 ## Best Practices
 
 1. **Always include context** when calling `handleError()`
+
    ```typescript
    handleError(error, { method: req.method, path: req.url });
    ```
 
 2. **Use Logger class for contextual logging**
+
    ```typescript
    const logger = new Logger("UsersAPI");
    logger.error("message"); // Outputs: "[UsersAPI] message"
    ```
 
 3. **Log sensitive operations** for audit trails
+
    ```typescript
    logger.info("User authentication", { userId, method: "password" });
    ```
 
 4. **Don't log passwords or tokens** even in development
+
    ```typescript
    // Bad ❌
    logger.info("Login attempt", { username, password });
-   
+
    // Good ✅
    logger.info("Login attempt", { username });
    ```
@@ -564,6 +619,7 @@ To apply this pattern to other routes:
 ## Conclusion
 
 This centralized error handling and structured logging system provides:
+
 - **Consistency** - All errors handled uniformly
 - **Security** - Production errors are user-safe
 - **Debuggability** - Full context in development
