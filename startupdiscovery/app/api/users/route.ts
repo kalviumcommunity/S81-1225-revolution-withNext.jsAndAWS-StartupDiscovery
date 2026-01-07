@@ -10,8 +10,12 @@ import {
   userDeleteSchema,
 } from "@/lib/schemas/userSchema";
 import { validateAuthHeader } from "@/lib/auth";
+import { handleError } from "@/lib/errorHandler";
+import { Logger } from "@/lib/logger";
 import { ZodError } from "zod";
 import prisma from "@/lib/prisma";
+
+const logger = new Logger("UsersAPI");
 
 // Authentication helper with JWT verification and role retrieval
 function checkAuth(req: Request): {
@@ -131,8 +135,12 @@ export async function GET(req: Request) {
       "Users fetched successfully"
     );
   } catch (error) {
-    console.error("Get users error:", error);
-    return sendError("Failed to fetch users", ERROR_CODES.INTERNAL_ERROR, 500);
+    logger.error("Failed to fetch users", { error: String(error) });
+    return handleError(error, {
+      method: "GET",
+      path: "/api/users",
+      statusCode: 500,
+    });
   }
 }
 
@@ -205,12 +213,12 @@ export async function POST(req: Request) {
     if (error instanceof ZodError) {
       return sendValidationError(error);
     }
-    console.error("Create user error:", error);
-    return sendError(
-      "Failed to create user",
-      ERROR_CODES.INVALID_REQUEST_BODY,
-      400
-    );
+    logger.error("Failed to create user", { error: String(error) });
+    return handleError(error, {
+      method: "POST",
+      path: "/api/users",
+      statusCode: 400,
+    });
   }
 }
 
@@ -295,12 +303,12 @@ export async function PUT(req: Request) {
     if (error instanceof ZodError) {
       return sendValidationError(error);
     }
-    console.error("Update user error:", error);
-    return sendError(
-      "Failed to update user",
-      ERROR_CODES.INVALID_REQUEST_BODY,
-      400
-    );
+    logger.error("Failed to update user", { error: String(error) });
+    return handleError(error, {
+      method: "PUT",
+      path: "/api/users",
+      statusCode: 400,
+    });
   }
 }
 
@@ -360,11 +368,11 @@ export async function DELETE(req: Request) {
     if (error instanceof ZodError) {
       return sendValidationError(error);
     }
-    console.error("Delete user error:", error);
-    return sendError(
-      "Failed to delete user",
-      ERROR_CODES.INVALID_REQUEST_BODY,
-      400
-    );
+    logger.error("Failed to delete user", { error: String(error) });
+    return handleError(error, {
+      method: "DELETE",
+      path: "/api/users",
+      statusCode: 400,
+    });
   }
 }
