@@ -52,83 +52,83 @@ export const POST = withErrorHandler(async (req: Request) => {
   const body = await request.json();
   const { filename, fileType, fileSize } = body;
 
-    logger.info("File upload request received", {
-      filename,
-      fileType,
-      fileSize,
-      requestId,
+  logger.info("File upload request received", {
+    filename,
+    fileType,
+    fileSize,
+    requestId,
+  });
+
+  // Validate inputs
+  if (!filename || !fileType) {
+    logger.warn("Invalid upload request - missing fields", {
+      hasFilename: !!filename,
+      hasFileType: !!fileType,
     });
-
-    // Validate inputs
-    if (!filename || !fileType) {
-      logger.warn("Invalid upload request - missing fields", {
-        hasFilename: !!filename,
-        hasFileType: !!fileType,
-      });
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Missing required fields: filename and fileType",
-        },
-        { status: 400 }
-      );
-    }
-
-    // Validate file type
-    if (!isAllowedFileType(fileType)) {
-      logger.warn("File type not allowed", { fileType });
-      return NextResponse.json(
-        {
-          success: false,
-          message: `File type '${fileType}' is not allowed. Allowed types: ${ALLOWED_MIME_TYPES.join(", ")}`,
-        },
-        { status: 400 }
-      );
-    }
-
-    // Validate file size if provided
-    if (fileSize && !isAllowedFileSize(fileSize, 50)) {
-      logger.warn("File size exceeds limit", {
-        fileSize,
-        maxSize: MAX_FILE_SIZE,
-      });
-      return NextResponse.json(
-        {
-          success: false,
-          message: `File size must be less than 50MB. Received: ${(fileSize / 1024 / 1024).toFixed(2)}MB`,
-        },
-        { status: 400 }
-      );
-    }
-
-    // Generate pre-signed URL
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 8);
-    const key = `uploads/${timestamp}-${randomString}-${filename}`;
-
-    const uploadUrl = await generateUploadPresignedUrl(
-      filename,
-      fileType,
-      fileSize
-    );
-
-    logger.info("Pre-signed URL generated successfully", {
-      key,
-      fileType,
-      requestId,
-    });
-
     return NextResponse.json(
       {
-        success: true,
-        uploadUrl,
-        key,
-        expiresIn: 3600,
-        bucket: process.env.AWS_BUCKET_NAME,
-        region: process.env.AWS_REGION,
+        success: false,
+        message: "Missing required fields: filename and fileType",
       },
-      { status: 200 }
+      { status: 400 }
     );
+  }
+
+  // Validate file type
+  if (!isAllowedFileType(fileType)) {
+    logger.warn("File type not allowed", { fileType });
+    return NextResponse.json(
+      {
+        success: false,
+        message: `File type '${fileType}' is not allowed. Allowed types: ${ALLOWED_MIME_TYPES.join(", ")}`,
+      },
+      { status: 400 }
+    );
+  }
+
+  // Validate file size if provided
+  if (fileSize && !isAllowedFileSize(fileSize, 50)) {
+    logger.warn("File size exceeds limit", {
+      fileSize,
+      maxSize: MAX_FILE_SIZE,
+    });
+    return NextResponse.json(
+      {
+        success: false,
+        message: `File size must be less than 50MB. Received: ${(fileSize / 1024 / 1024).toFixed(2)}MB`,
+      },
+      { status: 400 }
+    );
+  }
+
+  // Generate pre-signed URL
+  const timestamp = Date.now();
+  const randomString = Math.random().toString(36).substring(2, 8);
+  const key = `uploads/${timestamp}-${randomString}-${filename}`;
+
+  const uploadUrl = await generateUploadPresignedUrl(
+    filename,
+    fileType,
+    fileSize
+  );
+
+  logger.info("Pre-signed URL generated successfully", {
+    key,
+    fileType,
+    requestId,
+  });
+
+  return NextResponse.json(
+    {
+      success: true,
+      uploadUrl,
+      key,
+      expiresIn: 3600,
+      bucket: process.env.AWS_BUCKET_NAME,
+      region: process.env.AWS_REGION,
+    },
+    { status: 200 }
+  );
 });
 
 /**
