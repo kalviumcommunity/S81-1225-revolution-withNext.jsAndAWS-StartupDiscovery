@@ -55,12 +55,12 @@ components/
 
 ### Route Types Overview
 
-| Route Type | Purpose | Rendered | Authentication |
-|------------|---------|----------|-----------------|
-| **Public** | Accessible to all users | Static/Server | None required |
-| **Protected** | Requires authentication | Client (with check) | JWT token |
-| **Dynamic** | Parameterized routes | Client/Server | Depends on route |
-| **API** | Backend endpoints | Server | Token-based |
+| Route Type    | Purpose                 | Rendered            | Authentication   |
+| ------------- | ----------------------- | ------------------- | ---------------- |
+| **Public**    | Accessible to all users | Static/Server       | None required    |
+| **Protected** | Requires authentication | Client (with check) | JWT token        |
+| **Dynamic**   | Parameterized routes    | Client/Server       | Depends on route |
+| **API**       | Backend endpoints       | Server              | Token-based      |
 
 ---
 
@@ -89,6 +89,7 @@ export default function Home() {
 ```
 
 **Features**:
+
 - Gradient background (blue to indigo)
 - Hero section with call-to-action buttons
 - Feature showcase cards
@@ -152,6 +153,7 @@ export default function LoginPage() {
 ```
 
 **Key Points**:
+
 - Client-side component (`"use client"`)
 - Mock authentication (email: `demo@example.com`, password: `password`)
 - Stores auth token in both `localStorage` (client-side) and `httpOnly` cookie (server-side)
@@ -159,6 +161,7 @@ export default function LoginPage() {
 - Displays error messages for invalid login attempts
 
 **Authentication Flow**:
+
 1. User enters email and password
 2. Component validates against mock credentials
 3. On success:
@@ -235,6 +238,7 @@ export default function UsersPage() {
 ```
 
 **Features**:
+
 - Displays 5 mock users in responsive grid (1 col mobile, 2 col tablet, 3 col desktop)
 - Each user card shows name, role, followers, and startup count
 - Cards are links to individual user profiles
@@ -388,6 +392,7 @@ export default function DashboardPage() {
 ```
 
 **Key Features**:
+
 - **Client-side Authentication Check**: `useEffect` checks for `authToken` in localStorage
 - **Auto-redirect**: If no token found, redirects to `/login`
 - **User Profile Display**: Shows mock user data (name, email, role, featured status)
@@ -396,6 +401,7 @@ export default function DashboardPage() {
 - **Sign Out**: Button to clear auth token and redirect to login
 
 **Authentication Flow**:
+
 1. Component mounts
 2. `useEffect` runs and checks for auth token
 3. If no token → redirect to `/login`
@@ -615,11 +621,13 @@ export default function UserProfilePage() {
 5. **Breadcrumb Navigation**: Shows path to current page
 
 **URL Examples**:
+
 - `/users/1` → Displays Alice Johnson's profile
 - `/users/2` → Displays Bob Chen's profile
 - `/users/99` → Triggers 404 page (not found)
 
 **Dynamic Routing Benefits**:
+
 - Single file handles multiple routes
 - Reduces code duplication
 - Better SEO with real URLs
@@ -651,6 +659,7 @@ app/
 ```
 
 **Benefits**:
+
 - Organize routes without affecting URL structure
 - Apply shared layouts to route groups
 - Improve code organization
@@ -752,16 +761,13 @@ export const config = {
 **Key Features**:
 
 1. **Protected Routes Array**: List of routes requiring authentication
+
    ```typescript
-   const PROTECTED_ROUTES = [
-     "/dashboard",
-     "/users",
-     "/profile",
-     "/settings",
-   ];
+   const PROTECTED_ROUTES = ["/dashboard", "/users", "/profile", "/settings"];
    ```
 
 2. **Route Matching**: `isProtectedRoute()` checks if pathname requires auth
+
    ```typescript
    function isProtectedRoute(pathname: string): boolean {
      return PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
@@ -769,6 +775,7 @@ export const config = {
    ```
 
 3. **Token Extraction**: Checks both Authorization header and cookies
+
    ```typescript
    function extractToken(request: NextRequest): string | null {
      const authHeader = request.headers.get("authorization");
@@ -780,6 +787,7 @@ export const config = {
    ```
 
 4. **JWT Verification**: Validates token signature using HS256
+
    ```typescript
    async function verifyJWT(token: string): Promise<boolean> {
      try {
@@ -1025,6 +1033,7 @@ export default function RootLayout({
 **SEO Features**:
 
 1. **Metadata Export**: Comprehensive site metadata
+
    ```typescript
    export const metadata: Metadata = {
      title: "Startup Discovery - Find and Connect with Innovative Startups",
@@ -1034,6 +1043,7 @@ export default function RootLayout({
    ```
 
 2. **OpenGraph Tags**: For social media sharing
+
    ```typescript
    openGraph: {
      type: "website",
@@ -1044,6 +1054,7 @@ export default function RootLayout({
    ```
 
 3. **Twitter Card**: Optimized for Twitter sharing
+
    ```typescript
    twitter: {
      card: "summary_large_image",
@@ -1055,6 +1066,7 @@ export default function RootLayout({
 5. **Footer**: Organized links to public/protected routes and legal pages
 
 **SEO Benefits**:
+
 - Better search engine indexing
 - Improved social media sharing
 - Clear site structure and navigation
@@ -1121,6 +1133,7 @@ return <Breadcrumbs items={breadcrumbItems} />;
 ```
 
 **Renders as**:
+
 ```
 Home / Users / Alice Johnson
       ↑       ↑ (clickable)
@@ -1129,6 +1142,7 @@ Home / Users / Alice Johnson
 ```
 
 **Benefits**:
+
 - Improves user navigation
 - Reduces bounce rate
 - Better SEO (breadcrumb schema)
@@ -1190,6 +1204,7 @@ export default function NotFound() {
 ```
 
 **Features**:
+
 - Custom 404 page with helpful links
 - Branded design matching site theme
 - Metadata export for SEO
@@ -1197,6 +1212,7 @@ export default function NotFound() {
 - Graceful error handling
 
 **Triggering 404**:
+
 ```typescript
 // In dynamic route
 if (!userData) {
@@ -1213,6 +1229,7 @@ if (!userData) {
 #### Creating a New Route
 
 **Step 1: Create Directory Structure**
+
 ```
 app/
 └── about/
@@ -1220,6 +1237,7 @@ app/
 ```
 
 **Step 2: Implement Page Component**
+
 ```typescript
 // app/about/page.tsx
 export const metadata = {
@@ -1240,6 +1258,7 @@ export default function AboutPage() {
 ```
 
 **Step 3: Add Navigation Link**
+
 ```typescript
 // app/layout.tsx
 <Link href="/about" className="text-gray-700 hover:text-blue-600">
@@ -1278,6 +1297,7 @@ export default function BlogYearPage() {
 ```
 
 **Access**:
+
 - `/blog/2024` → year = "2024"
 - `/blog/2023` → year = "2023"
 
@@ -1330,12 +1350,14 @@ export default function AdminPage() {
 #### 1. **App Router vs Pages Router**
 
 **Why App Router?**
+
 - Simpler directory structure
 - Server Components by default
 - Built-in streaming and suspense
 - Better organization for large apps
 
 **Implementation Benefits**:
+
 - Layouts shared across routes
 - Nested routing with clear hierarchy
 - Middleware for cross-cutting concerns
@@ -1343,6 +1365,7 @@ export default function AdminPage() {
 #### 2. **Authentication Patterns**
 
 **Dual Authentication Approach**:
+
 1. **Client-side**: `localStorage` for quick access
    - Used for immediate UI rendering
    - Fast and responsive
@@ -1354,6 +1377,7 @@ export default function AdminPage() {
    - Secure and stateless
 
 **Why Both?**
+
 ```typescript
 // Client-side check for instant feedback
 const token = localStorage.getItem("authToken");
@@ -1365,6 +1389,7 @@ const token = localStorage.getItem("authToken");
 #### 3. **Dynamic Routes Advantages**
 
 **Single Route File, Multiple Paths**:
+
 ```
 [id].page.tsx handles:
 - /users/1
@@ -1374,6 +1399,7 @@ const token = localStorage.getItem("authToken");
 ```
 
 **Benefits**:
+
 - Less code duplication
 - Scalable to many items
 - Type-safe with TypeScript
@@ -1382,6 +1408,7 @@ const token = localStorage.getItem("authToken");
 #### 4. **Metadata & SEO**
 
 **Why Metadata Matters**:
+
 ```typescript
 // Improves search ranking
 export const metadata = {
@@ -1392,6 +1419,7 @@ export const metadata = {
 ```
 
 **Impact**:
+
 - Better Google rankings
 - Improved click-through rates
 - Better social media sharing
@@ -1400,6 +1428,7 @@ export const metadata = {
 #### 5. **Middleware for Cross-Cutting Concerns**
 
 **What Can Middleware Do?**
+
 - Authentication/Authorization
 - Request logging
 - Rate limiting
@@ -1407,6 +1436,7 @@ export const metadata = {
 - URL rewrites
 
 **Example Implementation**:
+
 ```typescript
 // One place to manage all protected routes
 const PROTECTED_ROUTES = ["/dashboard", "/users", "/profile"];
@@ -1422,6 +1452,7 @@ export async function middleware(request: NextRequest) {
 ### Best Practices Applied
 
 #### 1. **Component Organization**
+
 ```
 ✅ Reusable components (Breadcrumbs)
 ✅ Client vs Server components properly separated
@@ -1430,6 +1461,7 @@ export async function middleware(request: NextRequest) {
 ```
 
 #### 2. **Routing Structure**
+
 ```
 ✅ Logical directory organization
 ✅ Clear separation of public/protected routes
@@ -1438,6 +1470,7 @@ export async function middleware(request: NextRequest) {
 ```
 
 #### 3. **Authentication Security**
+
 ```
 ✅ JWT tokens for stateless auth
 ✅ Middleware verification
@@ -1446,6 +1479,7 @@ export async function middleware(request: NextRequest) {
 ```
 
 #### 4. **User Experience**
+
 ```
 ✅ Breadcrumb navigation
 ✅ Loading states
@@ -1456,7 +1490,9 @@ export async function middleware(request: NextRequest) {
 ### Lessons & Insights
 
 #### 1. **Why Server Components Matter**
+
 Server Components eliminate client-side rendering overhead:
+
 ```typescript
 // Server Component (default)
 export default function RootLayout({children}) {
@@ -1473,7 +1509,9 @@ export default function Button() {
 ```
 
 #### 2. **The Power of Middleware**
+
 Middleware runs before routes are even served:
+
 ```
 Request → Middleware (check auth) → Route Handler → Response
 ```
@@ -1481,13 +1519,17 @@ Request → Middleware (check auth) → Route Handler → Response
 This catches authentication issues early, before components render.
 
 #### 3. **Metadata as SEO Foundation**
+
 Proper metadata is the first step in SEO:
+
 ```
 Metadata → Search Engine Index → Better Rankings → More Visitors
 ```
 
 #### 4. **TypeScript for Route Safety**
+
 With TypeScript, route parameters are type-safe:
+
 ```typescript
 const userId = parseInt(params.id as string); // Type-safe extraction
 ```
@@ -1496,6 +1538,7 @@ const userId = parseInt(params.id as string); // Type-safe extraction
 
 **Q: Why not use a centralized state management like Redux?**
 A: Next.js App Router reduces the need for global state:
+
 - Server Components provide data at render time
 - `useContext` for smaller apps
 - Database queries on server
@@ -1503,6 +1546,7 @@ A: Next.js App Router reduces the need for global state:
 
 **Q: How would you scale this to 100,000 users?**
 A: Several strategies:
+
 1. Pagination on `/users` page
 2. Database queries instead of mock data
 3. Caching at middleware level
@@ -1511,6 +1555,7 @@ A: Several strategies:
 
 **Q: Should all protected routes require the same permission level?**
 A: Not necessarily. You could extend the authentication system:
+
 ```typescript
 enum UserRole {
   User = "user",
@@ -1526,6 +1571,7 @@ if (route === "/admin" && user.role !== "admin") {
 
 **Q: How does Next.js handle dynamic route conflicts?**
 A: Route precedence:
+
 1. Exact matches: `/users/profile`
 2. Dynamic segments: `/users/[id]`
 3. Catch-all: `/users/[...slug]`
@@ -1547,12 +1593,14 @@ This implementation demonstrates:
 9. ✅ **User Experience**: Loading states, error messages, responsive design
 
 **Quality Metrics**:
+
 - TypeScript: 0 errors
 - ESLint: 0 errors
 - Prettier: Fully formatted
 - Build: ✅ Compiled successfully
 
 **Routes Available**:
+
 - **Public**: `/`, `/login`, `/startups`, `/users`
 - **Protected**: `/dashboard`, `/profile`, `/settings`
 - **Dynamic**: `/users/[id]` (supports /users/1 through /users/5)
