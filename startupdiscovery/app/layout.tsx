@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { LayoutWrapper } from "@/components";
+import { AuthProvider, UIProvider } from "@/context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -49,9 +50,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <LayoutWrapper showHeader showSidebar headerTitle="Startup Discovery">
-          {children}
-        </LayoutWrapper>
+        <AuthProvider>
+          <UIProvider>
+            <LayoutWrapper
+              showHeader
+              showSidebar
+              headerTitle="Startup Discovery"
+            >
+              {children}
+            </LayoutWrapper>
+          </UIProvider>
+        </AuthProvider>
 
         {/* Footer */}
         <footer className="bg-gray-900 text-gray-300 mt-16">
