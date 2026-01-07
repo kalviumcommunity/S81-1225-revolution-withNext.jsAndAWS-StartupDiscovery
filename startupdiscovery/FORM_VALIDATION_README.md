@@ -30,6 +30,7 @@ const signupSchema = z.object({
 ```
 
 **Key Benefits:**
+
 - Single source of truth for validation rules
 - Type-safe form data with `z.infer<typeof signupSchema>`
 - Clear, user-friendly error messages
@@ -53,6 +54,7 @@ interface FormInputProps {
 ```
 
 **Features:**
+
 - Integrated with React Hook Form via `register`
 - Error state display with styling
 - Accessibility attributes (`aria-invalid`, `aria-describedby`)
@@ -77,6 +79,7 @@ const {
 ```
 
 **Key Features:**
+
 - Real-time validation on blur events
 - Loading state during submission
 - Success/error message display
@@ -109,6 +112,7 @@ const {
 ```
 
 The `register` function connects the input to React Hook Form, automatically handling:
+
 - State management
 - Validation triggering
 - Error tracking
@@ -117,17 +121,20 @@ The `register` function connects the input to React Hook Form, automatically han
 ## Accessibility Features
 
 ✅ **Labels with htmlFor** - Properly connected input labels
+
 ```typescript
 <label htmlFor={name} className="block mb-2 font-medium">
 ```
 
 ✅ **ARIA Attributes** - Screen reader support
+
 ```typescript
 aria-invalid={!!error}
 aria-describedby={error ? `${name}-error` : undefined}
 ```
 
 ✅ **Error Messages** - Clear, actionable feedback
+
 ```typescript
 {error && (
   <p id={`${name}-error`}>{error.message}</p>
@@ -135,6 +142,7 @@ aria-describedby={error ? `${name}-error` : undefined}
 ```
 
 ✅ **Visual States** - Color-coded feedback for errors
+
 - Red border and background for invalid fields
 - Blue focus ring for valid fields
 - Disabled state styling
@@ -146,10 +154,10 @@ aria-describedby={error ? `${name}-error` : undefined}
 
 The signup form enforces:
 
-| Field | Rules |
-|-------|-------|
-| **Name** | 3-50 characters required |
-| **Email** | Valid email format required |
+| Field        | Rules                                       |
+| ------------ | ------------------------------------------- |
+| **Name**     | 3-50 characters required                    |
+| **Email**    | Valid email format required                 |
 | **Password** | Min 6 chars, 1 uppercase, 1 number required |
 
 ## Testing the Form
@@ -163,6 +171,7 @@ Try these scenarios to see validation in action:
 5. **Valid Submission** - Fill all fields correctly → success message appears
 
 **Example Valid Submission:**
+
 - Name: `Alice Johnson`
 - Email: `alice@example.com`
 - Password: `SecurePass123`
@@ -170,32 +179,43 @@ Try these scenarios to see validation in action:
 ## Design Patterns & Best Practices
 
 ### 1. **Reusable Components**
+
 The `FormInput` component can be reused across the application:
+
 - Consistent styling
 - Consistent error handling
 - Reduced code duplication
 - Easier to maintain and update
 
 ### 2. **Schema-Driven Development**
+
 Zod schemas provide:
+
 - Type safety (`SignupFormData` type is auto-generated)
 - Single source of truth for validation
 - Easy to extend with new rules
 - Shareability between frontend and API
 
 ### 3. **Mode-Based Validation**
+
 ```typescript
-mode: "onBlur"  // Validate on blur (less annoying than onChange)
+mode: "onBlur"; // Validate on blur (less annoying than onChange)
 ```
+
 Other modes available:
+
 - `onChange` - Validate on every keystroke
 - `onSubmit` - Validate only on submission
 - `onTouched` - Validate after field is touched
 
 ### 4. **Error Handling**
+
 ```typescript
-formState: { errors, isSubmitting }
+formState: {
+  (errors, isSubmitting);
+}
 ```
+
 - `errors` object tracks all validation errors
 - `isSubmitting` prevents double-submission
 - Detailed error messages from Zod
@@ -203,6 +223,7 @@ formState: { errors, isSubmitting }
 ## Scalability Benefits
 
 ✅ **Easy to Add New Fields**
+
 ```typescript
 // Add to schema
 contact: z.string().regex(/^\d{10}$/, "Valid phone required")
@@ -212,16 +233,19 @@ contact: z.string().regex(/^\d{10}$/, "Valid phone required")
 ```
 
 ✅ **Consistent Validation Across App**
+
 - Reuse the same schema in API routes
 - Share validation logic between frontend and backend
 - Single point of maintenance
 
 ✅ **Type Safety Throughout**
+
 - TypeScript automatically infers form data types
 - IDE autocomplete for form fields
 - Catch errors at compile time
 
 ✅ **Accessible by Default**
+
 - FormInput component handles all a11y requirements
 - No need to remember ARIA attributes
 - Enforces best practices
@@ -256,6 +280,7 @@ app/
 ## Next Steps
 
 This form system can be extended to:
+
 - Profile update forms
 - Login forms
 - Multi-step forms/wizards
@@ -281,6 +306,7 @@ This form system can be extended to:
 ### Real-World Applications
 
 This pattern is used by companies like:
+
 - Discord (complex form handling)
 - Vercel (multi-step deployment forms)
 - Stripe (payment form validation)
