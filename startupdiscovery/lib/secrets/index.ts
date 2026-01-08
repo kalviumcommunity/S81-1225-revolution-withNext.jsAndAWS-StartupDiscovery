@@ -73,7 +73,10 @@ export async function getSecretValue(
   const provider = getSecretsProvider();
 
   if (provider === "aws") {
-    return getAwsSecretValue(secretId, key || "");
+    if (!key) {
+      throw new Error("Key is required for secret value retrieval");
+    }
+    return getAwsSecretValue(secretId, key);
   } else {
     return getAzureSecretValue(secretId, key);
   }

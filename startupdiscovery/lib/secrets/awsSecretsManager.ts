@@ -73,14 +73,20 @@ export async function getAwsSecret(secretId: string): Promise<SecretValue> {
  * Get a specific secret value by key
  * @param secretId - The secret ID or ARN
  * @param key - The key within the secret
- * @returns The secret value
+ * @returns The secret value or undefined if key not found
  */
 export async function getAwsSecretValue(
   secretId: string,
   key: string
-): Promise<string | undefined> {
+): Promise<string> {
   const secret = await getAwsSecret(secretId);
-  return secret[key];
+  const value = secret[key];
+
+  if (!value) {
+    throw new Error(`Key '${key}' not found in secret`);
+  }
+
+  return value;
 }
 
 /**
