@@ -11,6 +11,7 @@
 The StartupDiscovery application has been successfully enhanced with comprehensive input sanitization and OWASP-compliant security practices. All user inputs are validated, sanitized, and encoded to protect against XSS and SQL Injection attacks. The implementation includes server-side sanitization, client-side protection, security headers, and demonstration of attack prevention.
 
 **Key Metrics**:
+
 - 📦 7 new security module files created
 - 🛡️ 3 sanitization libraries installed (sanitize-html, validator, DOMPurify)
 - ✅ 100% code quality checks passing
@@ -52,33 +53,33 @@ Three sanitization levels implemented for different contexts:
 
 ```typescript
 enum SanitizationLevel {
-  STRICT = "strict",      // Plain text only - removes all HTML
-  MODERATE = "moderate",  // Safe HTML tags for rich text
-  MINIMAL = "minimal",    // Minimal sanitization
+  STRICT = "strict", // Plain text only - removes all HTML
+  MODERATE = "moderate", // Safe HTML tags for rich text
+  MINIMAL = "minimal", // Minimal sanitization
 }
 ```
 
-| Level | Use Case | Security | Example Output |
-|-------|----------|----------|-----------------|
-| **STRICT** | Titles, names, usernames | ⭐⭐⭐⭐⭐ | All tags removed |
-| **MODERATE** | Comments, descriptions | ⭐⭐⭐⭐ | Safe tags preserved |
-| **MINIMAL** | Pre-validated content | ⭐⭐⭐ | Basic tag removal |
+| Level        | Use Case                 | Security   | Example Output      |
+| ------------ | ------------------------ | ---------- | ------------------- |
+| **STRICT**   | Titles, names, usernames | ⭐⭐⭐⭐⭐ | All tags removed    |
+| **MODERATE** | Comments, descriptions   | ⭐⭐⭐⭐   | Safe tags preserved |
+| **MINIMAL**  | Pre-validated content    | ⭐⭐⭐     | Basic tag removal   |
 
 ### 3. Sanitization Functions
 
 #### Server-Side Functions
 
-| Function | Purpose | Input | Output |
-|----------|---------|-------|--------|
-| `sanitizeHtmlInput()` | Remove dangerous HTML | `<script>...</script>` | Empty or safe HTML |
-| `sanitizeTextInput()` | Plain text with escaping | `'<alert>' & "test"` | `&apos;&lt;alert&gt;&apos; &amp; &quot;test&quot;` |
-| `sanitizeUrl()` | Validate URLs | `javascript:alert()` | Empty (invalid) |
-| `sanitizeEmail()` | Validate emails | `test@example.com` | `test@example.com` |
-| `sanitizeNumber()` | Validate numbers | `"123abc"` | `null` (invalid) |
-| `sanitizeObject()` | Recursive object sanitization | `{name: "<script>"}` | `{name: ""}` |
-| `hasXSSPatterns()` | Detect XSS attempts | `<img onerror=alert()>` | `true` |
-| `hasSQLiPatterns()` | Detect SQL injection | `' OR '1'='1' --` | `true` |
-| `validateInput()` | Comprehensive validation | Various | `{valid: boolean, message: string}` |
+| Function              | Purpose                       | Input                   | Output                                             |
+| --------------------- | ----------------------------- | ----------------------- | -------------------------------------------------- |
+| `sanitizeHtmlInput()` | Remove dangerous HTML         | `<script>...</script>`  | Empty or safe HTML                                 |
+| `sanitizeTextInput()` | Plain text with escaping      | `'<alert>' & "test"`    | `&apos;&lt;alert&gt;&apos; &amp; &quot;test&quot;` |
+| `sanitizeUrl()`       | Validate URLs                 | `javascript:alert()`    | Empty (invalid)                                    |
+| `sanitizeEmail()`     | Validate emails               | `test@example.com`      | `test@example.com`                                 |
+| `sanitizeNumber()`    | Validate numbers              | `"123abc"`              | `null` (invalid)                                   |
+| `sanitizeObject()`    | Recursive object sanitization | `{name: "<script>"}`    | `{name: ""}`                                       |
+| `hasXSSPatterns()`    | Detect XSS attempts           | `<img onerror=alert()>` | `true`                                             |
+| `hasSQLiPatterns()`   | Detect SQL injection          | `' OR '1'='1' --`       | `true`                                             |
+| `validateInput()`     | Comprehensive validation      | Various                 | `{valid: boolean, message: string}`                |
 
 #### Client-Side Functions (React)
 
@@ -99,47 +100,54 @@ enum SanitizationLevel {
 **Protected Routes Updated**:
 
 ✅ **comments/route.ts**
+
 - POST: Sanitize comment content with MODERATE level
 - DELETE: Validate numeric IDs
 - XSS/SQLi pattern detection enabled
 
 ✅ **startups/route.ts**
+
 - POST: Sanitize title (STRICT), description (MODERATE), URL
 - PATCH: Same sanitization as POST
 - DELETE: Numeric ID validation
 
 ✅ **users/route.ts**
+
 - DELETE: Numeric ID sanitization with range check
 
 ✅ **roles/route.ts**
+
 - PATCH: Sanitize numeric user ID
 - Validate role enum values
 
 ✅ **analytics/route.ts**
+
 - GET: No injection points (read-only)
 
 ✅ **audit-logs/route.ts**
+
 - GET: No injection points (read-only)
 
 ### 5. OWASP Security Headers
 
 Comprehensive security headers implemented in `lib/security/headers.ts`:
 
-| Header | Purpose | Configuration |
-|--------|---------|----------------|
-| **Content-Security-Policy** | Prevent inline scripts/XSS | default-src 'self'; frame-ancestors 'none' |
-| **X-Content-Type-Options** | Prevent MIME type sniffing | nosniff |
-| **X-Frame-Options** | Prevent clickjacking | DENY |
-| **X-XSS-Protection** | Legacy XSS protection | 1; mode=block |
-| **Strict-Transport-Security** | Force HTTPS | max-age=31536000; includeSubDomains |
-| **Permissions-Policy** | Restrict browser APIs | camera, microphone, geolocation disabled |
-| **Referrer-Policy** | Control referrer info | strict-origin-when-cross-origin |
+| Header                        | Purpose                    | Configuration                              |
+| ----------------------------- | -------------------------- | ------------------------------------------ |
+| **Content-Security-Policy**   | Prevent inline scripts/XSS | default-src 'self'; frame-ancestors 'none' |
+| **X-Content-Type-Options**    | Prevent MIME type sniffing | nosniff                                    |
+| **X-Frame-Options**           | Prevent clickjacking       | DENY                                       |
+| **X-XSS-Protection**          | Legacy XSS protection      | 1; mode=block                              |
+| **Strict-Transport-Security** | Force HTTPS                | max-age=31536000; includeSubDomains        |
+| **Permissions-Policy**        | Restrict browser APIs      | camera, microphone, geolocation disabled   |
+| **Referrer-Policy**           | Control referrer info      | strict-origin-when-cross-origin            |
 
 ### 6. Attack Prevention Examples
 
 #### XSS Attack Prevention
 
 **Attack 1: Script Tag Injection**
+
 ```
 Before: <script>alert("XSS")</script>
 After:  (empty - all tags removed)
@@ -147,6 +155,7 @@ Status: ✅ BLOCKED
 ```
 
 **Attack 2: Event Handler Injection**
+
 ```
 Before: <img src=x onerror="alert('XSS')" />
 After:  <img src="x" /> (onerror removed)
@@ -154,6 +163,7 @@ Status: ✅ BLOCKED
 ```
 
 **Attack 3: JavaScript Protocol**
+
 ```
 Before: <a href="javascript:alert()">Click</a>
 After:  (link removed entirely)
@@ -163,6 +173,7 @@ Status: ✅ BLOCKED
 #### SQL Injection Prevention
 
 **Attack 1: OR 1=1**
+
 ```
 Before: ' OR '1'='1' --
 After:  ❌ VALIDATION FAILED
@@ -171,6 +182,7 @@ Status: ✅ BLOCKED
 ```
 
 **Attack 2: UNION SELECT**
+
 ```
 Before: ' UNION SELECT * FROM users --
 After:  ❌ VALIDATION FAILED
@@ -179,6 +191,7 @@ Status: ✅ BLOCKED
 ```
 
 **Attack 3: Comment Bypass**
+
 ```
 Before: admin' --
 After:  ❌ VALIDATION FAILED
@@ -239,12 +252,12 @@ Pre-built React components with integrated sanitization:
 
 ### Quality Checks
 
-| Check | Status | Command | Result |
-|-------|--------|---------|--------|
-| Type Check | ✅ | `npm run type-check` | 0 errors |
-| Linting | ✅ | `npm run lint` | 0 violations |
-| Formatting | ✅ | `npm run format:check` | All formatted |
-| Build | ✅ | `npm run build` | Success |
+| Check      | Status | Command                | Result        |
+| ---------- | ------ | ---------------------- | ------------- |
+| Type Check | ✅     | `npm run type-check`   | 0 errors      |
+| Linting    | ✅     | `npm run lint`         | 0 violations  |
+| Formatting | ✅     | `npm run format:check` | All formatted |
+| Build      | ✅     | `npm run build`        | Success       |
 
 ### Package Dependencies
 
@@ -329,10 +342,7 @@ import {
 } from "@/lib/security";
 
 // Sanitize user comment
-const clean = sanitizeHtmlInput(
-  userComment,
-  SanitizationLevel.MODERATE
-);
+const clean = sanitizeHtmlInput(userComment, SanitizationLevel.MODERATE);
 
 // Validate for attacks
 const validation = validateInput(clean, {
@@ -392,18 +402,18 @@ await prisma.comment.create({
 
 ### Coverage Matrix
 
-| OWASP Category | Status | Implementation |
-|----------------|--------|-----------------|
-| A1: Injection | ✅ | Parameterized queries + input validation |
-| A2: Broken Auth | ✅ | JWT verification + RBAC (existing) |
-| A3: Sensitive Data | ✅ | HSTS + secure headers |
-| A4: XXE | ✅ | Safe XML parsing + sanitization |
-| A5: Access Control | ✅ | RBAC system (existing) |
-| A6: Misconfiguration | ✅ | Security headers configured |
-| A7: XSS | ✅ | Input sanitization + output encoding |
-| A8: Deserialization | ✅ | Safe JSON + Zod validation |
-| A9: Components | ✅ | Dependency updates |
-| A10: Logging | ✅ | Audit logging (existing) |
+| OWASP Category       | Status | Implementation                           |
+| -------------------- | ------ | ---------------------------------------- |
+| A1: Injection        | ✅     | Parameterized queries + input validation |
+| A2: Broken Auth      | ✅     | JWT verification + RBAC (existing)       |
+| A3: Sensitive Data   | ✅     | HSTS + secure headers                    |
+| A4: XXE              | ✅     | Safe XML parsing + sanitization          |
+| A5: Access Control   | ✅     | RBAC system (existing)                   |
+| A6: Misconfiguration | ✅     | Security headers configured              |
+| A7: XSS              | ✅     | Input sanitization + output encoding     |
+| A8: Deserialization  | ✅     | Safe JSON + Zod validation               |
+| A9: Components       | ✅     | Dependency updates                       |
+| A10: Logging         | ✅     | Audit logging (existing)                 |
 
 ---
 
@@ -419,6 +429,7 @@ node .next/server/lib/security/demo.js
 ```
 
 **Demo Features**:
+
 - 6 XSS attack scenarios with before/after
 - 5 SQL injection patterns
 - Real-world usage examples
@@ -438,7 +449,7 @@ hasSQLiPatterns("' OR '1'='1' --"); // true
 sanitizeHtmlInput('<img onerror="alert()">'); // <img />
 
 // Test validation
-validateInput('<script>', { checkXSS: true });
+validateInput("<script>", { checkXSS: true });
 // { valid: false, message: "Input contains potentially malicious content (XSS detected)" }
 ```
 
@@ -477,18 +488,21 @@ validateInput('<script>', { checkXSS: true });
 ## Future Enhancements
 
 ### Phase 2 (Next Sprint)
+
 - [ ] Rate limiting with Redis
 - [ ] CAPTCHA for form submissions
 - [ ] Two-factor authentication
 - [ ] Request signing for API calls
 
 ### Phase 3 (Next Quarter)
+
 - [ ] Subresource Integrity (SRI)
 - [ ] Certificate pinning
 - [ ] Web Application Firewall (WAF)
 - [ ] ML-based anomaly detection
 
 ### Phase 4 (Strategic)
+
 - [ ] External security audit
 - [ ] Penetration testing program
 - [ ] Bug bounty program
@@ -530,17 +544,20 @@ feat: Implement input sanitization and OWASP compliance security
 ## Deployment Notes
 
 ### Prerequisites
+
 - Node.js 16+ (installed)
 - npm 8+ (installed)
 - All dependencies installed
 
 ### Installation
+
 ```bash
 npm install sanitize-html validator dompurify --legacy-peer-deps
 npm install --save-dev @types/sanitize-html @types/validator
 ```
 
 ### Verification
+
 ```bash
 npm run type-check   # ✅ No errors
 npm run lint         # ✅ 0 violations
@@ -549,6 +566,7 @@ npm run build        # ✅ Success
 ```
 
 ### Production Ready
+
 - ✅ Security headers configured
 - ✅ Input sanitization enabled
 - ✅ Output encoding implemented
@@ -561,6 +579,7 @@ npm run build        # ✅ Success
 ## Support & Documentation
 
 ### Resources
+
 - **SECURITY_GUIDE.md** - Comprehensive security guide with examples
 - **lib/security/demo.ts** - Before/after attack demonstrations
 - **lib/security/sanitizer.ts** - Core sanitization implementation
