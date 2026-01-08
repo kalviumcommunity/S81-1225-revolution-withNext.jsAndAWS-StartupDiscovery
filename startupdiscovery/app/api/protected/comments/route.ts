@@ -12,6 +12,7 @@ import {
   enforceOwnerPermission,
   PermissionDeniedError,
 } from "@/lib/rbac";
+import { sanitizeHtmlInput, validateInput } from "@/lib/security";
 import prisma from "@/lib/prisma";
 import { verifyAccessToken } from "@/lib/auth";
 import { z } from "zod";
@@ -53,6 +54,22 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validatedData = createCommentSchema.parse(body);
 
+    // Sanitize comment content - remove any HTML/script tags
+    const sanitizedContent = sanitizeHtmlInput(validatedData.content);
+
+    // Validate sanitized content for XSS/SQLi patterns
+    const validation = validateInput(sanitizedContent, {
+      required: true,
+      minLength: 1,
+      maxLength: 500,
+      checkXSS: true,
+      checkSQLi: true,
+    });
+
+    if (!validation.valid) {
+      return sendError(validation.message, ERROR_CODES.VALIDATION_ERROR, 400);
+    }
+
     // Get IP for audit logging
     const ipAddress =
       req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
@@ -91,10 +108,10 @@ export async function POST(req: Request) {
       return sendError("Startup not found", ERROR_CODES.NOT_FOUND, 404);
     }
 
-    // Create comment
+    // Create comment with sanitized content
     const comment = await prisma.comment.create({
       data: {
-        content: validatedData.content,
+        content: sanitizedContent,
         startupId: validatedData.startupId,
         userId: decoded.userId,
       },

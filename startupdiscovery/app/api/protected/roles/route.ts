@@ -11,6 +11,7 @@ import {
   PermissionDeniedError,
   canManageRole,
 } from "@/lib/rbac";
+import { sanitizeNumber, validateInput } from "@/lib/security";
 import prisma from "@/lib/prisma";
 import { verifyAccessToken } from "@/lib/auth";
 import { z } from "zod";
@@ -54,6 +55,22 @@ export async function PATCH(req: Request) {
 
     const body = await req.json();
     const validatedData = updateRoleSchema.parse(body);
+
+    // Sanitize userId input
+    const sanitizedUserId = sanitizeNumber(validatedData.userId);
+    if (sanitizedUserId === null) {
+      return sendError("Invalid user ID", ERROR_CODES.VALIDATION_ERROR, 400);
+    }
+
+    // Validate role is in allowed set
+    const validation = validateInput(validatedData.newRole, {
+      required: true,
+      pattern: /^(USER|ADMIN|MODERATOR)$/,
+    });
+
+    if (!validation.valid) {
+      return sendError(validation.message, ERROR_CODES.VALIDATION_ERROR, 400);
+    }
 
     // Get IP for audit logging
     const ipAddress =
@@ -99,7 +116,7 @@ export async function PATCH(req: Request) {
 
     // Verify target user exists
     const targetUser = await prisma.user.findUnique({
-      where: { id: validatedData.userId },
+      where: { id: sanitizedUserId },
     });
 
     if (!targetUser) {

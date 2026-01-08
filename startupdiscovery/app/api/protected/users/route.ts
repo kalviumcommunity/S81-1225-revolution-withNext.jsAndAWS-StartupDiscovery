@@ -7,6 +7,7 @@ import {
   enforcePermission,
   PermissionDeniedError,
 } from "@/lib/rbac";
+import { sanitizeNumber } from "@/lib/security";
 import prisma from "@/lib/prisma";
 import { verifyAccessToken } from "@/lib/auth";
 
@@ -129,8 +130,8 @@ export async function DELETE(
       );
     }
 
-    const userId = parseInt(id);
-    if (isNaN(userId)) {
+    const userId = sanitizeNumber(parseInt(id));
+    if (userId === null || isNaN(userId)) {
       return sendError("Invalid user ID", ERROR_CODES.VALIDATION_ERROR, 400);
     }
 
