@@ -29,6 +29,20 @@ export {
   type CORSConfig,
 } from "./headers";
 
+// Secure Headers and HTTPS Enforcement
+export {
+  SECURE_HEADERS,
+  CORS_CONFIG,
+  applySecureHeaders,
+  applyCORSHeaders,
+  applyAllSecurityHeaders,
+  isHttpsRequest,
+  isTrustedOrigin,
+} from "./secureHeaders";
+
+// CORS Handler Wrapper
+export { withCORS, corsResponse, corsErrorResponse } from "./corsHandler";
+
 // Client-side sanitization (only available in client components)
 export {
   sanitizeHtml,
