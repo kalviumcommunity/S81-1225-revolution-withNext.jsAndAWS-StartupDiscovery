@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAccessToken } from "@/lib/auth";
 import { extractTokensFromCookies } from "@/lib/tokenManager";
+import {
+  applySecureHeaders,
+  applyCORSHeaders,
+  isHttpsRequest,
+} from "@/lib/security/secureHeaders";
 
 /**
  * Route Protection Configuration
@@ -106,10 +111,22 @@ function verifyJWT(
 
 /**
  * Main middleware function
- * Handles route protection and JWT verification
+ * Handles route protection, JWT verification, and security headers
  */
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const origin = request.headers.get("origin") || undefined;
+  const protocol = request.headers.get("x-forwarded-proto") || "https";
+
+  // Verify HTTPS in production
+  if (!isHttpsRequest(protocol) && process.env.NODE_ENV === "production") {
+    return NextResponse.redirect(
+      `https://${request.headers.get("host")}${pathname}`,
+      {
+        status: 301,
+      }
+    );
+  }
 
   // Skip middleware for static files and public routes
   if (
@@ -120,7 +137,9 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/signup") ||
     pathname.startsWith("/api/auth")
   ) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    applySecureHeaders(response);
+    return response;
   }
 
   // Check if route is protected
@@ -138,15 +157,25 @@ export function middleware(request: NextRequest) {
     requestHeaders.set("x-user-email", userData.email);
     requestHeaders.set("x-user-role", userData.role);
 
-    return NextResponse.next({
+    const response = NextResponse.next({
       request: {
         headers: requestHeaders,
       },
     });
+
+    // Apply security headers
+    applySecureHeaders(response);
+    applyCORSHeaders(response, origin);
+
+    return response;
   }
 
-  // Public route, allow access
-  return NextResponse.next();
+  // Public route - apply security headers
+  const response = NextResponse.next();
+  applySecureHeaders(response);
+  applyCORSHeaders(response, origin);
+
+  return response;
 }
 
 /**
