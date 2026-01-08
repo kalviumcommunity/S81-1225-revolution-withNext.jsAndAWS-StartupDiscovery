@@ -12,6 +12,12 @@ import {
   enforceOwnerPermission,
   PermissionDeniedError,
 } from "@/lib/rbac";
+import {
+  sanitizeHtmlInput,
+  sanitizeTextInput,
+  sanitizeUrl,
+  validateInput,
+} from "@/lib/security";
 import prisma from "@/lib/prisma";
 import { verifyAccessToken } from "@/lib/auth";
 import { z } from "zod";
@@ -61,6 +67,42 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validatedData = createStartupSchema.parse(body);
 
+    // Sanitize input fields
+    const sanitizedTitle = sanitizeTextInput(validatedData.title);
+    const sanitizedTagline = sanitizeTextInput(validatedData.tagline);
+    const sanitizedDescription = sanitizeHtmlInput(validatedData.description);
+    const sanitizedWebsiteUrl = sanitizeUrl(validatedData.websiteUrl);
+    const sanitizedIndustry = sanitizeTextInput(validatedData.industry);
+
+    // Validate sanitized content
+    const titleValidation = validateInput(sanitizedTitle, {
+      required: true,
+      minLength: 3,
+      maxLength: 100,
+    });
+
+    if (!titleValidation.valid) {
+      return sendError(
+        titleValidation.message,
+        ERROR_CODES.VALIDATION_ERROR,
+        400
+      );
+    }
+
+    const descValidation = validateInput(sanitizedDescription, {
+      required: true,
+      minLength: 10,
+      maxLength: 1000,
+    });
+
+    if (!descValidation.valid) {
+      return sendError(
+        descValidation.message,
+        ERROR_CODES.VALIDATION_ERROR,
+        400
+      );
+    }
+
     // Get IP for audit logging
     const ipAddress =
       req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
@@ -90,15 +132,15 @@ export async function POST(req: Request) {
       throw error;
     }
 
-    // Create startup
+    // Create startup with sanitized data
     const startup = await prisma.startup.create({
       data: {
-        title: validatedData.title,
+        title: sanitizedTitle,
         slug: validatedData.slug,
-        tagline: validatedData.tagline,
-        description: validatedData.description,
-        websiteUrl: validatedData.websiteUrl,
-        industry: validatedData.industry || "Other",
+        tagline: sanitizedTagline,
+        description: sanitizedDescription,
+        websiteUrl: sanitizedWebsiteUrl || undefined,
+        industry: sanitizedIndustry || "Other",
         userId: decoded.userId,
         status: "DRAFT",
       },
