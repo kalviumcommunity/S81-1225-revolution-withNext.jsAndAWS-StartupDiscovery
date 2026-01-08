@@ -342,8 +342,7 @@ async function runTests() {
       "Next steps: Configure AWS S3 or Azure Blob credentials and upload files"
     );
   } catch (err: unknown) {
-    const errorMsg =
-      err instanceof Error ? err.message : String(err);
+    const errorMsg = err instanceof Error ? err.message : String(err);
     error(`Test suite failed: ${errorMsg}`);
     process.exit(1);
   }
