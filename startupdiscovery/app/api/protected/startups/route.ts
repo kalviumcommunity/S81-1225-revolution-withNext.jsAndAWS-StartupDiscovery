@@ -1,3 +1,4 @@
+import { NextRequest } from "next/server";
 import {
   sendSuccess,
   sendError,
@@ -126,10 +127,11 @@ export async function POST(req: Request) {
  * Update a startup (Own startup or Moderator+)
  */
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<Record<string, string>> }
 ) {
   try {
+    const { id } = await params;
     // Extract and verify access token
     const authHeader = req.headers.get("authorization");
     const token = authHeader?.startsWith("Bearer ")
@@ -153,7 +155,7 @@ export async function PATCH(
       );
     }
 
-    const startupId = parseInt(params.id);
+    const startupId = parseInt(id);
     if (isNaN(startupId)) {
       return sendError("Invalid startup ID", ERROR_CODES.VALIDATION_ERROR, 400);
     }
@@ -234,10 +236,11 @@ export async function PATCH(
  * Delete a startup (Own startup or Moderator+)
  */
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<Record<string, string>> }
 ) {
   try {
+    const { id } = await params;
     // Extract and verify access token
     const authHeader = req.headers.get("authorization");
     const token = authHeader?.startsWith("Bearer ")
@@ -261,7 +264,7 @@ export async function DELETE(
       );
     }
 
-    const startupId = parseInt(params.id);
+    const startupId = parseInt(id);
     if (isNaN(startupId)) {
       return sendError("Invalid startup ID", ERROR_CODES.VALIDATION_ERROR, 400);
     }

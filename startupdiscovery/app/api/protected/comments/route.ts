@@ -1,3 +1,4 @@
+import { NextRequest } from "next/server";
 import {
   sendSuccess,
   sendError,
@@ -122,10 +123,11 @@ export async function POST(req: Request) {
  * Delete a comment (Own comment or Moderator+)
  */
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<Record<string, string>> }
 ) {
   try {
+    const { id } = await params;
     // Extract and verify access token
     const authHeader = req.headers.get("authorization");
     const token = authHeader?.startsWith("Bearer ")
@@ -149,7 +151,7 @@ export async function DELETE(
       );
     }
 
-    const commentId = parseInt(params.id);
+    const commentId = parseInt(id);
     if (isNaN(commentId)) {
       return sendError("Invalid comment ID", ERROR_CODES.VALIDATION_ERROR, 400);
     }
