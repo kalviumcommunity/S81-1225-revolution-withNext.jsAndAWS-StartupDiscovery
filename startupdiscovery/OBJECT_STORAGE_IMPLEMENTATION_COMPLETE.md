@@ -3,6 +3,7 @@
 ## Executive Summary
 
 ✅ **Fully implemented object storage configuration** supporting both AWS S3 and Azure Blob Storage with:
+
 - Presigned URL generation for secure, time-limited uploads
 - Comprehensive file validation (MIME type, size, format)
 - Direct-to-storage upload flows (bypassing server)
@@ -21,18 +22,21 @@
 **14 comprehensive sections** covering:
 
 #### AWS S3 Setup (Part 1)
+
 - Step-by-step bucket creation with security settings
 - IAM user configuration with least-privilege permissions
 - AWS CLI testing examples
 - Recommended lifecycle rules and versioning
 
 #### Azure Blob Setup (Part 2)
+
 - Storage account and container creation
 - Access key and SAS token configuration
 - Azure CLI testing examples
 - Connection string examples for both authentication methods
 
 #### Implementation Guides (Parts 3-7)
+
 - File structure overview
 - Presigned URL flow (AWS S3)
 - SAS URL flow (Azure Blob Storage)
@@ -40,6 +44,7 @@
 - Security best practices (8 key areas)
 
 #### Operational Guides (Parts 8-14)
+
 - Lifecycle policies for cost optimization
 - Cost estimation ($12.20/month AWS, $3.80/month Azure)
 - API endpoint documentation (5 endpoints)
@@ -54,22 +59,25 @@
 **Complete validation system** with:
 
 #### Exports (300+ LOC)
+
 - `ALLOWED_MIME_TYPES` - Organized by category (images, documents, spreadsheets)
 - `MAX_FILE_SIZES` - Type-specific limits
 - `EXTENSION_TO_MIME_TYPE` - Mapping for verification
 - `ValidationResult` interface with error and warning support
 
 #### Validation Functions
-| Function | Purpose |
-|----------|---------|
-| `validateFileType()` | Check MIME type against whitelist |
-| `validateFileSize()` | Enforce size limits by type |
-| `validateFilename()` | Detect dangerous characters and traversal |
-| `validateExtensionMimeMatch()` | Verify extension matches MIME type |
-| `validateFile()` | Comprehensive validation combining all checks |
-| `validateFileObject()` | Browser File object validation |
+
+| Function                       | Purpose                                       |
+| ------------------------------ | --------------------------------------------- |
+| `validateFileType()`           | Check MIME type against whitelist             |
+| `validateFileSize()`           | Enforce size limits by type                   |
+| `validateFilename()`           | Detect dangerous characters and traversal     |
+| `validateExtensionMimeMatch()` | Verify extension matches MIME type            |
+| `validateFile()`               | Comprehensive validation combining all checks |
+| `validateFileObject()`         | Browser File object validation                |
 
 #### Utility Functions
+
 - `generateSafeFilename()` - Sanitize filenames for storage
 - `getFileExtension()` - Extract extension safely
 - `getMimeTypeFromExtension()` - Reverse lookup
@@ -82,38 +90,43 @@
 **Cloud storage integration** (300+ LOC):
 
 #### AWS S3 Functions
+
 ```typescript
-generateS3PresignedUrl()      // PUT URLs for uploads
-getS3ObjectMetadata()         // Retrieve file info
-deleteS3Object()              // Delete from S3
+generateS3PresignedUrl(); // PUT URLs for uploads
+getS3ObjectMetadata(); // Retrieve file info
+deleteS3Object(); // Delete from S3
 ```
 
 #### Azure Blob Functions
+
 ```typescript
-generateAzureSasUrl()         // Upload tokens
-getAzureBlobMetadata()        // Retrieve blob info
-deleteAzureBlob()             // Delete from Azure
+generateAzureSasUrl(); // Upload tokens
+getAzureBlobMetadata(); // Retrieve blob info
+deleteAzureBlob(); // Delete from Azure
 ```
 
 #### Provider-Agnostic Functions
+
 ```typescript
-generatePresignedUrl()        // Auto-detects provider
-deleteStorageObject()         // Provider-aware deletion
-generateDownloadUrl()         // Read-only download URLs
+generatePresignedUrl(); // Auto-detects provider
+deleteStorageObject(); // Provider-aware deletion
+generateDownloadUrl(); // Read-only download URLs
 ```
 
 #### Response Types
+
 ```typescript
 interface PresignedUrlResponse {
-  uploadUrl: string;          // Direct upload URL
-  downloadUrl: string;        // Download URL
-  expiresIn: number;          // Expiration in seconds
-  provider: "aws" | "azure";  // Which provider
-  fileKey?: string;           // Unique file identifier
+  uploadUrl: string; // Direct upload URL
+  downloadUrl: string; // Download URL
+  expiresIn: number; // Expiration in seconds
+  provider: "aws" | "azure"; // Which provider
+  fileKey?: string; // Unique file identifier
 }
 ```
 
 **Key Features**:
+
 - Automatic credential detection from environment
 - Configurable expiration times (300s for upload, 86400s for download)
 - Error handling with helpful messages
@@ -126,14 +139,15 @@ interface PresignedUrlResponse {
 **Configuration management** (200+ LOC):
 
 ```typescript
-loadStorageConfig()           // Load from environment
-validateStorageConfig()       // Comprehensive validation
-initializeStorageConfig()     // Load + validate
-getProviderDisplayName()      // "AWS S3" / "Azure Blob Storage"
-getStorageInfo()              // Diagnostics info
+loadStorageConfig(); // Load from environment
+validateStorageConfig(); // Comprehensive validation
+initializeStorageConfig(); // Load + validate
+getProviderDisplayName(); // "AWS S3" / "Azure Blob Storage"
+getStorageInfo(); // Diagnostics info
 ```
 
 **Validation Checks**:
+
 - ✅ Provider is valid ("aws" or "azure")
 - ✅ File size is positive and reasonable
 - ✅ At least one MIME type allowed
@@ -142,6 +156,7 @@ getStorageInfo()              // Diagnostics info
 - ✅ Container/bucket names set
 
 **Configuration Example**:
+
 ```javascript
 {
   provider: "aws",
@@ -156,14 +171,17 @@ getStorageInfo()              // Diagnostics info
 ### 5. API Endpoints
 
 #### GET `/api/storage/upload-url`
+
 Generates presigned/SAS URLs for direct uploads
 
 **Request**:
+
 ```
 GET /api/storage/upload-url?fileName=avatar.jpg&fileType=image/jpeg&fileSize=2097152
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "uploadUrl": "https://s3.amazonaws.com/bucket/avatar.jpg?...",
@@ -175,6 +193,7 @@ GET /api/storage/upload-url?fileName=avatar.jpg&fileType=image/jpeg&fileSize=209
 ```
 
 **Error** (400 Bad Request):
+
 ```json
 {
   "error": "File type not allowed: application/exe",
@@ -183,14 +202,17 @@ GET /api/storage/upload-url?fileName=avatar.jpg&fileType=image/jpeg&fileSize=209
 ```
 
 #### GET `/api/storage/retrieve`
+
 Gets file metadata and download URLs
 
 **Request**:
+
 ```
 GET /api/storage/retrieve?key=avatar.jpg
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "fileName": "avatar.jpg",
@@ -204,14 +226,17 @@ GET /api/storage/retrieve?key=avatar.jpg
 ```
 
 #### GET `/api/storage/download`
+
 Generates time-limited download URLs
 
 **Request**:
+
 ```
 GET /api/storage/download?key=document.pdf
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "downloadUrl": "https://...",
@@ -223,15 +248,18 @@ GET /api/storage/download?key=document.pdf
 ```
 
 #### DELETE `/api/storage/delete`
+
 Deletes files (requires JWT authentication)
 
 **Request**:
+
 ```
 DELETE /api/storage/delete?key=document.pdf
 Authorization: Bearer <token>
 ```
 
 **Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -241,9 +269,11 @@ Authorization: Bearer <token>
 ```
 
 #### GET `/api/storage/status`
+
 Returns storage configuration and status
 
 **Response** (200 OK):
+
 ```json
 {
   "status": "configured",
@@ -283,6 +313,7 @@ export { loadStorageConfig, validateStorageConfig, ... }
 ```
 
 **Usage in application code**:
+
 ```typescript
 import { validateFile, generatePresignedUrl } from "@/lib/storage";
 
@@ -299,6 +330,7 @@ if (validation.valid) {
 **Complete React component** (350+ LOC) with:
 
 #### Main Component: `StorageUploadComponent`
+
 ```typescript
 export function StorageUploadComponent({
   onUploadSuccess?: (fileUrl, fileName) => void,
@@ -309,6 +341,7 @@ export function StorageUploadComponent({
 ```
 
 **Features**:
+
 - ✅ Drag-and-drop file upload
 - ✅ File input selection
 - ✅ Real-time progress tracking
@@ -319,11 +352,13 @@ export function StorageUploadComponent({
 - ✅ Clear completed uploads button
 
 #### Subcomponents
+
 - `UploadItem` - Individual upload progress display
 - `StatusBadge` - Visual status indicators
 - `SimpleFileUpload` - Minimal alternative component
 
 **Upload Flow**:
+
 1. User selects/drags file
 2. Component validates (type, size)
 3. Requests presigned URL from API
@@ -342,16 +377,17 @@ npx ts-node scripts/test-storage.ts
 
 **6 Test Categories**:
 
-| Test | Purpose | Checks |
-|------|---------|--------|
-| 1. Status | Verify storage configured | Configuration detection |
-| 2. Validation | Test file type/size checks | 4 test cases (pass/fail) |
-| 3. Presigned URLs | Generate upload URLs | Multiple file types |
-| 4. Retrieval | Get file metadata | File existence handling |
-| 5. Download URLs | Generate download links | Download link generation |
-| 6. Configuration | Verify environment vars | Required/optional vars |
+| Test              | Purpose                    | Checks                   |
+| ----------------- | -------------------------- | ------------------------ |
+| 1. Status         | Verify storage configured  | Configuration detection  |
+| 2. Validation     | Test file type/size checks | 4 test cases (pass/fail) |
+| 3. Presigned URLs | Generate upload URLs       | Multiple file types      |
+| 4. Retrieval      | Get file metadata          | File existence handling  |
+| 5. Download URLs  | Generate download links    | Download link generation |
+| 6. Configuration  | Verify environment vars    | Required/optional vars   |
 
 **Output**:
+
 - Color-coded results (✓ success, ✗ error)
 - Detailed error messages
 - Configuration status
@@ -388,22 +424,26 @@ AZURE_BLOB_CONTAINER_NAME="uploads"
 ## Quality Assurance
 
 ### Format Verification
+
 - ✅ **Prettier Check**: All new files formatted correctly
 - Status: 10 files formatted (included storage modules)
 
 ### Linting
+
 - ✅ **ESLint**: No critical errors in storage modules
 - Warnings: 9 intentional (unused underscore-prefixed params in OPTIONS handlers)
 - Status: Passing
 
 ### Type Safety
+
 - ✅ **TypeScript**: All storage module types correct
 - Fixed: 3 Azure credential typing issues
 - Status: All storage files type-safe
 
 ### Dependencies
+
 - ✅ **npm install**: All packages installed successfully
-  - `@aws-sdk/client-s3` 
+  - `@aws-sdk/client-s3`
   - `@aws-sdk/s3-request-presigner`
   - `@azure/storage-blob`
 - Version: 653 total packages, 0 vulnerabilities
@@ -414,30 +454,35 @@ AZURE_BLOB_CONTAINER_NAME="uploads"
 ## Security Highlights
 
 ### 1. Server-Side Validation
+
 - MIME type whitelist enforcement
 - File size limits by type
 - Filename sanitization
 - Path traversal prevention
 
 ### 2. Presigned URLs
+
 - Short expiration times (5 minutes for uploads)
 - Server-side signing (credentials never exposed)
 - Method restrictions (PUT for uploads, GET for downloads)
 - Unique file identifiers
 
 ### 3. SAS Tokens
+
 - Least-privilege permissions (only needed access)
 - StorageSharedKeyCredential for secure signing
 - Configurable expiration
 - Read-only download tokens
 
 ### 4. API Security
+
 - JWT authentication on deletion endpoints
 - Authorization header validation
 - Secure header application via middleware
 - CORS configuration support
 
 ### 5. Configuration Security
+
 - No hardcoded credentials
 - Environment variable validation
 - Provider-specific credential checking
@@ -448,22 +493,24 @@ AZURE_BLOB_CONTAINER_NAME="uploads"
 ## Cost Analysis
 
 ### AWS S3 (Monthly)
-| Component | Rate | Quantity | Cost |
-|-----------|------|----------|------|
-| Storage | $0.023/GB | 100 GB | $2.30 |
-| Data Transfer | $0.09/GB | 50 GB | $4.50 |
-| PUT Requests | $0.005/1K | 1M | $5.00 |
-| Archive (Glacier) | $0.004/GB | 100 GB | $0.40 |
-| **TOTAL** | | | **$12.20/month** |
+
+| Component         | Rate      | Quantity | Cost             |
+| ----------------- | --------- | -------- | ---------------- |
+| Storage           | $0.023/GB | 100 GB   | $2.30            |
+| Data Transfer     | $0.09/GB  | 50 GB    | $4.50            |
+| PUT Requests      | $0.005/1K | 1M       | $5.00            |
+| Archive (Glacier) | $0.004/GB | 100 GB   | $0.40            |
+| **TOTAL**         |           |          | **$12.20/month** |
 
 ### Azure Blob (Monthly)
-| Component | Rate | Quantity | Cost |
-|-----------|------|----------|------|
-| Storage | $0.024/GB | 100 GB | $2.40 |
-| Read Ops | $0.40/million | 1M | $0.40 |
-| Write Ops | $5/million | 100K | $0.50 |
-| Delete Ops | $5/million | 100K | $0.50 |
-| **TOTAL** | | | **$3.80/month** |
+
+| Component  | Rate          | Quantity | Cost            |
+| ---------- | ------------- | -------- | --------------- |
+| Storage    | $0.024/GB     | 100 GB   | $2.40           |
+| Read Ops   | $0.40/million | 1M       | $0.40           |
+| Write Ops  | $5/million    | 100K     | $0.50           |
+| Delete Ops | $5/million    | 100K     | $0.50           |
+| **TOTAL**  |               |          | **$3.80/month** |
 
 ---
 
@@ -472,15 +519,18 @@ AZURE_BLOB_CONTAINER_NAME="uploads"
 ### Created Files (12 files)
 
 #### Documentation
+
 - `OBJECT_STORAGE_SETUP.md` (580 lines) - Comprehensive setup guide
 
 #### Storage Module
+
 - `lib/storage/fileValidation.ts` (310 lines) - File validation
 - `lib/storage/uploadUtils.ts` (400 lines) - Cloud storage integration
 - `lib/storage/storageClient.ts` (200 lines) - Configuration management
 - `lib/storage/index.ts` (40 lines) - Module exports
 
 #### API Routes (5 endpoints)
+
 - `app/api/storage/upload-url/route.ts` (110 lines)
 - `app/api/storage/retrieve/route.ts` (105 lines)
 - `app/api/storage/download/route.ts` (90 lines)
@@ -488,13 +538,16 @@ AZURE_BLOB_CONTAINER_NAME="uploads"
 - `app/api/storage/status/route.ts` (60 lines)
 
 #### Frontend & Testing
+
 - `components/StorageUploadComponent.tsx` (350 lines) - Upload UI
 - `scripts/test-storage.ts` (420 lines) - Testing suite
 
 ### Modified Files (1 file)
+
 - `.env.example` - Added storage configuration section
 
 ### Total Lines of Code
+
 - **New Code**: ~2,800 lines
 - **Documentation**: 580 lines
 - **Implementation**: 2,220 lines
@@ -543,17 +596,10 @@ export async function POST(req: NextRequest) {
 // app/api/upload/route.ts
 import { validateFile } from "@/lib/storage";
 
-const validation = validateFile(
-  "document.pdf",
-  "application/pdf",
-  5242880
-);
+const validation = validateFile("document.pdf", "application/pdf", 5242880);
 
 if (!validation.valid) {
-  return NextResponse.json(
-    { error: validation.error },
-    { status: 400 }
-  );
+  return NextResponse.json({ error: validation.error }, { status: 400 });
 }
 ```
 
@@ -581,26 +627,31 @@ if (!validation.valid) {
 ## Next Steps
 
 ### 1. Configure Cloud Storage
+
 - Set up AWS S3 bucket or Azure Blob account
 - Generate credentials
 - Add to `.env.local`
 
 ### 2. Test Integration
+
 ```bash
 npx ts-node scripts/test-storage.ts
 ```
 
 ### 3. Integrate with Application
+
 - Add `StorageUploadComponent` to pages
 - Use validation functions
 - Call API endpoints
 
 ### 4. Monitor Usage
+
 - Check CloudWatch (AWS) or Monitor (Azure)
 - Set up cost alerts
 - Review access logs
 
 ### 5. Optimize Costs
+
 - Configure lifecycle policies
 - Archive old files
 - Clean up unused objects
@@ -612,19 +663,23 @@ npx ts-node scripts/test-storage.ts
 ### Common Issues
 
 **"Access Denied" error**
+
 - Verify IAM permissions (AWS) or SAS/connection string (Azure)
 - Check credentials in environment variables
 - Confirm bucket/container exists
 
 **"File too large" error**
+
 - Check STORAGE_MAX_FILE_SIZE
 - Verify AWS_REGION or AZURE_BLOB_CONTAINER_NAME
 
 **CORS errors**
+
 - Ensure presigned URL includes correct headers
 - Check Content-Type header matches file type
 
 **Credentials not found**
+
 - Run `getStorageInfo()` to diagnose
 - Verify .env.local has correct variables
 - Check provider is set correctly
@@ -645,6 +700,7 @@ npm run build && npm start
 ## Summary
 
 This implementation provides a **production-ready object storage solution** with:
+
 - ✅ Multi-cloud support (AWS S3 & Azure Blob)
 - ✅ Secure presigned/SAS URL generation
 - ✅ Comprehensive file validation

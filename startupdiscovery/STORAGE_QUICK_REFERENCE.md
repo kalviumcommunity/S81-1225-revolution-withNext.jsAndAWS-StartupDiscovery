@@ -3,6 +3,7 @@
 ## 📦 What Was Implemented
 
 A complete object storage system supporting **AWS S3** and **Azure Blob Storage** with:
+
 - ✅ File validation (type, size, format)
 - ✅ Presigned URL generation (AWS)
 - ✅ SAS token generation (Azure)
@@ -22,6 +23,7 @@ A complete object storage system supporting **AWS S3** and **Azure Blob Storage*
 Copy `.env.example` to `.env.local` and add:
 
 **For AWS S3**:
+
 ```bash
 STORAGE_PROVIDER="aws"
 AWS_REGION="us-east-1"
@@ -31,6 +33,7 @@ AWS_S3_BUCKET_NAME="your-bucket-name"
 ```
 
 **For Azure Blob**:
+
 ```bash
 STORAGE_PROVIDER="azure"
 AZURE_STORAGE_ACCOUNT_NAME="your-account"
@@ -111,6 +114,7 @@ OBJECT_STORAGE_SETUP.md      # Comprehensive documentation
 ## 🔌 API Endpoints
 
 ### Upload URL Generation
+
 ```
 GET /api/storage/upload-url?fileName=file.jpg&fileType=image/jpeg&fileSize=2000000
 
@@ -124,6 +128,7 @@ Response:
 ```
 
 ### File Retrieval
+
 ```
 GET /api/storage/retrieve?key=file.jpg
 
@@ -138,6 +143,7 @@ Response:
 ```
 
 ### Download URL
+
 ```
 GET /api/storage/download?key=file.jpg
 
@@ -150,6 +156,7 @@ Response:
 ```
 
 ### Delete File
+
 ```
 DELETE /api/storage/delete?key=file.jpg
 Authorization: Bearer <token>
@@ -162,6 +169,7 @@ Response:
 ```
 
 ### Storage Status
+
 ```
 GET /api/storage/status
 
@@ -181,18 +189,20 @@ Response:
 ## 📚 Validation Examples
 
 ### Valid Files
+
 ```typescript
-validateFile("image.jpg", "image/jpeg", 1000000)      // ✓ OK
-validateFile("doc.pdf", "application/pdf", 5000000)  // ✓ OK
-validateFile("sheet.xlsx", "application/vnd.openxmlformats...", 3000000) // ✓ OK
+validateFile("image.jpg", "image/jpeg", 1000000); // ✓ OK
+validateFile("doc.pdf", "application/pdf", 5000000); // ✓ OK
+validateFile("sheet.xlsx", "application/vnd.openxmlformats...", 3000000); // ✓ OK
 ```
 
 ### Invalid Files
+
 ```typescript
-validateFile("script.exe", "application/x-msdownload", 1000000)  // ✗ Type not allowed
-validateFile("huge.pdf", "application/pdf", 100000000)          // ✗ Too large
-validateFile("file../traversal.jpg", "image/jpeg", 1000000)     // ✗ Path traversal
-validateFile("", "image/jpeg", 1000000)                          // ✗ No filename
+validateFile("script.exe", "application/x-msdownload", 1000000); // ✗ Type not allowed
+validateFile("huge.pdf", "application/pdf", 100000000); // ✗ Too large
+validateFile("file../traversal.jpg", "image/jpeg", 1000000); // ✗ Path traversal
+validateFile("", "image/jpeg", 1000000); // ✗ No filename
 ```
 
 ---
@@ -200,11 +210,13 @@ validateFile("", "image/jpeg", 1000000)                          // ✗ No filen
 ## 🧪 Testing
 
 ### Run Test Suite
+
 ```bash
 npx ts-node scripts/test-storage.ts
 ```
 
 ### Manual API Testing
+
 ```bash
 # Generate upload URL
 curl "http://localhost:3000/api/storage/upload-url?fileName=test.jpg&fileType=image/jpeg&fileSize=1000000"
@@ -224,17 +236,20 @@ curl "http://localhost:3000/api/storage/download?key=test.jpg"
 ## 🔒 Security Features
 
 ### File Validation
+
 - MIME type whitelist
 - Size limits by type
 - Filename sanitization
 - Path traversal prevention
 
 ### Presigned URLs
+
 - Short expiration (5 min for uploads, 24h for downloads)
 - Server-side signing
 - Method restrictions
 
 ### API Security
+
 - JWT authentication on DELETE
 - Secure header middleware
 - CORS configuration
@@ -244,12 +259,14 @@ curl "http://localhost:3000/api/storage/download?key=test.jpg"
 ## 💰 Costs
 
 ### AWS S3
+
 - ~$2.30 for storage (100GB)
 - ~$4.50 for data transfer
 - ~$5.00 for API requests
 - **Total: ~$12/month**
 
 ### Azure Blob
+
 - ~$2.40 for storage (100GB)
 - ~$1.40 for operations
 - **Total: ~$3.80/month**
@@ -261,22 +278,26 @@ See `OBJECT_STORAGE_SETUP.md` for detailed breakdown.
 ## 🐛 Troubleshooting
 
 ### "Access Denied" Error
+
 1. Check AWS/Azure credentials in `.env.local`
 2. Verify IAM permissions (AWS) or SAS permissions (Azure)
 3. Ensure bucket/container exists
 4. Run `/api/storage/status` for diagnostics
 
 ### "File too large" Error
+
 1. Check `STORAGE_MAX_FILE_SIZE` environment variable
 2. Verify file size vs. type limits
 3. Adjust `MAX_FILE_SIZES` in `lib/storage/fileValidation.ts`
 
 ### CORS Errors
+
 1. Ensure `Content-Type` header matches file type
 2. Check presigned URL includes correct headers
 3. Verify bucket/container CORS configuration
 
 ### Credentials Not Found
+
 1. Verify `.env.local` exists with correct variables
 2. Run `source .env.local` if using shell
 3. Check `process.env.STORAGE_PROVIDER` is set
@@ -286,13 +307,13 @@ See `OBJECT_STORAGE_SETUP.md` for detailed breakdown.
 
 ## 📖 Documentation Files
 
-| File | Purpose |
-|------|---------|
-| `OBJECT_STORAGE_SETUP.md` | Complete setup and configuration guide |
+| File                                        | Purpose                                  |
+| ------------------------------------------- | ---------------------------------------- |
+| `OBJECT_STORAGE_SETUP.md`                   | Complete setup and configuration guide   |
 | `OBJECT_STORAGE_IMPLEMENTATION_COMPLETE.md` | Implementation details and API reference |
-| `lib/storage/fileValidation.ts` | Validation function documentation |
-| `lib/storage/uploadUtils.ts` | Cloud integration documentation |
-| `components/StorageUploadComponent.tsx` | Component props and examples |
+| `lib/storage/fileValidation.ts`             | Validation function documentation        |
+| `lib/storage/uploadUtils.ts`                | Cloud integration documentation          |
+| `components/StorageUploadComponent.tsx`     | Component props and examples             |
 
 ---
 
@@ -335,6 +356,7 @@ Client                          Server                      Cloud Storage
 ## 📦 Dependencies
 
 All dependencies installed via `npm install`:
+
 - `@aws-sdk/client-s3` - AWS S3 client
 - `@aws-sdk/s3-request-presigner` - Presigned URL generation
 - `@azure/storage-blob` - Azure Blob Storage client
@@ -369,6 +391,7 @@ All dependencies installed via `npm install`:
 ## 📞 Support
 
 For issues or questions:
+
 1. Check `OBJECT_STORAGE_SETUP.md` troubleshooting section
 2. Run test suite: `npx ts-node scripts/test-storage.ts`
 3. Check API response in browser DevTools
