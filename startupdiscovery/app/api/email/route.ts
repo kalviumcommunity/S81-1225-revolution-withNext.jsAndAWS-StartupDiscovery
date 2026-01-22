@@ -13,8 +13,9 @@
  */
 
 import { NextResponse, NextRequest } from "next/server";
-import { Logger } from "@/lib/logger";
+import { Logger, generateRequestId } from "@/lib/logger";
 import { withErrorHandler } from "@/lib/errorHandler";
+import { logApiRequest, logApiResponse } from "@/lib/requestLogger";
 import {
   sendEmail,
   sendWelcomeEmail,
@@ -31,7 +32,13 @@ const logger = new Logger("EmailAPI");
  * Send email with template or custom content
  */
 export const POST = withErrorHandler(async (req: Request) => {
+  const startTime = Date.now();
+  const requestId = generateRequestId();
+  const logger = new Logger("EmailAPI", requestId);
   const request = req as NextRequest;
+
+  logger.logRequest(req.method, "/api/email");
+
   const body = await request.json();
 
   const {
@@ -58,12 +65,18 @@ export const POST = withErrorHandler(async (req: Request) => {
       hasTo: !!to,
       hasSubject: !!subject,
     });
+    
+    logApiResponse(logger, req, 400, startTime, { error: "validation_failed" });
+    
     return NextResponse.json(
       {
         success: false,
         message: "Missing required fields: to and subject",
       },
-      { status: 400 }
+      { 
+        status: 400,
+        headers: { "x-request-id": requestId }
+      }
     );
   }
 
@@ -120,12 +133,18 @@ export const POST = withErrorHandler(async (req: Request) => {
           hasHtml: !!html,
           hasText: !!text,
         });
+        
+        logApiResponse(logger, req, 400, startTime, { error: "validation_failed" });
+        
         return NextResponse.json(
           {
             success: false,
             message: "Missing content: provide either html or text",
           },
-          { status: 400 }
+          { 
+            status: 400,
+            headers: { "x-request-id": requestId }
+          }
         );
       }
 
@@ -146,19 +165,28 @@ export const POST = withErrorHandler(async (req: Request) => {
         to,
       });
 
+      logApiResponse(logger, req, 200, startTime, { 
+        messageId: result.messageId,
+        emailsSent: 1
+      });
+
       return NextResponse.json(
         {
           success: true,
           messageId: result.messageId,
           message: "Email sent successfully",
         },
-        { status: 200 }
+        { 
+          status: 200,
+          headers: { "x-request-id": requestId }
+        }
       );
     } else {
-      logger.error("Email send failed", {
-        error: result.error,
+      logger.error("Email send failed", new Error(result.error || "Unknown error"), {
         to,
       });
+
+      logApiResponse(logger, req, 500, startTime, { error: "email_send_failed" });
 
       return NextResponse.json(
         {
@@ -166,17 +194,21 @@ export const POST = withErrorHandler(async (req: Request) => {
           message: "Failed to send email",
           error: result.error,
         },
-        { status: 500 }
+        { 
+          status: 500,
+          headers: { "x-request-id": requestId }
+        }
       );
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
-    logger.error("Email API error", {
-      error: errorMessage,
+    logger.error("Email API error", error instanceof Error ? error : new Error(errorMessage), {
       to,
       subject,
     });
+
+    logApiResponse(logger, req, 500, startTime, { error: "internal_error" });
 
     return NextResponse.json(
       {
@@ -184,7 +216,10 @@ export const POST = withErrorHandler(async (req: Request) => {
         message: "Internal server error",
         error: errorMessage,
       },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: { "x-request-id": requestId }
+      }
     );
   }
 });

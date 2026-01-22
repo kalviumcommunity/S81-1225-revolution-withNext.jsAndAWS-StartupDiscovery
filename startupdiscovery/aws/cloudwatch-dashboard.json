@@ -1,0 +1,85 @@
+{
+  "widgets": [
+    {
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          ["StartupDiscovery/API", "ErrorCount", { "stat": "Sum", "label": "Error Count" }],
+          [".", "4xxErrors", { "stat": "Sum", "label": "4xx Errors" }],
+          [".", "5xxErrors", { "stat": "Sum", "label": "5xx Errors" }]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "ap-south-1",
+        "title": "Error Metrics",
+        "period": 300,
+        "yAxis": {
+          "left": {
+            "label": "Count"
+          }
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          ["StartupDiscovery/API", "APIResponseTime", { "stat": "Average", "label": "Avg Response Time" }],
+          ["...", { "stat": "Maximum", "label": "Max Response Time" }],
+          ["...", { "stat": "p99", "label": "P99 Response Time" }]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "ap-south-1",
+        "title": "API Response Time",
+        "period": 300,
+        "yAxis": {
+          "left": {
+            "label": "Milliseconds"
+          }
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          ["AWS/ECS", "CPUUtilization", { "stat": "Average" }],
+          [".", "MemoryUtilization", { "stat": "Average" }]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "ap-south-1",
+        "title": "ECS Resource Utilization",
+        "period": 300
+      }
+    },
+    {
+      "type": "log",
+      "properties": {
+        "query": "SOURCE '/ecs/startupdiscovery-nextjs'\n| fields @timestamp, level, message, requestId, endpoint, statusCode, duration\n| filter level = \"error\"\n| sort @timestamp desc\n| limit 20",
+        "region": "ap-south-1",
+        "title": "Recent Errors",
+        "stacked": false
+      }
+    },
+    {
+      "type": "log",
+      "properties": {
+        "query": "SOURCE '/ecs/startupdiscovery-nextjs'\n| fields endpoint, method, statusCode\n| filter statusCode >= 200\n| stats count() as requests by endpoint\n| sort requests desc\n| limit 10",
+        "region": "ap-south-1",
+        "title": "Top API Endpoints by Request Count",
+        "stacked": false
+      }
+    },
+    {
+      "type": "log",
+      "properties": {
+        "query": "SOURCE '/ecs/startupdiscovery-nextjs'\n| fields @timestamp, endpoint, duration\n| filter duration > 1000\n| sort duration desc\n| limit 20",
+        "region": "ap-south-1",
+        "title": "Slow Requests (>1s)",
+        "stacked": false
+      }
+    }
+  ]
+}
