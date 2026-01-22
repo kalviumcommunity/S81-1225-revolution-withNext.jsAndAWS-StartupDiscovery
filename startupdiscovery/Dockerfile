@@ -48,6 +48,10 @@ WORKDIR /app
 # Set NODE_ENV to production
 ENV NODE_ENV=production
 
+# Enable JSON logging for CloudWatch
+ENV LOG_FORMAT=json
+ENV LOG_LEVEL=info
+
 # Create a non-root user for security
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
