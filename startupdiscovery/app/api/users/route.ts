@@ -166,7 +166,9 @@ export async function GET(req: Request) {
       "Users fetched successfully"
     );
   } catch (error) {
-    logger.error("Failed to fetch users", { error: String(error) });
+    logger.error("Failed to fetch users", undefined, {
+      error: String(error),
+    });
     return handleError(error, {
       method: "GET",
       path: "/api/users",
@@ -247,7 +249,9 @@ export async function POST(req: Request) {
     if (error instanceof ZodError) {
       return sendValidationError(error);
     }
-    logger.error("Failed to create user", { error: String(error) });
+    logger.error("Failed to create user", undefined, {
+      error: String(error),
+    });
     return handleError(error, {
       method: "POST",
       path: "/api/users",
@@ -340,7 +344,9 @@ export async function PUT(req: Request) {
     if (error instanceof ZodError) {
       return sendValidationError(error);
     }
-    logger.error("Failed to update user", { error: String(error) });
+    logger.error("Failed to update user", undefined, {
+      error: String(error),
+    });
     return handleError(error, {
       method: "PUT",
       path: "/api/users",
@@ -408,7 +414,9 @@ export async function DELETE(req: Request) {
     if (error instanceof ZodError) {
       return sendValidationError(error);
     }
-    logger.error("Failed to delete user", { error: String(error) });
+    logger.error("Failed to delete user", undefined, {
+      error: String(error),
+    });
     return handleError(error, {
       method: "DELETE",
       path: "/api/users",

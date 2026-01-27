@@ -103,11 +103,15 @@ export async function generateUploadPresignedUrl(
 
     return uploadUrl;
   } catch (error) {
-    logger.error("Failed to generate pre-signed URL", {
-      error: error instanceof Error ? error.message : String(error),
-      filename,
-      fileType,
-    });
+    logger.error(
+      "Failed to generate pre-signed URL",
+      error instanceof Error ? error : undefined,
+      {
+        error: error instanceof Error ? error.message : String(error),
+        filename,
+        fileType,
+      }
+    );
     throw error;
   }
 }
@@ -135,10 +139,14 @@ export async function generateDownloadPresignedUrl(
     logger.info("Pre-signed download URL generated", { key, expiresIn });
     return downloadUrl;
   } catch (error) {
-    logger.error("Failed to generate download URL", {
-      error: error instanceof Error ? error.message : String(error),
-      key,
-    });
+    logger.error(
+      "Failed to generate download URL",
+      error instanceof Error ? error : undefined,
+      {
+        error: error instanceof Error ? error.message : String(error),
+        key,
+      }
+    );
     throw error;
   }
 }
@@ -252,8 +260,14 @@ export function parseS3Url(url: string): S3UrlComponents | null {
     }
 
     return null;
-  } catch {
-    logger.error("Failed to parse S3 URL", { url });
+  } catch (error) {
+    logger.error(
+      "Failed to parse S3 URL",
+      error instanceof Error ? error : undefined,
+      {
+        url,
+      }
+    );
     return null;
   }
 }

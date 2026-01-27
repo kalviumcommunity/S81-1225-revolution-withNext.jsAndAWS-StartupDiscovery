@@ -108,7 +108,7 @@ export function handleError(
 
   // Log the error in structured format
   const logMessage = `Error in ${context.method || "UNKNOWN"} ${context.path || "UNKNOWN"}`;
-  logError(logMessage, errorMeta);
+  logError(logMessage, error instanceof Error ? error : undefined, errorMeta);
 
   // Prepare response based on environment
   let responseMessage: string;

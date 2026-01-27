@@ -56,8 +56,17 @@ export function generateRequestId(): string {
  */
 export function getRequestId(): string {
   try {
-    const headersList = headers();
-    return headersList.get("x-request-id") || generateRequestId();
+    const headersResult = headers();
+
+    // Handle environments where headers() may return a Promise
+    if (headersResult instanceof Promise) {
+      return generateRequestId();
+    }
+    const headerGetter = headersResult as unknown as {
+      get(name: string): string | null;
+    };
+
+    return headerGetter.get?.("x-request-id") || generateRequestId();
   } catch {
     // headers() can only be called in Server Components or Route Handlers
     return generateRequestId();
@@ -102,8 +111,9 @@ function createLogEntry(
   if (options?.error) {
     entry.error = {
       message: options.error.message,
-      stack: process.env.NODE_ENV === "production" ? undefined : options.error.stack,
-      code: (options.error as any).code,
+      stack:
+        process.env.NODE_ENV === "production" ? undefined : options.error.stack,
+      code: (options.error as { code?: string }).code,
     };
   }
 
