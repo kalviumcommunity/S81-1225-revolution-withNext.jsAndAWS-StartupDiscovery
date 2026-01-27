@@ -62,8 +62,11 @@ export function getRequestId(): string {
     if (headersResult instanceof Promise) {
       return generateRequestId();
     }
+    const headerGetter = headersResult as unknown as {
+      get(name: string): string | null;
+    };
 
-    return headersResult.get("x-request-id") || generateRequestId();
+    return headerGetter.get?.("x-request-id") || generateRequestId();
   } catch {
     // headers() can only be called in Server Components or Route Handlers
     return generateRequestId();
