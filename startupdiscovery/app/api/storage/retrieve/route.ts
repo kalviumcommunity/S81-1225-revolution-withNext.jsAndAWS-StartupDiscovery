@@ -101,7 +101,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 }
 
 // Options handler for CORS preflight
-export async function OPTIONS(_req: NextRequest): Promise<NextResponse> {
+export async function OPTIONS(): Promise<NextResponse> {
   const response = new NextResponse(null, { status: 200 });
   return applySecureHeaders(response);
 }

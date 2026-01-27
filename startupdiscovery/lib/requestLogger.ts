@@ -6,8 +6,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Logger, generateRequestId } from "./logger";
 
-const logger = new Logger("RequestLogger");
-
 export interface RequestLoggerOptions {
   excludePaths?: string[];
   logBody?: boolean;

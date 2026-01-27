@@ -5,12 +5,12 @@
  * Returns storage configuration and status information
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getStorageInfo, loadStorageConfig } from "@/lib/storage/storageClient";
 import { applySecureHeaders } from "@/lib/security/secureHeaders";
 import { formatFileSize } from "@/lib/storage/fileValidation";
 
-export async function GET(_req: NextRequest): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   try {
     // Get storage info
     const storageInfo = getStorageInfo();
@@ -50,7 +50,7 @@ export async function GET(_req: NextRequest): Promise<NextResponse> {
 }
 
 // Options handler for CORS preflight
-export async function OPTIONS(_req: NextRequest): Promise<NextResponse> {
+export async function OPTIONS(): Promise<NextResponse> {
   const response = new NextResponse(null, { status: 200 });
   return applySecureHeaders(response);
 }

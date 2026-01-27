@@ -103,7 +103,7 @@ function createLogEntry(
     entry.error = {
       message: options.error.message,
       stack: process.env.NODE_ENV === "production" ? undefined : options.error.stack,
-      code: (options.error as any).code,
+      code: (options.error as { code?: string }).code,
     };
   }
 

@@ -15,7 +15,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { Logger, generateRequestId } from "@/lib/logger";
 import { withErrorHandler } from "@/lib/errorHandler";
-import { logApiRequest, logApiResponse } from "@/lib/requestLogger";
+import { logApiResponse } from "@/lib/requestLogger";
 import {
   sendEmail,
   sendWelcomeEmail,
@@ -25,7 +25,7 @@ import {
   EmailTemplateType,
 } from "@/lib/email";
 
-const logger = new Logger("EmailAPI");
+// Logger will be instantiated per-request with correlation id
 
 /**
  * POST /api/email
