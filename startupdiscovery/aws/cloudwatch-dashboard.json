@@ -4,7 +4,11 @@
       "type": "metric",
       "properties": {
         "metrics": [
-          ["StartupDiscovery/API", "ErrorCount", { "stat": "Sum", "label": "Error Count" }],
+          [
+            "StartupDiscovery/API",
+            "ErrorCount",
+            { "stat": "Sum", "label": "Error Count" }
+          ],
           [".", "4xxErrors", { "stat": "Sum", "label": "4xx Errors" }],
           [".", "5xxErrors", { "stat": "Sum", "label": "5xx Errors" }]
         ],
@@ -24,7 +28,11 @@
       "type": "metric",
       "properties": {
         "metrics": [
-          ["StartupDiscovery/API", "APIResponseTime", { "stat": "Average", "label": "Avg Response Time" }],
+          [
+            "StartupDiscovery/API",
+            "APIResponseTime",
+            { "stat": "Average", "label": "Avg Response Time" }
+          ],
           ["...", { "stat": "Maximum", "label": "Max Response Time" }],
           ["...", { "stat": "p99", "label": "P99 Response Time" }]
         ],

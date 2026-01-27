@@ -20,21 +20,24 @@ export function withRequestLogger(
 ) {
   return async (req: NextRequest): Promise<NextResponse> => {
     const startTime = Date.now();
-    
+
     // Generate or get request ID
     const requestId = req.headers.get("x-request-id") || generateRequestId();
-    
+
     // Create logger with request context
     const reqLogger = new Logger("API", requestId);
-    
+
     // Extract request details
     const method = req.method;
     const endpoint = req.nextUrl.pathname;
     const userAgent = req.headers.get("user-agent") || "unknown";
-    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    const ip =
+      req.headers.get("x-forwarded-for") ||
+      req.headers.get("x-real-ip") ||
+      "unknown";
 
     // Check if path should be excluded from logging
-    if (options.excludePaths?.some(path => endpoint.includes(path))) {
+    if (options.excludePaths?.some((path) => endpoint.includes(path))) {
       return handler(req);
     }
 
@@ -48,10 +51,10 @@ export function withRequestLogger(
     try {
       // Execute the handler
       const response = await handler(req);
-      
+
       // Calculate duration
       const duration = Date.now() - startTime;
-      
+
       // Log response
       reqLogger.logResponse(method, endpoint, response.status, duration, {
         userAgent,
@@ -61,7 +64,7 @@ export function withRequestLogger(
       // Add request ID to response headers
       const headers = new Headers(response.headers);
       headers.set("x-request-id", requestId);
-      
+
       return new NextResponse(response.body, {
         status: response.status,
         statusText: response.statusText,
@@ -69,7 +72,7 @@ export function withRequestLogger(
       });
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       // Log error
       reqLogger.error(
         "Request failed with error",

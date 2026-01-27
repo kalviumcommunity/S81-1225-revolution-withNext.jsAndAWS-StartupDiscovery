@@ -155,7 +155,7 @@ fields @timestamp, endpoint, message, userId, requestId
 ```
 fields @timestamp, message, meta.to, meta.messageId
 | filter context = "EmailAPI"
-| stats count() as total, 
+| stats count() as total,
         sum(level = "info" and message = "Email sent successfully") as success,
         sum(level = "error") as errors
 | fields total, success, errors, (success * 100.0 / total) as success_rate
@@ -170,9 +170,9 @@ fields @timestamp, message, meta.to, meta.messageId
 ```
 fields duration
 | filter duration > 0
-| stats pct(duration, 50) as p50, 
-        pct(duration, 90) as p90, 
-        pct(duration, 95) as p95, 
+| stats pct(duration, 50) as p50,
+        pct(duration, 90) as p90,
+        pct(duration, 95) as p95,
         pct(duration, 99) as p99
 ```
 
@@ -198,7 +198,7 @@ fields @timestamp, context, message, error.message
 ```
 fields @timestamp, endpoint, statusCode
 | filter endpoint = "/api/health"
-| stats count() as total, 
+| stats count() as total,
         sum(statusCode = 200) as healthy,
         sum(statusCode != 200) as unhealthy by bin(5m)
 | fields @timestamp, total, healthy, unhealthy, (healthy * 100.0 / total) as uptime_percent
@@ -213,7 +213,7 @@ fields @timestamp, endpoint, statusCode
 ```
 fields requestId
 | filter requestId != ""
-| stats count() as requests_with_id, 
+| stats count() as requests_with_id,
         count_distinct(requestId) as unique_requests
 ```
 
@@ -238,7 +238,7 @@ fields @timestamp, level, message, endpoint, requestId
 ```
 fields @timestamp, message, meta.query, meta.duration
 | filter message like "Database query"
-| stats avg(meta.duration) as avg_ms, 
+| stats avg(meta.duration) as avg_ms,
         max(meta.duration) as max_ms by meta.query
 | sort avg_ms desc
 | limit 20
