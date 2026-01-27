@@ -1,0 +1,60 @@
+name: Deploy to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+      - production
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: startupdiscovery-app
+  CONTAINER_REGISTRY: startupdiscoveryacr
+  RESOURCE_GROUP: startupdiscovery-rg
+
+jobs:
+  deploy:
+    name: Deploy to Azure
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.CONTAINER_REGISTRY }}.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push Docker image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t ${{ env.CONTAINER_REGISTRY }}.azurecr.io/startupdiscovery:$IMAGE_TAG .
+          docker tag ${{ env.CONTAINER_REGISTRY }}.azurecr.io/startupdiscovery:$IMAGE_TAG \
+                     ${{ env.CONTAINER_REGISTRY }}.azurecr.io/startupdiscovery:latest
+          docker push ${{ env.CONTAINER_REGISTRY }}.azurecr.io/startupdiscovery:$IMAGE_TAG
+          docker push ${{ env.CONTAINER_REGISTRY }}.azurecr.io/startupdiscovery:latest
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          images: ${{ env.CONTAINER_REGISTRY }}.azurecr.io/startupdiscovery:${{ github.sha }}
+
+      - name: Azure logout
+        run: az logout
+
+      - name: Deployment summary
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "🐳 Image: ${{ env.CONTAINER_REGISTRY }}.azurecr.io/startupdiscovery:${{ github.sha }}"
+          echo "🌐 App: ${{ env.AZURE_WEBAPP_NAME }}"
