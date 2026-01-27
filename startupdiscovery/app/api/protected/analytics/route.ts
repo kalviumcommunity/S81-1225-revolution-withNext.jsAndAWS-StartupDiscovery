@@ -168,21 +168,21 @@ export async function GET(req: Request) {
         })),
         topStartupCreators: startupsPerUser.map(
           (user): { userId: string; email: string; startupCount: number } => ({
-            userId: user.id,
+            userId: String(user.id),
             email: user.email,
             startupCount: user._count.startups,
           })
         ),
         topCommenters: commentsPerUser.map(
           (user): { userId: string; email: string; commentCount: number } => ({
-            userId: user.id,
+            userId: String(user.id),
             email: user.email,
             commentCount: user._count.comments,
           })
         ),
         topCommentedStartups: commentsPerStartup.map(
           (startup): { startupId: string; title: string; commentCount: number } => ({
-            startupId: startup.id,
+            startupId: String(startup.id),
             title: startup.title,
             commentCount: startup._count.comments,
           })

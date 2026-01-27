@@ -12,7 +12,7 @@
 import prisma from "../lib/prisma";
 
 type SampleUser = {
-  id: string;
+  id: string | number;
   username: string | null;
   email: string;
   name: string | null;
@@ -29,7 +29,7 @@ type StartupWithRelations = {
   stage: string;
   slug: string;
   user: {
-    id: string;
+    id: string | number;
     username: string | null;
     name: string | null;
   };
