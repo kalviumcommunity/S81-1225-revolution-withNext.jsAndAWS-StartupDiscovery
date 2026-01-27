@@ -232,9 +232,13 @@ export async function clearAllCache(): Promise<boolean> {
     logger.warn("All cache cleared");
     return true;
   } catch (error) {
-    logger.error("Error clearing cache", {
-      error: error instanceof Error ? error.message : String(error),
-    });
+    logger.error(
+      "Error clearing cache",
+      error instanceof Error ? error : undefined,
+      {
+        error: error instanceof Error ? error.message : String(error),
+      }
+    );
     return false;
   }
 }

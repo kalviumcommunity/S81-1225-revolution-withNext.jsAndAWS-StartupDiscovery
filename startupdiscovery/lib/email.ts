@@ -301,11 +301,15 @@ export async function sendEmail(options: EmailOptions): Promise<EmailResponse> {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
-    logger.error("Failed to send email", {
-      error: errorMessage,
-      to: options.to,
-      subject: options.subject,
-    });
+    logger.error(
+      "Failed to send email",
+      error instanceof Error ? error : undefined,
+      {
+        error: errorMessage,
+        to: options.to,
+        subject: options.subject,
+      }
+    );
 
     return {
       success: false,

@@ -35,10 +35,14 @@ export function getRedisClient(): Redis {
     });
 
     redis.on("error", (err: Error & { code?: string }) => {
-      logger.error("Redis connection error", {
-        error: err.message,
-        code: err.code,
-      });
+      logger.error(
+        "Redis connection error",
+        err,
+        {
+          error: err.message,
+          code: err.code,
+        }
+      );
     });
 
     redis.on("ready", () => {
@@ -52,9 +56,13 @@ export function getRedisClient(): Redis {
 
     return redis;
   } catch (error) {
-    logger.error("Failed to initialize Redis client", {
-      error: error instanceof Error ? error.message : String(error),
-    });
+    logger.error(
+      "Failed to initialize Redis client",
+      error instanceof Error ? error : undefined,
+      {
+        error: error instanceof Error ? error.message : String(error),
+      }
+    );
     // Create a dummy client that won't cache
     redis = new Redis(); // This will fail gracefully if Redis not available
     return redis;
@@ -71,9 +79,13 @@ export async function closeRedis(): Promise<void> {
       redis = null;
       logger.info("Redis connection closed");
     } catch (error) {
-      logger.error("Error closing Redis connection", {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      logger.error(
+        "Error closing Redis connection",
+        error instanceof Error ? error : undefined,
+        {
+          error: error instanceof Error ? error.message : String(error),
+        }
+      );
     }
   }
 }
