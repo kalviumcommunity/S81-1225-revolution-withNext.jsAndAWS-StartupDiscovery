@@ -83,7 +83,7 @@ async function testDatabaseConnection() {
     if (users.length === 0) {
       console.log("   ⚠️  No users found in database");
     } else {
-      users.forEach((user, index) => {
+      users.forEach((user: any, index: number) => {
         const prefix = index === users.length - 1 ? "└─" : "├─";
         console.log(`   ${prefix} ${user.username} (${user.role})`);
         console.log(`      Email: ${user.email}`);
@@ -149,18 +149,18 @@ async function testDatabaseConnection() {
     if (startups.length === 0) {
       console.log("   ⚠️  No published startups found");
     } else {
-      startups.forEach((startup, index) => {
+      startups.forEach((startup: any, index: number) => {
         const prefix = index === startups.length - 1 ? "└─" : "├─";
         console.log(`   ${prefix} ${startup.title} (${startup.stage})`);
         console.log(`      By: ${startup.user.name || startup.user.username}`);
         console.log(`      Slug: ${startup.slug}`);
 
         const categories = startup.categories
-          .map((sc) => sc.category.name)
+          .map((sc: any) => sc.category.name)
           .join(", ");
         console.log(`      Categories: ${categories || "None"}`);
 
-        const tags = startup.tags.map((st) => st.tag.name).join(", ");
+        const tags = startup.tags.map((st: any) => st.tag.name).join(", ");
         console.log(`      Tags: ${tags || "None"}`);
 
         console.log(
@@ -227,7 +227,7 @@ async function testDatabaseConnection() {
     if (categories.length === 0) {
       console.log("   ⚠️  No categories found");
     } else {
-      categories.forEach((category, index) => {
+      categories.forEach((category: any, index: number) => {
         const prefix = index === categories.length - 1 ? "└─" : "├─";
         console.log(`   ${prefix} ${category.name} (${category.slug})`);
         console.log(`      Startups: ${category._count.startups}`);
@@ -287,7 +287,7 @@ async function testDatabaseConnection() {
     if (recentComments.length === 0) {
       console.log("   ⚠️  No comments found");
     } else {
-      recentComments.forEach((comment, index) => {
+      recentComments.forEach((comment: any, index: number) => {
         const prefix = index === recentComments.length - 1 ? "└─" : "├─";
         const preview =
           comment.content.substring(0, 60) +

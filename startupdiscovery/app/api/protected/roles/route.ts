@@ -257,7 +257,7 @@ export async function GET(req: Request) {
 
     return sendSuccess(
       {
-        users: users.map((user) => ({
+        users: users.map((user: any) => ({
           ...user,
           startupCount: user._count.startups,
           commentCount: user._count.comments,

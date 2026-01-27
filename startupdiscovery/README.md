@@ -13,11 +13,14 @@ A comprehensive Next.js 16 application with enterprise-grade security, cloud int
 - [Database Setup](#database-setup)
 - [Object Storage](#object-storage)
 - [Secrets Management](#secrets-management)
+- [Docker Containerization](#docker-containerization)
+- [Cloud Deployment](#cloud-deployment)
 - [Security](#security)
 - [API Documentation](#api-documentation)
 - [Development](#development)
 - [Testing](#testing)
-- [Deployment](#deployment)
+- [CI/CD Pipeline](#cicd-pipeline)
+- [Monitoring](#monitoring)
 
 ## Overview
 
@@ -46,7 +49,18 @@ Startup Discovery is a production-ready Next.js application featuring:
 - **Database**: RDS PostgreSQL or Azure PostgreSQL with Prisma ORM
 - **Object Storage**: S3 or Azure Blob Storage with file validation
 - **Secrets**: AWS Secrets Manager or Azure Key Vault
+- **Container Registry**: AWS ECR or Azure ACR
+- **Orchestration**: AWS ECS (Fargate) or Azure App Service for Containers
 - Multi-cloud provider abstraction layer
+
+### ✅ Containerization
+
+- Multi-stage Docker build for optimal image size
+- Docker Compose for local development
+- Health checks and monitoring
+- Non-root user execution for security
+- Automated CI/CD pipelines
+- Container orchestration ready
 
 ### ✅ Developer Experience
 
@@ -305,6 +319,260 @@ az keyvault secret set \
 SECRETS_PROVIDER=azure
 AZURE_KEYVAULT_NAME=myKeyVault
 ```
+
+See [ENVIRONMENT_SETUP_CLOUD.md](ENVIRONMENT_SETUP_CLOUD.md) for complete guide.
+
+## Docker Containerization
+
+### Quick Start
+
+```bash
+# Build Docker image
+docker build -t startupdiscovery:latest .
+
+# Run container locally
+docker run -p 3000:3000 \
+  -e DATABASE_URL="your-db-url" \
+  -e JWT_SECRET="your-secret" \
+  startupdiscovery:latest
+
+# Or use Docker Compose
+docker-compose up -d
+```
+
+### Multi-Stage Dockerfile
+
+Our Dockerfile uses a multi-stage build for:
+
+- **Smaller image size**: ~150MB (Alpine Linux base)
+- **Security**: Non-root user execution
+- **Health checks**: Built-in container monitoring
+- **Production optimization**: Separate build and runtime stages
+
+```dockerfile
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npx prisma generate && npm run build
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+# Copy built application and dependencies
+COPY --from=builder /app/.next/standalone ./
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+### Health Checks
+
+Container includes built-in health monitoring:
+
+```bash
+# Check health endpoint
+curl http://localhost:3000/api/health
+
+# Response
+{
+  "status": "healthy",
+  "uptime": 123.45,
+  "environment": "production"
+}
+```
+
+See [DEPLOYMENT_QUICKSTART.md](DEPLOYMENT_QUICKSTART.md) for details.
+
+## Cloud Deployment
+
+### AWS ECS (Fargate)
+
+**Automated Deployment**:
+
+```bash
+# Set environment variables
+export AWS_ACCOUNT_ID=123456789012
+export AWS_REGION=us-east-1
+
+# Run deployment script
+./deploy-aws.sh
+```
+
+**Manual Steps**:
+
+1. Create ECR repository
+2. Push Docker image to ECR
+3. Create ECS cluster and task definition
+4. Configure service with auto-scaling
+5. Set up Application Load Balancer
+
+**Key Configuration**:
+
+- **CPU**: 512 vCPU
+- **Memory**: 1024 MB
+- **Auto-scaling**: 1-10 tasks based on CPU (70% threshold)
+- **Health check**: /api/health every 30s
+
+### Azure App Service for Containers
+
+**Automated Deployment**:
+
+```bash
+# Set environment variables
+export RESOURCE_GROUP=StartupDiscoveryRG
+export ACR_NAME=kalviumregistry
+export APP_NAME=startupdiscovery
+
+# Run deployment script
+./deploy-azure.sh
+```
+
+**Manual Steps**:
+
+1. Create Azure Container Registry (ACR)
+2. Push Docker image to ACR
+3. Create App Service Plan (Linux, container-based)
+4. Deploy container from ACR
+5. Configure auto-scaling rules
+
+**Key Configuration**:
+
+- **Plan**: P1V2 (production)
+- **Auto-scaling**: 1-10 instances based on CPU (70% threshold)
+- **Continuous deployment**: Enabled from GitHub Actions
+
+### Container Registry
+
+**AWS ECR**:
+
+```bash
+# Login
+aws ecr get-login-password --region us-east-1 | \
+  docker login --username AWS --password-stdin \
+  $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com
+
+# Push image
+docker tag startupdiscovery:latest \
+  $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/startupdiscovery:latest
+docker push $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/startupdiscovery:latest
+```
+
+**Azure ACR**:
+
+```bash
+# Login
+az acr login --name kalviumregistry
+
+# Push image
+docker tag startupdiscovery:latest \
+  kalviumregistry.azurecr.io/startupdiscovery:latest
+docker push kalviumregistry.azurecr.io/startupdiscovery:latest
+```
+
+See [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) for comprehensive deployment guide.
+
+## CI/CD Pipeline
+
+### GitHub Actions
+
+Two automated workflows for continuous deployment:
+
+**AWS ECS Workflow** (`.github/workflows/deploy-aws-ecs.yml`):
+
+1. Checkout code
+2. Build Docker image
+3. Push to Amazon ECR
+4. Update ECS task definition
+5. Deploy to ECS service
+6. Wait for service stability
+
+**Azure App Service Workflow** (`.github/workflows/deploy-azure-appservice.yml`):
+
+1. Checkout code
+2. Build Docker image
+3. Push to Azure Container Registry
+4. Deploy to App Service
+5. Verify deployment
+
+### Triggering Deployments
+
+```bash
+# Automatic: Push to main branch
+git push origin main
+
+# Manual: Via GitHub CLI
+gh workflow run deploy-aws-ecs.yml
+
+# Manual: Via GitHub UI
+# Actions → Select workflow → Run workflow
+```
+
+### Required Secrets
+
+Configure in: **Settings → Secrets and variables → Actions**
+
+**For AWS**:
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+
+**For Azure**:
+
+- `ACR_USERNAME`
+- `ACR_PASSWORD`
+- `AZURE_CREDENTIALS`
+
+## Monitoring
+
+### Container Metrics
+
+**AWS CloudWatch**:
+
+```bash
+# View logs
+aws logs tail /ecs/startupdiscovery --follow
+
+# Create CPU alarm
+aws cloudwatch put-metric-alarm \
+  --alarm-name startupdiscovery-high-cpu \
+  --metric-name CPUUtilization \
+  --threshold 80
+```
+
+**Azure Monitor**:
+
+```bash
+# View logs
+az webapp log tail \
+  --name startupdiscovery \
+  --resource-group StartupDiscoveryRG
+
+# Enable Application Insights
+az webapp config appsettings set \
+  --name startupdiscovery \
+  --settings APPLICATIONINSIGHTS_CONNECTION_STRING="..."
+```
+
+### Key Metrics
+
+| Metric              | Target  | Alert Threshold |
+| ------------------- | ------- | --------------- |
+| CPU Utilization     | < 70%   | > 80%           |
+| Memory Usage        | < 80%   | > 90%           |
+| Response Time (P95) | < 500ms | > 1000ms        |
+| Error Rate          | < 1%    | > 5%            |
+| Health Check        | 100%    | < 95%           |
+
+### Auto-Scaling
+
+Both ECS and App Service configured for automatic scaling:
+
+- **Scale Out**: When CPU > 70% for 5 minutes
+- **Scale In**: When CPU < 30% for 5 minutes
+- **Min Instances**: 1
+- **Max Instances**: 10
+- **Cool-down**: 60s (scale out), 300s (scale in)
 
 See [ENVIRONMENT_SETUP_CLOUD.md](ENVIRONMENT_SETUP_CLOUD.md) for complete guide.
 

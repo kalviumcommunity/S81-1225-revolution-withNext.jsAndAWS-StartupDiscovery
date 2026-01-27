@@ -162,21 +162,21 @@ export async function GET(req: Request) {
           recentUsers30Days: recentUsers,
           recentStartups30Days: recentStartups,
         },
-        roleDistribution: roleDistribution.map((item) => ({
+        roleDistribution: roleDistribution.map((item: { role: string; _count: number }) => ({
           role: item.role,
           count: item._count,
         })),
-        topStartupCreators: startupsPerUser.map((user) => ({
+        topStartupCreators: startupsPerUser.map((user: any) => ({
           userId: user.id,
           email: user.email,
           startupCount: user._count.startups,
         })),
-        topCommenters: commentsPerUser.map((user) => ({
+        topCommenters: commentsPerUser.map((user: any) => ({
           userId: user.id,
           email: user.email,
           commentCount: user._count.comments,
         })),
-        topCommentedStartups: commentsPerStartup.map((startup) => ({
+        topCommentedStartups: commentsPerStartup.map((startup: any) => ({
           startupId: startup.id,
           title: startup.title,
           commentCount: startup._count.comments,
