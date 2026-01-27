@@ -261,9 +261,13 @@ export function parseS3Url(url: string): S3UrlComponents | null {
 
     return null;
   } catch (error) {
-    logger.error("Failed to parse S3 URL", error instanceof Error ? error : undefined, {
-      url,
-    });
+    logger.error(
+      "Failed to parse S3 URL",
+      error instanceof Error ? error : undefined,
+      {
+        url,
+      }
+    );
     return null;
   }
 }

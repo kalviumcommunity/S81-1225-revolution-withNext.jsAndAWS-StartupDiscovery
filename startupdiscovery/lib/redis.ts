@@ -35,14 +35,10 @@ export function getRedisClient(): Redis {
     });
 
     redis.on("error", (err: Error & { code?: string }) => {
-      logger.error(
-        "Redis connection error",
-        err,
-        {
-          error: err.message,
-          code: err.code,
-        }
-      );
+      logger.error("Redis connection error", err, {
+        error: err.message,
+        code: err.code,
+      });
     });
 
     redis.on("ready", () => {
