@@ -166,21 +166,27 @@ export async function GET(req: Request) {
           role: item.role,
           count: item._count,
         })),
-        topStartupCreators: startupsPerUser.map((user: any) => ({
-          userId: user.id,
-          email: user.email,
-          startupCount: user._count.startups,
-        })),
-        topCommenters: commentsPerUser.map((user: any) => ({
-          userId: user.id,
-          email: user.email,
-          commentCount: user._count.comments,
-        })),
-        topCommentedStartups: commentsPerStartup.map((startup: any) => ({
-          startupId: startup.id,
-          title: startup.title,
-          commentCount: startup._count.comments,
-        })),
+        topStartupCreators: startupsPerUser.map(
+          (user): { userId: string; email: string; startupCount: number } => ({
+            userId: user.id,
+            email: user.email,
+            startupCount: user._count.startups,
+          })
+        ),
+        topCommenters: commentsPerUser.map(
+          (user): { userId: string; email: string; commentCount: number } => ({
+            userId: user.id,
+            email: user.email,
+            commentCount: user._count.comments,
+          })
+        ),
+        topCommentedStartups: commentsPerStartup.map(
+          (startup): { startupId: string; title: string; commentCount: number } => ({
+            startupId: startup.id,
+            title: startup.title,
+            commentCount: startup._count.comments,
+          })
+        ),
       },
       "Analytics retrieved successfully",
       200

@@ -4,7 +4,6 @@
  * Returns connection pool statistics and performance metrics
  */
 
-import { NextRequest } from "next/server";
 import type { NextResponse } from "next/server";
 import { getPoolMetrics, checkDatabaseHealth } from "@/lib/cloudDatabase";
 import { applySecureHeaders } from "@/lib/security/secureHeaders";
@@ -25,7 +24,7 @@ interface MetricsResponse {
   recommendations: string[];
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     const metrics = getPoolMetrics();
     const health = await checkDatabaseHealth();

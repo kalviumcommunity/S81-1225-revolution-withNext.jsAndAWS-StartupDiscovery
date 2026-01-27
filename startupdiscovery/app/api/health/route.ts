@@ -4,9 +4,9 @@
  * GET /api/health
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     // Basic health check
     const health = {
@@ -30,7 +30,7 @@ export async function GET(_req: NextRequest) {
   }
 }
 
-export async function HEAD(_req: NextRequest) {
+export async function HEAD() {
   // Simple HEAD request for basic health checks
   return new NextResponse(null, { status: 200 });
 }

@@ -4,12 +4,11 @@
  * Returns database connection status and server information
  */
 
-import { NextRequest } from "next/server";
 import type { NextResponse } from "next/server";
 import { checkDatabaseHealth } from "@/lib/cloudDatabase";
 import { applySecureHeaders } from "@/lib/security/secureHeaders";
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     const health = await checkDatabaseHealth();
 

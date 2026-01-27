@@ -11,6 +11,56 @@
 
 import prisma from "../lib/prisma";
 
+type SampleUser = {
+  id: string;
+  username: string | null;
+  email: string;
+  name: string | null;
+  role: string;
+  createdAt: Date;
+  _count: {
+    startups: number;
+    comments: number;
+  };
+};
+
+type StartupWithRelations = {
+  title: string;
+  stage: string;
+  slug: string;
+  user: {
+    id: string;
+    username: string | null;
+    name: string | null;
+  };
+  categories: { category: { name: string; slug: string } }[];
+  tags: { tag: { name: string } }[];
+  _count: {
+    comments: number;
+    votes: number;
+    bookmarks: number;
+  };
+  viewCount: number;
+};
+
+type CategoryWithCount = {
+  name: string;
+  slug: string;
+  _count: {
+    startups: number;
+  };
+};
+
+type RecentComment = {
+  content: string;
+  user: {
+    username: string;
+  };
+  startup: {
+    title: string;
+  };
+};
+
 async function testDatabaseConnection() {
   console.log("🔍 Testing database connection...\n");
   console.log("═══════════════════════════════════════════════════════════\n");
@@ -58,7 +108,7 @@ async function testDatabaseConnection() {
     // ============================================
     console.log("Test 3: Fetching sample users...");
 
-    const users = await prisma.user.findMany({
+    const users: SampleUser[] = await prisma.user.findMany({
       take: 5,
       select: {
         id: true,
@@ -83,7 +133,7 @@ async function testDatabaseConnection() {
     if (users.length === 0) {
       console.log("   ⚠️  No users found in database");
     } else {
-      users.forEach((user: any, index: number) => {
+      users.forEach((user, index) => {
         const prefix = index === users.length - 1 ? "└─" : "├─";
         console.log(`   ${prefix} ${user.username} (${user.role})`);
         console.log(`      Email: ${user.email}`);
@@ -99,7 +149,7 @@ async function testDatabaseConnection() {
     // ============================================
     console.log("Test 4: Fetching startups with relations...");
 
-    const startups = await prisma.startup.findMany({
+    const startups: StartupWithRelations[] = await prisma.startup.findMany({
       take: 3,
       where: {
         status: "PUBLISHED",
@@ -149,18 +199,18 @@ async function testDatabaseConnection() {
     if (startups.length === 0) {
       console.log("   ⚠️  No published startups found");
     } else {
-      startups.forEach((startup: any, index: number) => {
+      startups.forEach((startup, index) => {
         const prefix = index === startups.length - 1 ? "└─" : "├─";
         console.log(`   ${prefix} ${startup.title} (${startup.stage})`);
         console.log(`      By: ${startup.user.name || startup.user.username}`);
         console.log(`      Slug: ${startup.slug}`);
 
         const categories = startup.categories
-          .map((sc: any) => sc.category.name)
+          .map((sc) => sc.category.name)
           .join(", ");
         console.log(`      Categories: ${categories || "None"}`);
 
-        const tags = startup.tags.map((st: any) => st.tag.name).join(", ");
+        const tags = startup.tags.map((st) => st.tag.name).join(", ");
         console.log(`      Tags: ${tags || "None"}`);
 
         console.log(
@@ -210,7 +260,7 @@ async function testDatabaseConnection() {
     // ============================================
     console.log("Test 6: Fetching categories...");
 
-    const categories = await prisma.category.findMany({
+    const categories: CategoryWithCount[] = await prisma.category.findMany({
       include: {
         _count: {
           select: {
@@ -227,7 +277,7 @@ async function testDatabaseConnection() {
     if (categories.length === 0) {
       console.log("   ⚠️  No categories found");
     } else {
-      categories.forEach((category: any, index: number) => {
+      categories.forEach((category, index) => {
         const prefix = index === categories.length - 1 ? "└─" : "├─";
         console.log(`   ${prefix} ${category.name} (${category.slug})`);
         console.log(`      Startups: ${category._count.startups}`);
@@ -264,7 +314,7 @@ async function testDatabaseConnection() {
     // ============================================
     console.log("Test 8: Fetching recent activity...");
 
-    const recentComments = await prisma.comment.findMany({
+    const recentComments: RecentComment[] = await prisma.comment.findMany({
       take: 3,
       include: {
         user: {
@@ -287,7 +337,7 @@ async function testDatabaseConnection() {
     if (recentComments.length === 0) {
       console.log("   ⚠️  No comments found");
     } else {
-      recentComments.forEach((comment: any, index: number) => {
+      recentComments.forEach((comment, index) => {
         const prefix = index === recentComments.length - 1 ? "└─" : "├─";
         const preview =
           comment.content.substring(0, 60) +

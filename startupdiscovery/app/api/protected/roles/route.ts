@@ -257,11 +257,13 @@ export async function GET(req: Request) {
 
     return sendSuccess(
       {
-        users: users.map((user: any) => ({
-          ...user,
-          startupCount: user._count.startups,
-          commentCount: user._count.comments,
-        })),
+        users: users.map(
+          (user): typeof user & { startupCount: number; commentCount: number } => ({
+            ...user,
+            startupCount: user._count.startups,
+            commentCount: user._count.comments,
+          })
+        ),
         total: users.length,
       },
       "Users retrieved successfully",
