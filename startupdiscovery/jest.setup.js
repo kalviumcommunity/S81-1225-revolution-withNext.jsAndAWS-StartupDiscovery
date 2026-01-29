@@ -9,8 +9,6 @@ jest.mock('next/navigation', () => ({
       replace: jest.fn(),
       prefetch: jest.fn(),
       back: jest.fn(),
-      forward: jest.fn(),
-      refresh: jest.fn(),
       pathname: '/',
       query: {},
       asPath: '/',
@@ -27,7 +25,7 @@ jest.mock('next/navigation', () => ({
 // Mock environment variables
 process.env.NEXT_PUBLIC_API_URL = 'http://localhost:3000'
 
-// Suppress expected console errors in tests (optional)
+// Suppress console errors in tests (optional - remove if you want to see all errors)
 const originalError = console.error
 beforeAll(() => {
   console.error = (...args) => {
@@ -46,5 +44,5 @@ afterAll(() => {
   console.error = originalError
 })
 
-// Global test timeout
+// Global test timeout (optional)
 jest.setTimeout(10000)

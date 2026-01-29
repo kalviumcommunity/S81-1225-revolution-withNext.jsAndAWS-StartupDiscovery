@@ -1,177 +1,117 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Counter } from './Counter'
-
-/**
- * Component Testing with React Testing Library
- * 
- * Key principles:
- * - Test user behavior, not implementation details
- * - Use semantic queries (getByRole, getByLabelText) when possible
- * - Use userEvent for realistic user interactions
- * - Test accessibility attributes
- */
 
 describe('Counter Component', () => {
   it('should render with default initial count of 0', () => {
     render(<Counter />)
-
+    
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('0')
     expect(screen.getByRole('heading', { name: /count/i })).toBeInTheDocument()
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('0')
   })
 
   it('should render with custom initial count', () => {
-    render(<Counter initialCount={42} />)
-
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('42')
+    render(<Counter initialCount={10} />)
+    
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('10')
   })
 
   it('should render with custom label', () => {
-    render(<Counter label="Points" />)
-
-    expect(screen.getByRole('heading', { name: /points/i })).toBeInTheDocument()
+    render(<Counter label="Custom Label" />)
+    
+    expect(screen.getByRole('heading', { name: /custom label/i })).toBeInTheDocument()
   })
 
   it('should increment counter when + button is clicked', async () => {
     const user = userEvent.setup()
     render(<Counter />)
-
-    const incrementButton = screen.getByRole('button', {
-      name: /increment by 1/i,
-    })
-
+    
+    const incrementButton = screen.getByRole('button', { name: /increment counter/i })
+    
     await user.click(incrementButton)
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('1')
-
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('1')
+    
     await user.click(incrementButton)
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('2')
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('2')
   })
 
-  it('should decrement counter when − button is clicked', async () => {
+  it('should decrement counter when - button is clicked', async () => {
     const user = userEvent.setup()
     render(<Counter initialCount={5} />)
-
-    const decrementButton = screen.getByRole('button', {
-      name: /decrement by 1/i,
-    })
-
+    
+    const decrementButton = screen.getByRole('button', { name: /decrement counter/i })
+    
     await user.click(decrementButton)
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('4')
-
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('4')
+    
     await user.click(decrementButton)
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('3')
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('3')
   })
 
-  it('should reset counter to initial value', async () => {
+  it('should reset counter to initial value when reset button is clicked', async () => {
     const user = userEvent.setup()
     render(<Counter initialCount={10} />)
-
-    const incrementButton = screen.getByRole('button', {
-      name: /increment by 1/i,
-    })
-    const resetButton = screen.getByRole('button', { name: /reset/i })
-
-    // Increment several times
+    
+    const incrementButton = screen.getByRole('button', { name: /increment counter/i })
+    const resetButton = screen.getByRole('button', { name: /reset counter/i })
+    
+    // Increment a few times
     await user.click(incrementButton)
     await user.click(incrementButton)
-    await user.click(incrementButton)
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('13')
-
-    // Reset should return to initial value
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('12')
+    
+    // Reset should go back to initial count
     await user.click(resetButton)
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('10')
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('10')
   })
 
-  it('should respect custom step value', async () => {
+  it('should use custom step value for increment/decrement', async () => {
     const user = userEvent.setup()
     render(<Counter initialCount={0} step={5} />)
-
-    const incrementButton = screen.getByRole('button', {
-      name: /increment by 5/i,
-    })
-    const decrementButton = screen.getByRole('button', {
-      name: /decrement by 5/i,
-    })
-
+    
+    const incrementButton = screen.getByRole('button', { name: /increment counter/i })
+    const decrementButton = screen.getByRole('button', { name: /decrement counter/i })
+    
     await user.click(incrementButton)
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('5')
-
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('5')
+    
     await user.click(incrementButton)
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('10')
-
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('10')
+    
     await user.click(decrementButton)
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('5')
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('5')
   })
 
-  it('should support negative counts', async () => {
+  it('should handle negative counts', async () => {
     const user = userEvent.setup()
     render(<Counter initialCount={0} />)
-
-    const decrementButton = screen.getByRole('button', {
-      name: /decrement by 1/i,
-    })
-
+    
+    const decrementButton = screen.getByRole('button', { name: /decrement counter/i })
+    
     await user.click(decrementButton)
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('-1')
-
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('-1')
+    
     await user.click(decrementButton)
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('-2')
-  })
-
-  it('should call onCountChange callback when count changes', async () => {
-    const user = userEvent.setup()
-    const handleCountChange = jest.fn()
-    render(<Counter initialCount={0} onCountChange={handleCountChange} />)
-
-    const incrementButton = screen.getByRole('button', {
-      name: /increment by 1/i,
-    })
-
-    await user.click(incrementButton)
-    expect(handleCountChange).toHaveBeenCalledWith(1)
-    expect(handleCountChange).toHaveBeenCalledTimes(1)
-
-    await user.click(incrementButton)
-    expect(handleCountChange).toHaveBeenCalledWith(2)
-    expect(handleCountChange).toHaveBeenCalledTimes(2)
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('-2')
   })
 
   it('should have proper accessibility attributes', () => {
-    render(<Counter label="Score" />)
-
-    const displayElement = screen.getByTestId('counter-display')
-    expect(displayElement).toHaveAttribute('aria-live', 'polite')
-    expect(displayElement).toHaveAttribute('aria-atomic', 'true')
-
-    expect(
-      screen.getByRole('button', { name: /increment by 1/i })
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /decrement by 1/i })
-    ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /reset/i })).toBeInTheDocument()
+    render(<Counter />)
+    
+    expect(screen.getByTestId('counter-value')).toHaveAttribute('aria-live', 'polite')
+    expect(screen.getByRole('button', { name: /increment counter/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /decrement counter/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /reset counter/i })).toBeInTheDocument()
   })
 
-  it('should handle rapid user interactions', async () => {
+  it('should support rapid clicking', async () => {
     const user = userEvent.setup()
-    render(<Counter initialCount={0} />)
-
-    const incrementButton = screen.getByRole('button', {
-      name: /increment by 1/i,
-    })
-
-    // Simulate rapid clicking
-    await user.click(incrementButton)
-    await user.click(incrementButton)
-    await user.click(incrementButton)
-
-    expect(screen.getByTestId('counter-display')).toHaveTextContent('3')
-  })
-
-  it('should display current and initial values in info section', () => {
-    render(<Counter initialCount={5} />)
-
-    const infoElement = screen.getByTestId('counter-info')
-    expect(infoElement).toHaveTextContent('Current: 0 | Initial: 5')
+    render(<Counter />)
+    
+    const incrementButton = screen.getByRole('button', { name: /increment counter/i })
+    
+    // Rapid clicks
+    await user.tripleClick(incrementButton)
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('3')
   })
 })

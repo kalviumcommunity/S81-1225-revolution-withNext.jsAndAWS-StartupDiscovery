@@ -2,83 +2,51 @@
 
 import { useState } from 'react'
 
-interface ButtonProps {
+interface CounterProps {
   initialCount?: number
   step?: number
   label?: string
-  onCountChange?: (count: number) => void
 }
 
-/**
- * Counter component demonstrating state management and user interactions
- * Perfect for testing React components with RTL
- */
-export function Counter({
-  initialCount = 0,
-  step = 1,
-  label = 'Count',
-  onCountChange,
-}: ButtonProps) {
+export function Counter({ initialCount = 0, step = 1, label = 'Count' }: CounterProps) {
   const [count, setCount] = useState(initialCount)
 
-  const handleIncrement = () => {
-    const newCount = count + step
-    setCount(newCount)
-    onCountChange?.(newCount)
-  }
-
-  const handleDecrement = () => {
-    const newCount = count - step
-    setCount(newCount)
-    onCountChange?.(newCount)
-  }
-
-  const handleReset = () => {
-    setCount(initialCount)
-    onCountChange?.(initialCount)
-  }
+  const increment = () => setCount((prev) => prev + step)
+  const decrement = () => setCount((prev) => prev - step)
+  const reset = () => setCount(initialCount)
 
   return (
     <div className="flex flex-col items-center gap-4 p-6 border rounded-lg">
       <h2 className="text-2xl font-bold">{label}</h2>
-      
-      <div
-        className="text-5xl font-mono font-bold"
-        data-testid="counter-display"
+      <div 
+        className="text-4xl font-mono" 
+        data-testid="counter-value"
         aria-live="polite"
-        aria-atomic="true"
       >
         {count}
       </div>
-
       <div className="flex gap-2">
         <button
-          onClick={handleDecrement}
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
-          aria-label={`Decrement by ${step}`}
+          onClick={decrement}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          aria-label="Decrement counter"
         >
-          − {step}
+          -
         </button>
-
         <button
-          onClick={handleReset}
+          onClick={reset}
           className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-          aria-label="Reset to initial value"
+          aria-label="Reset counter"
         >
           Reset
         </button>
-
         <button
-          onClick={handleIncrement}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
-          aria-label={`Increment by ${step}`}
+          onClick={increment}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          aria-label="Increment counter"
         >
-          + {step}
+          +
         </button>
-      </div>
-
-      <div className="text-sm text-gray-600" data-testid="counter-info">
-        Current: {count} | Initial: {initialCount}
       </div>
     </div>
   )
