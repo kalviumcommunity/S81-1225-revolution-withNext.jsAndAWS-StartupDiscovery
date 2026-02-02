@@ -2,6 +2,21 @@
 
 **Advanced Data Fetching with Next.js App Router (SSG, SSR & Hybrid Rendering)**
 
+## ⚡ Quick Start
+
+```bash
+cd startupdiscovery
+npm install
+npm run dev
+```
+
+Set up MongoDB in `.env.local`:
+```env
+MONGODB_URI=mongodb://localhost:27017/startupdiscovery
+```
+
+For detailed setup instructions, see [SETUP.md](./startupdiscovery/SETUP.md)
+
 ## 📌 Project Overview
 
 **StartupDiscovery** is an enterprise-ready full-stack web application built with **Next.js App Router**.
