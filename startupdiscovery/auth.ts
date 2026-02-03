@@ -13,7 +13,15 @@ type GitHubProfile = {
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [GitHub],
+  providers: [
+    GitHub({
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    }),
+  ],
+
+  secret: process.env.NEXTAUTH_SECRET,
+
   callbacks: {
     async signIn({ user, profile }) {
       await connectToDatabase();
