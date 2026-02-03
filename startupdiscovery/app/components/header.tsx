@@ -13,6 +13,7 @@ type HeaderProps = {
 
 export default function Header({ session }: HeaderProps) {
   const user = session?.user;
+  const isAuthenticated = session && user && user.email;
   const displayName = user?.name ?? "Guest";
   const displayEmail = user?.email ?? "Sign in to personalize";
   const imageUrl = user?.image ?? "";
@@ -29,7 +30,7 @@ export default function Header({ session }: HeaderProps) {
           <Link href="/create" className={navLinkClasses}>
             Create
           </Link>
-          {session ? (
+          {isAuthenticated ? (
             <>
               <button
                 onClick={() => signOut()}
