@@ -72,7 +72,7 @@ export default function HomeClient({ startups }: HomeClientProps) {
 
   return (
     <div className="min-h-screen">
-      <section className="hero-stripes">
+      <section className="hero-stripes overflow-hidden">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-6 py-14 text-center text-white">
           <span className="rounded-full bg-yellow-300 px-3 py-1 text-xs font-bold uppercase tracking-wide text-black">
             Pitch, vote, and grow
