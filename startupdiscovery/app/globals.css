@@ -34,6 +34,9 @@ body {
     ),
     linear-gradient(180deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
   background-size: 18px 18px;
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
 }
 
 .card-shadow {
