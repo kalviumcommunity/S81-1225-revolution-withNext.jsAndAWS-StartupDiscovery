@@ -98,7 +98,7 @@ export default async function StartupDetailsPage({ params }: PageProps) {
             {formatDate(startup.createdAt)}
           </span>
           <h1 className="mt-5 text-3xl font-black sm:text-4xl">
-            {startup.title}
+            {startup.title}https://chat.google.com/u/0/api/get_attachment_url?url_type=FIFE_URL&content_type=image%2Fjpeg&attachment_token=AOo0EEXl0y4O%2BsZ4wGhtkucJa%2FZG6bvE%2FoHZY2a5eLgYKjsZdJgtqW2YcuAbJWQGLjDZHAcDvdRyKH20VMgNQftP3tsgMdSWwOxsS2lg14VtCDX%2FAMZN1%2FrJC6KEUoxMD1uwmSd4GBCEwwPMdC5WvxHIev6HfvbvAGopbWzYKNDzYhoJyTjqWYg7XJ9WEAGbN%2F%2B7WrE0UKEuVFQlPpLn%2FOfykVvNb9YHGq3cVb%2FrbPv9GMAejSb9z%2B766upA6bfjXUHr%2F8AyFaKXPM2xW3ne4v1lh6RCPqJtHoOpoehuC72ui2SW7Bm7UywARcGJMbPmeTZgzlnLNdPeC44PdFyPyjUrx7TRtfmRsXClkgte2gh2ARKlSvzK7prPSvgPYf5c59leihx%2FfX01OAyI1fiiHTxszR66Ei0cRRGwuhJ7m%2BZMk9y0dkQ2QpsHyMLIJ8Gm8r%2F2ExPJisZ%2B3XZJ1yGFf1KU5le6hOd2A9srHCpXvzQpHtUZz9mN%2FOeWA%2FKbdMpY%2BfId7yKWL1nxO5QDxfcDr2t7GGWkr1QZ5iHgfYFf8MMHgt1ah2ueAcfgtW0MfB0a%2B7701Ss82jS%2B8ugxJSacZMytTMes7l98dbfgtFnnBHj9QFy3Nj9feLRG2TfVZXvmxDFjOsRpQ4ZVzO8%2FDHuSRxbvK6A4&allow_caching=true&sz=w1920-h933-rw&auditContext=forDisplay
           </h1>
           <p className="mt-3 max-w-3xl text-sm text-white/80 sm:text-base">
             {startup.description}
